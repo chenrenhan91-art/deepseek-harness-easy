@@ -1131,7 +1131,7 @@ describe('strips and variants', () => {
 
   it('points a QUOTA promptError toast at the official top-up page', () => {
     const send = bench({
-      promptError: { op: 'send', error: { code: 'QUOTA', message: 'insufficient_quota', details: {} } },
+      promptError: { op: 'send', error: { code: 'internal', message: 'HTTP 402: insufficient_quota', details: {} } },
     })
     expect(send.view.getByRole('alert').textContent).toContain('账户余额不足，请先充值后再试。')
     expect(send.view.getByRole('alert').textContent).toContain('https://platform.deepseek.com/top_up')
