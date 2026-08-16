@@ -1,3 +1,5 @@
+# Beginner-pack fork: do not open version-update PRs (those belong on
+# deepseek-ai/deepseek-harness). Limit 0 disables new Dependabot PRs.
 version: 2
 
 updates:
@@ -12,6 +14,7 @@ updates:
       timezone: "Asia/Shanghai"
     cooldown:
       default-days: 30
+    open-pull-requests-limit: 0
     labels:
       - "kind/dependency"
       - "area/infra"
@@ -24,6 +27,7 @@ updates:
       timezone: "Asia/Shanghai"
     cooldown:
       default-days: 30
+    open-pull-requests-limit: 0
     labels:
       - "kind/dependency"
       - "area/infra"
@@ -36,6 +40,7 @@ updates:
       timezone: "Asia/Shanghai"
     cooldown:
       default-days: 30
+    open-pull-requests-limit: 0
     labels:
       - "kind/dependency"
       - "area/infra"
