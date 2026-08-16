@@ -168,8 +168,8 @@ describe('web e2e: agent-preset selection', () => {
 
     await expect.poll(() => page.locator('[data-skill-pins]').count(), { timeout: 15_000 }).toBe(1)
     expect(await page.locator('[data-skill-pin="draft-and-revise"]').textContent()).toContain('写作')
-    expect(page.locator('[data-skill-pin="write-plain"]')).toHaveCount(1)
-    expect(page.locator('[data-skill-pin="keep-the-facts"]')).toHaveCount(1)
+    expect(await page.locator('[data-skill-pin="write-plain"]').count()).toBe(1)
+    expect(await page.locator('[data-skill-pin="keep-the-facts"]').count()).toBe(1)
 
     await composer.fill('/')
     await expect.poll(() => menuOptions(page), { timeout: 15_000 })
@@ -189,7 +189,7 @@ describe('web e2e: agent-preset selection', () => {
     await expect.poll(() => livePreset(scaffold.baseUrl), { timeout: 15_000 }).toBe('study')
 
     await expect.poll(() => page.locator('[data-skill-pin="explain-clearly"]').count(), { timeout: 15_000 }).toBe(1)
-    expect(page.locator('[data-skill-pin="draft-and-revise"]')).toHaveCount(0)
+    expect(await page.locator('[data-skill-pin="draft-and-revise"]').count()).toBe(0)
 
     await composer.fill('/')
     await expect.poll(() => menuOptions(page), { timeout: 15_000 })
