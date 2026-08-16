@@ -7,7 +7,6 @@ import { readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { afterEach, expect, it } from 'vitest'
-import { CallId } from '@deepseek-ai/dsh-llm'
 import { canonicalPath, writableRoots } from '@deepseek-ai/dsh-sandbox'
 import { SessionId } from '@deepseek-ai/dsh-session'
 // Empty type imports carry the tools/sandboxPolicy/approval Context merges.
@@ -26,35 +25,25 @@ const FILE_REFERENCE_PROMPT = fileURLToPath(new URL(
 
 /**
  * The catalog the shipped Web composition puts in front of the model, minus the
- * ripgrep-dependent pair below. The absences are deliberate, not incidental
- * gaps: the `cordis_*` toolset executes model-written JavaScript that no
- * sandbox row confines, `web_fetch` chooses its own request target, and
- * `mcp_*` servers spawn outside `ctx.shell`. The composition Agent Note owns the
- * rationale and its sources.
+ * ripgrep-dependent pair below. Host tools that belong to expert product
+ * surfaces (`create_goal`, `job_*`, `subagent`, `ralph`, `workflow`) stay
+ * disabled on the Web patch. `cordis_*` executes model-written JavaScript that
+ * no sandbox row confines, and `mcp_*` servers spawn outside `ctx.shell`.
  */
 const EXPECTED_TOOLS = [
   'ask_user_question',
   'bash',
-  'create_goal',
   'edit',
   'exit_plan_mode',
-  'get_goal',
-  'interrupt_agent',
-  'job_kill',
-  'job_list',
-  'job_output',
-  'list_agents',
-  'ralph',
   'read',
   'read_image',
-  'send_message',
+  'schedule_create',
+  'schedule_delete',
+  'schedule_list',
   'skill',
-  'subagent',
-  'subagent_fork',
   'todo_write',
-  'update_goal',
+  'web_fetch',
   'web_search',
-  'workflow',
   'write',
 ]
 
@@ -73,7 +62,7 @@ afterEach(async () => {
   scaffold = undefined
 })
 
-it('assembles the shipped Web catalog, file-reference guidance, and confined access default', async () => {
+it('assembles the shipped Web catalog, file-reference guidance, and beginner access default', async () => {
   scaffold = await launchWebScaffold()
   const ctx = scaffold.ctx
   // The catalog belongs to an AGENT, not to the process: every model-facing row
@@ -108,7 +97,7 @@ it('assembles the shipped Web catalog, file-reference guidance, and confined acc
   )
   expect(scaffold.ctx.sandboxPolicy.defaultMode).toBe('workspace-write')
   expect(scaffold.ctx.approval.config.policy).toBe('ask')
-  expect(scaffold.ctx.permissionPresets.defaultPreset).toBe('workspace-write')
+  expect(scaffold.ctx.permissionPresets.defaultPreset).toBe('danger-full-access')
 
   const commandHandle = await scaffold.ctx.agents.create({
     sessionId: SessionId('shipped-command-catalog'),
@@ -123,66 +112,5 @@ it('assembles the shipped Web catalog, file-reference guidance, and confined acc
     })
   } finally {
     await commandHandle.dispose()
-  }
-}, 120_000)
-
-it('lets a preset producer reach the background-job registry', async () => {
-  scaffold = await launchWebScaffold()
-  const ctx = scaffold.ctx
-  const handle = await ctx.agents.create({
-    sessionId: SessionId('shipped-background-job'),
-    meta: { cwd: scaffold.workspaceCwd },
-    setup: agentCtx => ctx.agentPresets.mount(agentCtx).then(() => undefined),
-  })
-  try {
-    const signal = new AbortController().signal
-    // `tool-bash` is a preset row and `tasks` is a host registry; the producer
-    // resolves it with `ctx.get`, so a registry hidden behind a preset realm
-    // fails here — with every task control still listed in the catalog above.
-    const started = await ctx.tools.execute({
-      signal,
-      callId: CallId('shipped-bash-background'),
-      name: 'bash',
-      arguments: {
-        command: 'printf SHIPPED_BACKGROUND_OK',
-        description: 'shipped background probe',
-        run_in_background: true,
-      },
-      agent: handle.agent,
-    })
-    expect({ isError: started.isError, content: started.content }).toEqual({
-      isError: false,
-      content: [{ type: 'text', text: 'started background job bash-1' }],
-    })
-
-    // The controller reads what the producer started: same registry, one
-    // owner. A per-preset registry would list nothing here even on success.
-    const listed = await ctx.tools.execute({
-      signal,
-      callId: CallId('shipped-task-list'),
-      name: 'job_list',
-      arguments: {},
-      agent: handle.agent,
-    })
-    expect(listed.isError).toBe(false)
-    expect(listed.content).toEqual([
-      { type: 'text', text: expect.stringContaining('bash-1 [bash]') as unknown as string },
-    ])
-
-    // The full round trip: the output a host-plane producer wrote is collected
-    // through a preset-plane control, which is the linkage the realm severed.
-    const collected = await ctx.tools.execute({
-      signal,
-      callId: CallId('shipped-task-output'),
-      name: 'job_output',
-      arguments: { job_id: 'bash-1', wait: true },
-      agent: handle.agent,
-    })
-    expect(collected.isError).toBe(false)
-    expect(collected.content).toEqual([
-      { type: 'text', text: expect.stringContaining('SHIPPED_BACKGROUND_OK') as unknown as string },
-    ])
-  } finally {
-    await handle.dispose()
   }
 }, 120_000)

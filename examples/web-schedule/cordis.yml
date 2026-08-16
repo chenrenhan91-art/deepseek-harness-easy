@@ -1,9 +1,9 @@
-# Opt-in Schedule patch over the shipped Web composition. The owner observes
-# only roots published after this overlay loads.
+# The shipped Web composition already loads time-context and schedule.
+# Restating the rows keeps `dsh web --patch examples/web-schedule/cordis.yml`
+# valid against that composition.
 
-- insert:
-    - id: time-context
-      name: '@deepseek-ai/dsh-time-context'
+- id: time-context
+  name: '@deepseek-ai/dsh-time-context'
 
-    - id: schedule
-      name: '@deepseek-ai/dsh-schedule'
+- id: schedule
+  name: '@deepseek-ai/dsh-schedule'

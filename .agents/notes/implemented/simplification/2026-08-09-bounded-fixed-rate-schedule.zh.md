@@ -12,13 +12,13 @@ cold 或 busy Session 也无法有效回放每个错过的间隔。这样做会�
 
 ## 决策
 
-保留的周期 selector 只有 `every_seconds`，其值必须是至少为 300 的安全整数。创建时会把第一个目标存为创建时刻加上一个间隔。每次 dispatch 都会存储记录 id 和一个由墙钟确定的 `acceptedAt`；纯整数运算会选出不晚于该决策时点、与创建锚点对齐的最新发生时点，并直接推进到其后的第一个对齐目标。系统不会枚举、持久化或回放错过的发生时点。
+保留的固定速率周期 selector 只有 `every_seconds`，其值必须是至少为 300 的安全整数。创建时会把第一个目标存为创建时刻加上一个间隔。每次 dispatch 都会存储记录 id 和一个由墙钟确定的 `acceptedAt`；纯整数运算会选出不晚于该决策时点、与创建锚点对齐的最新发生时点，并直接推进到其后的第一个对齐目标。系统不会枚举、持久化或回放错过的发生时点。
 
 没有一次性提醒到期时，所有不同的逾期 Every 记录都会按目标时间和创建顺序参与同一个 follow-up 批次。每条记录恰好贡献一个最新发生时点，该批次中的每个 dispatch 都使用相同的决策时点。已到期的一次性提醒仍然优先，因此已经承诺的单次提醒不会被隐藏在周期批次中。
 
 至少 5 分钟是每条 Every 规则自身的属性，而不是全局门控。系统不存在 `lastRecurringAcceptedAt`、`deliveryNotBefore`、冷却、配额、门控耗尽状态或通用周期记录抽象。如果运算无法表示下一个采用四位年份的 UTC 目标，最后一次 dispatch 会终结该记录。
 
-日历表达式与 Cron 表达式，以及相应的求值器依赖、parser、canonicalizer、时区搜索、频率证明、持久记录和 dispatch variant、测试、快照与第三方声明条目均已移除。严格的版本 1 decoder 会拒绝预发布阶段的旧 Cron 记录，而不是迁移它们或通过兼容性残留接受它们。
+任意 Cron 表达式，以及相应的求值器依赖、parser、canonicalizer、时区搜索、频率证明、Cron 持久记录和 dispatch variant、测试、快照与第三方声明条目仍然不存在。严格的版本 1 decoder 会拒绝预发布阶段的旧 Cron 记录，而不是迁移它们或通过兼容性残留接受它们。本地钟点的每天／每周 kind 是另一套持久规则（[日历每天／每周 Schedule](../feature/2026-08-15-calendar-schedule-page.md)）。
 
 ## 已考虑的替代方案
 
@@ -38,7 +38,7 @@ cold 或 busy Session 也无法有效回放每个错过的间隔。这样做会�
 
 ## 后果
 
-- 持久规则 union 包含 After、At 与 Every；工具 selector union 包含 `after_seconds`、`at` 与 `every_seconds`。
+- 持久固定速率 kind 仍是 Every；固定速率工具 selector 仍是 `every_seconds`。本地钟点的每天／每周 kind 由[日历每天／每周 Schedule](../feature/2026-08-15-calendar-schedule-page.md) 拥有。Cron 仍然不存在。
 - 重新打开长期 cold 的 Session 时只会产生当前提醒工作，不会集中触发大量历史轮次。
 - 多条逾期 Every 记录共享一个模型请求，但不共享调度状态，也不会彼此延迟。
-- 基于日历的周期性需要未来的产品边界，而不是休眠兼容代码。
+- 基于 Cron 的周期性仍在此产品边界之外，而不是休眠兼容代码。每天／每周本地钟点是另一种 kind，不是 Cron 求值器（[日历每天／每周 Schedule](../feature/2026-08-15-calendar-schedule-page.md)）。

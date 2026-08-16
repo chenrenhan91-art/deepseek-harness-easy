@@ -1,0 +1,73 @@
+/* Mode skill chips tucked into the top of the composer card so they read as
+   tags inside the dialog, not a second toolbar. */
+
+.root {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  width: calc(
+    100% -
+    var(--dsh-composer-side-clearance) -
+    var(--dsh-composer-side-clearance)
+  );
+  max-width: var(--dsh-composer-card-max-width);
+  margin: 0 auto calc(0px - var(--dsh-composer-stack-gap));
+  padding: 8px 12px 6px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: var(--dsw-alias-bg-base);
+}
+
+.hint {
+  flex: 1 0 100%;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-caption);
+}
+
+.pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  padding: 2px 4px 2px 8px;
+  border: 1px solid var(--dsw-alias-state-business-primary);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 10%, transparent);
+  color: var(--dsw-alias-state-business-primary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.pinOff {
+  border-color: var(--dsw-alias-border-l2);
+  background: transparent;
+  color: var(--dsw-alias-label-caption);
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}

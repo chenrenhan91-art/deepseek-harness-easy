@@ -1,14 +1,11 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Math rendering" [disabled]
-  - button "Session log":
-    - text: Session log
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: Render this mathematical proof. {{clock}}
-- button "Copy":
+- button "复制":
   - img
 - heading "Math rendering" [level=2]
 - paragraph:
@@ -31,21 +28,21 @@
       - cell:
         - math: 1 5
 - paragraph: MATH_RENDERING_DONE
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: {{clock}} Ran for {{duration}}
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}}
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：工作区可写": 工作区可写
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: 1 turns · 1 steps LLM {{duration}}
+- button "发送消息" [disabled]
+- text: 1 轮 · 1 步 LLM {{duration}}

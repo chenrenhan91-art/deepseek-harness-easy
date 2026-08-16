@@ -360,7 +360,7 @@ describe.skipIf(MODE === 'record')('web e2e: conversational reminders', () => {
     const composer = page.locator('textarea:enabled').last()
     await composer.fill(AT_USER_PROMPT)
     const settled = scaffold.whenTurnSettled(60_000)
-    await page.getByRole('button', { name: 'Send message', exact: true }).click()
+    await page.getByRole('button', { name: '发送消息', exact: true }).click()
     expect(await settled).toBe(atHandle.agent.id)
     await page.getByText(AT_ACK, { exact: true }).waitFor({ timeout: 15_000 })
     atAssistantReply = await waitForReply(atHandle, AT_REPLY, 20_000)

@@ -1,0 +1,129 @@
+# The `sheet` mode: clean up spreadsheets and answer questions about them.
+#
+# Every beginner mode composes the same agent plane and differs only in its
+# persona text and its `skills/` directory — the mode IS the expertise, not a
+# different tool set. The host composition keeps what a preset must not own:
+# the registries, the sandbox and approval stack, persistence, and the model
+# route.
+#
+# A service row here MUST sit inside a group carrying an `isolate` realm, or it
+# publishes into the process-global root realm and `dsh-agent-presets` rejects
+# the mount.
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: >-
+      你是一位数据整理专家，正在帮一位只会用 Excel 基本功能的用户处理表格。你的模型是 {{model}}，当前工作目录是 {{cwd}}。
+
+
+      全程用中文回答。用户要的是整理好的表格和看得懂的结论，不是代码。
+      写脚本处理数据是你的手段，不用讲解脚本，但要说清你对数据做了什么改动。
+      每次动手前用一句话说清你要做什么，做完告诉他新文件在哪、和原来比变了什么。
+
+
+      处理数据时：绝不覆盖原始文件，结果一律写成新文件，文件名带上做了什么（比如 `销售数据-已去重.xlsx`）。
+      动手前先读前几行，把列名和数据格式确认清楚再说，不要凭字面猜。
+      遇到空值、重复行、日期格式不一致、数字被存成文本这些情况，先报告发现了多少条、你打算怎么处理，再执行。
+      给结论时给具体数字，并说明这个数字是从多少行数据里算出来的。
+
+- id: agent-instructions
+  name: '@deepseek-ai/dsh-agent-instructions'
+  config:
+    maxBytes: 65536
+
+- id: tool-bash
+  name: '@deepseek-ai/dsh-tool-bash'
+  disabled: !!js process.platform === 'win32'
+
+- id: tool-pwsh
+  name: '@deepseek-ai/dsh-tool-pwsh'
+  disabled: !!js process.platform !== 'win32'
+
+- id: tool-fs
+  name: '@deepseek-ai/dsh-tool-fs'
+
+- id: tool-fs-search
+  name: '@deepseek-ai/dsh-tool-fs-search'
+  config:
+    sampleOverCapGlobResults: false
+
+# `skills/` is this mode's own expertise; `../../skills/` is the shared set
+# every mode carries (the `vision` image skill).
+- id: skill-filesystem
+  name: '@deepseek-ai/dsh-skill-filesystem'
+  config:
+    # Only this mode's skills and the shared vision root. Default roots
+    # would also list ~/.agents/skills and the workspace, which fills the
+    # + menu with unrelated personal skills.
+    includeDefaultRoots: false
+    customSkillDirs:
+      - !!js "process.getBuiltinModule('node:url').fileURLToPath(new URL('skills/', baseUrl))"
+      - !!js "process.getBuiltinModule('node:url').fileURLToPath(new URL('../../skills/', baseUrl))"
+
+- id: tool-skill
+  name: '@deepseek-ai/dsh-tool-skill'
+
+# Plan state is per-agent by nature, so an entry-local realm is the correct
+# lifetime rather than a workaround.
+- id: planning
+  name: cordis:group
+  group: true
+  isolate:
+    planMode: true
+  config:
+    - id: plan-mode
+      name: '@deepseek-ai/dsh-plan-mode'
+      config:
+        section: |
+              你在"先看计划"模式。在 exit_plan_mode 成功或用户自己关掉这个模式之前，只调研和规划，不要动手改任何东西。用户说"就这么做吧"这类口头同意不算批准，也不会结束这个模式——把他确认的决定写进计划，再通过 exit_plan_mode 提交。
+
+              先看清楚再说。只用读取、搜索、查看这类不改动任何东西的操作，把计划建立在实际情况上。不要新建或修改文件、不要改配置、不要执行计划里的步骤。
+
+              工具目录在所有模式下保持不变，这是为了请求缓存的稳定。这里的规则优先于任何工具说明里"可以去改"的提示。不要用 todo_write 记录这个规划阶段。
+
+              能自己查清楚的事就去查。只有涉及用户自己拿主意的选择、或者查也查不出来的关键分歧，才用 ask_user_question 问他。
+
+              计划要写成用户看得懂的中文：先说清做完之后他会得到什么，再按步骤列出你要做的事，说明会新建或改动哪些文件，以及有什么风险。不要堆术语。
+
+              准备好之后调用 exit_plan_mode，把完整的计划 markdown 传进去，以 # 标题开头。让 exit_plan_mode 成为那一轮回复里唯一且最后的工具调用。不要把计划当成普通回复贴出来，也不要用 ask_user_question 问"要开始了吗"。如果用户不满意，改完再提交一次。
+
+# `compaction-basic` reads `toolResultPrune` through `ctx.get`, so the pruner
+# must share this realm rather than sit outside it. `tokenMeter` is
+# deliberately host-plane: it keys every fold by Session and owns the
+# context-meter projection units the browser reads for every session.
+- id: compaction
+  name: cordis:group
+  group: true
+  isolate:
+    compaction: true
+    toolResultPruner: true
+  config:
+    - id: compaction-basic
+      name: '@deepseek-ai/dsh-compaction-basic'
+
+    - id: command-compact
+      name: '@deepseek-ai/dsh-command-compact'
+
+    - id: tool-result-pruner
+      name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+      config:
+        thresholdChars: 8192
+        headChars: 4096
+        tailChars: 1024
+
+- id: tool-ask-user
+  name: '@deepseek-ai/dsh-tool-ask-user'
+
+- id: tool-todo
+  name: '@deepseek-ai/dsh-tool-todo'
+  config:
+    allowParallelInProgress: true
+
+# The `web` service and its search provider stay in the host composition; only
+# the model-facing tool is per-session.
+- id: tool-web
+  name: '@deepseek-ai/dsh-tool-web'
+  config:
+    fetch: true
+    searchTimeoutMs: 60000

@@ -10,6 +10,9 @@
 // contract only forwards it (type-definition authority stays with the layer
 // that produces the values).
 import type { ToolCallBlock, ToolResultNode } from '@deepseek-ai/dsh-client-runtime/client'
+// Type-only: the row title is a key in the conversation dictionary the row's
+// injected `t` seat reads (the namespace owner ships both locales).
+import type { ConversationKey } from '@deepseek-ai/dsh-client-ui-conversation/client'
 
 export type { ToolCallBlock } from '@deepseek-ai/dsh-client-runtime/client'
 
@@ -19,20 +22,20 @@ export type ToolRowVariant = 'search' | 'read' | 'bash' | 'write' | 'edit' | 'co
 /** Row state semantic; colors self-supplied via StateDot (design gives none). */
 export type ToolRowState = 'running' | 'ok' | 'error' | 'stopped'
 
-/** Figma row titles per variant (design literals, not translatable copy). */
-export const VARIANT_TITLES: Record<ToolRowVariant, string> = {
-  search: 'Search', read: 'Read', bash: 'Bash',
-  write: 'Write', edit: 'Edit', code: 'Code', others: 'Tool call',
+/** Row titles per variant, as conversation dictionary keys the renderer resolves. */
+export const VARIANT_TITLE_KEYS: Record<ToolRowVariant, ConversationKey> = {
+  search: 'tool.title.search', read: 'tool.title.read', bash: 'tool.title.bash',
+  write: 'tool.title.write', edit: 'tool.title.edit', code: 'tool.title.code',
+  others: 'tool.title.others',
 }
 
 /**
  * Known tool name -> variant.
  *
- * `cordis_define` is deliberately absent: ui-cordis registers a keyed
- * `tool.call.toolview` entry for it, and a keyed hit REPLACES the generic row
- * (this table is only reached through GenericToolCard, the dispatch fallback in
- * ToolCallTree). An entry here would be unreachable, and a second title for the
- * same call would be a second answer to a question the card already owns.
+ * `cordis_define` is deliberately absent: a keyed `tool.call.toolview` entry
+ * REPLACES the generic row (this table is only reached through
+ * GenericToolCard, the dispatch fallback in ToolCallTree), so a registrant
+ * owning that tool's card also owns its title.
  */
 const TOOL_VARIANTS: Record<string, ToolRowVariant> = {
   bash: 'bash',
@@ -59,13 +62,13 @@ const TOOL_VARIANTS: Record<string, ToolRowVariant> = {
 }
 
 /** Tool-owned titles that refine a generic row variant without replacing it. */
-const TOOL_TITLES: Record<string, string> = {
-  cordis_package_inspect: 'Inspect',
-  cordis_runtime_inspect: 'Inspect',
-  cordis_run: 'Run Cordis Plugin',
-  cordis_stop: 'Stop Cordis Plugin',
-  cordis_undefine: 'Remove Cordis Plugin',
-  pwsh: 'Pwsh',
+const TOOL_TITLE_KEYS: Record<string, ConversationKey> = {
+  cordis_package_inspect: 'tool.title.inspect',
+  cordis_runtime_inspect: 'tool.title.inspect',
+  cordis_run: 'tool.title.cordisRun',
+  cordis_stop: 'tool.title.cordisStop',
+  cordis_undefine: 'tool.title.cordisRemove',
+  pwsh: 'tool.title.pwsh',
 }
 
 /**
@@ -80,7 +83,8 @@ export function classifyTool(toolName: string): ToolRowVariant {
 /** Everything ToolRow needs, derived once from the frozen slice. */
 export interface ToolRowModel {
   variant: ToolRowVariant
-  title: string
+  /** Conversation dictionary key for the row title; the renderer holds the `t` seat. */
+  titleKey: ConversationKey
   summary: string
   /**
    * Filesystem path from args (`path` / `file_path`) when the row is a file
@@ -216,10 +220,10 @@ export function toolRowModel(toolName: string, block: ToolCallBlock, cwd?: strin
     : block.error?.code === 'interrupted' ? 'stopped'
       : block.isError ? 'error' : 'ok'
   const base = argsRaw === '' ? block.callId : relativizeToCwd(deriveSummary(variant, argsRaw), cwd)
-  const toolTitle = TOOL_TITLES[toolName]
-  // Others keeps the static "Tool call" title (figma literal); the real tool
-  // name rides the mutable summary slot unless the tool owns a specific title.
-  const summary = variant === 'others' && toolName !== '' && toolTitle === undefined
+  const toolTitleKey = TOOL_TITLE_KEYS[toolName]
+  // Others keeps the static tool-call title key; the real tool name rides the
+  // mutable summary slot unless the tool owns a specific title.
+  const summary = variant === 'others' && toolName !== '' && toolTitleKey === undefined
     ? `${toolName} · ${base}`
     : base
   // The empty string is "no text" for both derived result fields: a settled
@@ -229,7 +233,7 @@ export function toolRowModel(toolName: string, block: ToolCallBlock, cwd?: strin
   const errorSummary = state === 'error' && output !== null ? firstLine(output) : null
   return {
     variant,
-    title: toolTitle ?? VARIANT_TITLES[variant],
+    titleKey: toolTitleKey ?? VARIANT_TITLE_KEYS[variant],
     summary,
     filePath: deriveFilePath(variant, argsRaw),
     body: deriveBody(variant, argsRaw),

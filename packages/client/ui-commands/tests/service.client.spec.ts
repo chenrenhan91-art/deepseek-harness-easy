@@ -10,11 +10,14 @@
 import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it, vi } from 'vitest'
 import type { CommandResult } from '@deepseek-ai/dsh-commands/types'
+import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { createScope, scopeOf } from '@deepseek-ai/dsh-client-runtime/client'
 import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client'
+import { usePinnedBrowserLanguages } from '@deepseek-ai/dsh-client-test-runtime'
 import type { ClientSessionContext, ConsumeTokenRequest, InputTriggerPick, InputTriggerSource } from '@deepseek-ai/dsh-client-ui-input-trigger/client'
 import type { CommandContribution, CommandDecoration, CommandUiSpec, SelectOption } from '../src/client/contract.ts'
 import type { CommandDescriptor } from '../src/client/directory.ts'
+import { en, NS, zh } from '../src/client/locales.ts'
 import { CommandUiRuntime } from '../src/client/service.ts'
 
 const sid = (k: string): SessionId => k as SessionId
@@ -39,6 +42,8 @@ interface BenchOptions {
   commands?: (payload: { sessionId: SessionId }) => Promise<{ commands: CommandDescriptor[] }>
   execute?: (payload: { sessionId: SessionId; line: string }) => Promise<ExecuteValue>
   addressed?: SessionId
+  /** When set, Host menu captions overlay from this locale's dictionaries. */
+  menuLocale?: 'zh' | 'en'
 }
 
 /**
@@ -122,6 +127,12 @@ async function bench(opts: BenchOptions = {}) {
   })
   ctx.provide('remote.commands', commandsRemote)
   const executions: Array<{ sessionId: SessionId; name: string; result: CommandResult }> = []
+  if (opts.menuLocale !== undefined) {
+    const locale = new LocaleRuntime(ctx)
+    ctx.provide('locale', locale)
+    locale.register(NS, { zh, en })
+    locale.setLocale(opts.menuLocale)
+  }
   ctx.on('command/executed', (sessionId, name, result) => {
     executions.push({ sessionId, name, result })
   })
@@ -216,6 +227,26 @@ describe('candidates', () => {
     const list = await source.candidates(proj('s1'), req('g'))
     expect(listCalls).toEqual([{ sessionId: sid('s1') }])
     expect(list).toEqual([{ name: 'goal', description: 'leadingInput kind', hint: 'goal text' }])
+  })
+
+  describe('localized host descriptions', () => {
+    usePinnedBrowserLanguages('zh-CN')
+
+    it('overlays owned Host command captions from the active locale', async () => {
+      const { source } = await bench({
+        menuLocale: 'zh',
+        commands: () => Promise.resolve({
+          commands: [
+            { name: 'plan', description: 'Enter or leave plan mode' },
+            { name: 'mystery', description: 'Host-only caption' },
+          ],
+        }),
+      })
+      await expect(source.candidates(proj('s1'), req(''))).resolves.toEqual([
+        { name: 'plan', description: '进入或退出 plan mode' },
+        { name: 'mystery', description: 'Host-only caption' },
+      ])
+    })
   })
 
   it('matches case-insensitive subsequences and ranks prefixes, boundaries, adjacency, gaps, then source order', async () => {

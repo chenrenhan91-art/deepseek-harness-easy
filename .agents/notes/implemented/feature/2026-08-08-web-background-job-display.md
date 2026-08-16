@@ -10,7 +10,7 @@ English | [中文](2026-08-08-web-background-job-display.zh.md)
 
 A human at the Web client therefore could not see that a build was running, could not distinguish a finished task from a stuck one, and could not stop one. The only trace was the `run_in_background` tool card that printed a job id somewhere earlier in the transcript, and that card never updates again.
 
-The session header was already the place where per-session background activity lives: [`dsh-client-ui-subagent`](../../../../packages/client/ui-subagent/README.md) contributes the subagent catalog to `conversation.session.header.actions`. Placement was settled. What was missing was any channel at all that carried task state to a browser.
+The session header was already the place where per-session background activity lives. Web no longer ships a subagent catalog or jobs header action ([beginner Web workbench](./2026-08-15-beginner-web-workbench.md)). What this note still owns is the mux channel that carried task state to a browser.
 
 ## Decision
 
@@ -87,7 +87,7 @@ Two clears keep it honest. On re-subscribe the manager drops the session's mirro
 
 ### The header action
 
-[`@deepseek-ai/dsh-client-ui-jobs`](../../../../packages/client/ui-jobs/README.md) registers one entry in `conversation.session.header.actions`, ordered after the subagent catalog. Its own README owns the presentation contract; the decisions worth recording here are that the control does not render at all until the session has a task, that the live badge is omitted at zero so a history-only session keeps a quiet entry point, and that settled rows stay visible because a failed task's `detail` is the only place its failure is legible.
+`@deepseek-ai/dsh-client-ui-jobs` registered one entry in `conversation.session.header.actions`, ordered after the subagent catalog. Web no longer ships that package ([beginner Web workbench](./2026-08-15-beginner-web-workbench.md)). The decisions worth recording here remain: the control does not render at all until the session has a task, the live badge is omitted at zero so a history-only session keeps a quiet entry point, and settled rows stay visible because a failed task's `detail` is the only place its failure is legible.
 
 A running one-shot background subagent therefore appears both there and in the subagent catalog. The two answer different questions — the catalog navigates into the child's transcript, this list is the only handle a cancellation can ever attach to — and suppressing `kind: 'subagent'` here would leave the cancellation phase with no entry point for exactly those tasks.
 
@@ -115,9 +115,7 @@ A running one-shot background subagent therefore appears both there and in the s
 
 ## Testing
 
-The [web e2e scenario](../../../../apps/web/tests/background-job-list.e2e.ts) is the end-to-end proof and runs keyless: a real `run_in_background` bash call registers with `ctx.jobs`, the header count and row appear with no user interaction, and killing the task through the registry flips the open list to its producer detail. It asserts the whole delivery path rather than any single layer.
-
-Below it, [`jobs-local`](../../../../packages/jobs/jobs-local/tests/jobs.spec.ts) pins the change feed at all four commit points, its containment of a throwing observer, and its removal on both explicit disposal and fiber teardown; [`api-proxy-jobs`](../../../../packages/host/apiproxy/tests/api-proxy-jobs.spec.ts) pins the baseline-only-when-non-empty rule, the three change pushes, the dropped internal fields, the unowned fan-out, the no-resume guarantee, and the registry-absent composition; and the client suites pin the last-wins fold, the absent-key representation, both clears, and the component's ordering, duration, and dismissal behavior.
+Host and package tests pin the change feed. Web no longer ships the jobs header e2e ([beginner Web workbench](./2026-08-15-beginner-web-workbench.md)). [`jobs-local`](../../../../packages/jobs/jobs-local/tests/jobs.spec.ts) pins the change feed at all four commit points, its containment of a throwing observer, and its removal on both explicit disposal and fiber teardown; [`api-proxy-jobs`](../../../../packages/host/apiproxy/tests/api-proxy-jobs.spec.ts) pins the baseline-only-when-non-empty rule, the three change pushes, the dropped internal fields, the unowned fan-out, the no-resume guarantee, and the registry-absent composition.
 
 ## Consequences
 

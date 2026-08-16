@@ -1,50 +1,59 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Use the bash tool to" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: "Use the bash tool to run exactly: echo WEB_E2E_OK. Then reply with the single word DONE and stop. {{clock}}"
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
-  - img
-  - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- button "Think The user wants me to run a simple bash command and reply with \"DONE\".":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Think The user wants me to run a simple bash command and reply with "DONE".
-- button "Bash Echo the test string":
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
   - img
   - img
-  - text: Bash Echo the test string
-- button "Think The command executed successfully and output \"WEB_E2E_OK\". I just need to reply with \"DONE\".":
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
   - img
   - img
-  - text: Think The command executed successfully and output "WEB_E2E_OK". I just need to reply with "DONE".
+  - text: 上下文注入 time-context
+- button "思考 The user wants me to run a simple bash command and reply with \"DONE\".":
+  - img
+  - img
+  - text: 思考 The user wants me to run a simple bash command and reply with "DONE".
+- button "执行命令 Echo the test string":
+  - img
+  - img
+  - text: 执行命令 Echo the test string
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
+- button "思考 The command executed successfully and output \"WEB_E2E_OK\". I just need to reply with \"DONE\".":
+  - img
+  - img
+  - text: 思考 The command executed successfully and output "WEB_E2E_OK". I just need to reply with "DONE".
 - paragraph: DONE
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "6% of context used"
-- button "Send message" [disabled]
-- text: 1 turns · 2 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 99% Input 15.7K tok · Output 111 tok
+- button "上下文已用 6%"
+- button "发送消息" [disabled]
+- text: 1 轮 · 2 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 99% 输入 15.7K tok · 输出 111 tok

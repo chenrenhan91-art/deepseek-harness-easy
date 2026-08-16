@@ -97,7 +97,7 @@ describe('web e2e: skill invocation policy through the real host', () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-skill-invocation-policy'))
     const input = page.locator('textarea').first()
     await input.fill('/policy')
-    const menu = page.getByRole('listbox', { name: 'Trigger suggestions' })
+    const menu = page.getByRole('listbox', { name: '触发候选建议' })
     await expect.poll(
       () => menu.getByRole('option', { name: /policy-shared/ }).count(),
       { timeout: 10_000 },
@@ -105,7 +105,7 @@ describe('web e2e: skill invocation policy through the real host', () => {
 
     // The user-only quadrant is invocable here — its only entry point — and
     // wears the user-only marker; both user-disabled quadrants stay hidden.
-    expect(await menu.getByRole('option', { name: /policy-user-only user-only · / }).count()).toBe(1)
+    expect(await menu.getByRole('option', { name: /policy-user-only 仅用户 · / }).count()).toBe(1)
     expect(await menu.getByRole('option', { name: /policy-model-only/ }).count()).toBe(0)
     expect(await menu.getByRole('option', { name: /policy-trusted-only/ }).count()).toBe(0)
 

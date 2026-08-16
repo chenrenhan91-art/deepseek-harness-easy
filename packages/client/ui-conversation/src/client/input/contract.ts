@@ -203,6 +203,13 @@ export interface InputMachineOptions {
   readonly mergeWindowMs?: number
   /** Monotonic clock for typing-merge decisions (default: constant 0). */
   readonly now?: () => number
+  /**
+   * Notice text for a rejected submit that carries neither an error message
+   * nor outcome text. Read at failure time so it follows a locale switch;
+   * absent leaves the untranslated key, which is what a dictionary-less
+   * composition (pure tests) should show.
+   */
+  readonly commandFailedText?: () => string
 }
 
 /** Published input state (the currency; per-session). */

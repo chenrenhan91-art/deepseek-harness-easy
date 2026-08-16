@@ -58,6 +58,12 @@ The one registration-captured fact is the retry policy: when its resolved value 
 
 The plugin also declares its route in the configurable-provider directory (`ctx.llm.listConfigurableProviders()`): provider `deepseek-official`, settings namespace `llm-deepseek`, empty settings path — the whole section is the profile. Configuration surfaces use that entry to offer this adapter alongside dormant pi-ai providers.
 
+## Endpoint interrogation and the key probe
+
+The plugin offers `ctx.llm.registerModelDiscovery('llm-deepseek', …)`, which asks the route's endpoint for its OpenAI-compatible `GET /models` listing with bearer auth. Unlike a catalog-backed adapter, this one **always asks the endpoint** rather than reciting the configured catalog: that catalog is deployment configuration, so answering from it would report a rejected key as a working provider, and the first-run page runs exactly this call as a key probe before storing anything. A draft `baseURL` overrides the resolved endpoint; a draft key wins over the stored one, being the one under test, and a draft carrying none resolves the route's own credential the same way a request does — a configuration surface holds only a redacted descriptor, so going out unauthenticated would report the endpoint's 401 as a wrong key. The reply is read by [`readModelListing`](../llm/README.md#reading-a-model-listing-model-listingts).
+
+A 401 or 403 fails with `INVALID_CREDENTIAL`, and an unusable probe key is refused before the header is built with the same code; every other failure — unreachable endpoint, non-2xx status, unreadable listing — fails with `DISCOVERY_FAILED`, and a cancellation before or during the body read surfaces as `ABORTED`. That split is what lets a surface say whether the key or the connection is what the user must fix.
+
 ## App attribution
 
 Every request carries the shared attribution header from dsh-llm's `attributionHeaders()` - the mandatory `User-Agent` baseline identifying the harness (see [dsh-llm § App attribution](../llm/README.md#app-attribution-attributionts)). Direct DeepSeek requests and OpenAI-compatible gateway requests get no provider-specific app-attribution headers under this adapter contract; OpenRouter app attribution is deferred to a future explicit OpenRouter adapter or mode. A request whose `GenerateOptions.purpose` is `compaction` (dsh-compaction-basic's auxiliary summarization call) additionally carries `x-deepseek-harness-compact: 1`, so the host can separate compaction traffic from conversation requests.

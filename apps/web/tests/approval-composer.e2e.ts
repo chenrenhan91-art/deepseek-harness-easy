@@ -90,10 +90,10 @@ describe('web e2e: approval takeover keeps its actions reachable', () => {
 
     // Read-only: the mode whose denial the model escalates from. Switched
     // through the shipped access-mode chip, not a test-only override.
-    await page.locator('[aria-label^="Access mode"]').click()
-    await page.getByRole('menuitem', { name: 'Read Only' }).click()
+    await page.locator('[aria-label^="访问模式"]').click()
+    await page.getByRole('menuitem', { name: '只读' }).click()
     await expect.poll(
-      () => page.locator('[aria-label="Access mode, current: Read Only"]').count(),
+      () => page.locator('[aria-label="访问模式，当前：只读"]').count(),
       { timeout: 15_000 },
     ).toBe(1)
 
@@ -152,7 +152,7 @@ describe('web e2e: approval takeover keeps its actions reachable', () => {
       await page.setViewportSize(original)
     }
 
-    await panel.getByRole('button', { name: 'Allow once' }).click()
+    await panel.getByRole('button', { name: '允许一次' }).click()
 
     const sessionId = await settled
     if (MODE === 'record') {

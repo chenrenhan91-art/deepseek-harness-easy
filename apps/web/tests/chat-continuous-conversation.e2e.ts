@@ -228,7 +228,7 @@ describe('web e2e: continuous conversation grown through the composer', () => {
       expect(await composer.inputValue()).toBe(spec.prompt)
 
       const settled = scaffold.whenTurnSettled(60_000)
-      await page.getByRole('button', { name: 'Send message', exact: true }).click()
+      await page.getByRole('button', { name: '发送消息', exact: true }).click()
       await page.getByText(spec.userMarker, { exact: false }).last().waitFor({ timeout: 15_000 })
       await expect.poll(() => sessionEvents.slice(eventStart).some(event => (
         event.type === 'user/message'

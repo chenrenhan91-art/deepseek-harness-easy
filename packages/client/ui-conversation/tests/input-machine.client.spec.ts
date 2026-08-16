@@ -766,6 +766,20 @@ describe('input-machine: submitting transaction', () => {
     expect(m.state.claim?.token).toBe('/goal ')
   })
 
+  it('rollback without a message uses the injected command-failed text', () => {
+    const m = new InputMachine({ commandFailedText: () => '命令失败' })
+    const { attempt } = enterSubmitting(m, 'goal', 'x')
+    expect(m.dispatch({ type: 'submit-settled', attempt, ok: false }))
+      .toEqual([{ type: 'notice', level: 'error', text: '命令失败' }])
+  })
+
+  it('rollback without a message and without a text thunk shows the dictionary key', () => {
+    const m = new InputMachine()
+    const { attempt } = enterSubmitting(m, 'goal', 'x')
+    expect(m.dispatch({ type: 'submit-settled', attempt, ok: false }))
+      .toEqual([{ type: 'notice', level: 'error', text: 'command.failed' }])
+  })
+
   it('rollback with a deviated draft only notices — the newer input wins', () => {
     const m = new InputMachine()
     const { attempt } = enterSubmitting(m, 'goal', 'x')

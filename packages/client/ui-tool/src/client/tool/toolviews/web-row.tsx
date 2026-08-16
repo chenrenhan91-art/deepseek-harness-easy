@@ -11,6 +11,7 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import { IconBrowseOutline16, IconGlobeOutline14 } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { ConversationKey } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallViewProps } from '../../contract/slots.ts'
 import { webCardModel } from '../models/web-card-model.ts'
@@ -21,10 +22,10 @@ import { CONVERSATION_NS as NS } from '../../locale.ts'
 /** Full row props: the toolview runtime share plus the standard locale seat. */
 type WebRowProps = ToolCallViewProps & PropsLocale<'conversation'>
 
-/** web_fetch reads one URL; web_search queries. Titles are figma literals. */
-const WEB_TITLES: Record<string, string> = {
-  web_search: 'Search',
-  web_fetch: 'Fetch',
+/** web_fetch reads one URL; web_search queries. */
+const WEB_TITLE_KEYS: Record<string, ConversationKey> = {
+  web_search: 'tool.title.webSearch',
+  web_fetch: 'tool.title.webFetch',
 }
 
 /**
@@ -32,7 +33,7 @@ const WEB_TITLES: Record<string, string> = {
  * the completed retrieval's web card as the row's collapsed-by-default card
  * body. The row discriminates on `toolName` only to pick its icon and title.
  */
-export function WebRow({ toolName, block, inspect, t }: WebRowProps) {
+export function WebRow({ toolName, block, t }: WebRowProps) {
   const model = toolRowModel(toolName, block)
   const web = webCardModel(block)
   // Web search uses a globe; local grep/glob keep the magnifier family.
@@ -43,14 +44,13 @@ export function WebRow({ toolName, block, inspect, t }: WebRowProps) {
       variant={model.variant}
       toolName={toolName}
       icon={icon}
-      title={WEB_TITLES[toolName] ?? model.title}
+      title={t(WEB_TITLE_KEYS[toolName] ?? model.titleKey)}
       summary={model.summary}
       body={null}
       output={model.output}
       errorSummary={model.errorSummary}
       web={web}
       state={model.state}
-      inspect={inspect}
     />
   )
 }

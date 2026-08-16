@@ -1,37 +1,42 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Use the ask_user_question tool to" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: Use the ask_user_question tool to ask me exactly one question with id "checkpoint", question "Ready to continue?", header "Checkpoint", and options labeled "Yes" and "No". After I answer, reply with one short sentence acknowledging my answer and stop. {{clock}}
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
-  - img
-  - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- button "Think The user wants me to ask them a checkpoint question first, then continue with whatever they interject. Let me do exactly that.":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Think The user wants me to ask them a checkpoint question first, then continue with whatever they interject. Let me do exactly that.
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
+  - img
+  - img
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
+- button "思考 The user wants me to ask them a checkpoint question first, then continue with whatever they interject. Let me do exactly that.":
+  - img
+  - img
+  - text: 思考 The user wants me to ask them a checkpoint question first, then continue with whatever they interject. Let me do exactly that.
 - status: Deep diving...
 - text: "Interjection: include the word BANANA in your final reply."
-- button "Copy":
+- button "复制":
   - img
 - text: "Interjection: include the word ORANGE in your final reply."
-- button "Copy":
+- button "复制":
   - img
-- textbox "Message the agent"
-- button "Commands":
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Stop generating"
+- button "停止生成"

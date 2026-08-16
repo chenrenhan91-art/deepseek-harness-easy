@@ -79,7 +79,7 @@ describe('web e2e: resident question composer round trip', () => {
 
     const selectedRow = page.locator('[role="treeitem"][aria-selected="true"]')
     await expect.poll(() => selectedRow.locator('[data-state="warning"]').count(), { timeout: 10_000 }).toBe(1)
-    await expect.poll(() => selectedRow.getByText('Waiting for answer', { exact: true }).count(), { timeout: 10_000 }).toBe(1)
+    await expect.poll(() => selectedRow.getByText('等待回答', { exact: true }).count(), { timeout: 10_000 }).toBe(1)
 
     if (MODE !== 'record') {
       // This golden owns the stable question surface; the answered-state

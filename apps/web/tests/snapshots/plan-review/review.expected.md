@@ -1,5 +1,5 @@
 - region "Approve this plan and leave plan mode?":
-  - text: Plan review
+  - text: 计划待审
   - heading "Add --greeting flag to CLI" [level=1]:
     - text: Add
     - code: "--greeting"
@@ -37,8 +37,8 @@
       - strong: No tests or config changes
       - text: unless they already exist and directly validate the flag's presence.
   - status
-  - button "Chat about it":
+  - button "去聊天里说":
     - img
-    - text: Chat about it
-  - button "Refuse"
-  - button "Approve"
+    - text: 去聊天里说
+  - button "拒绝"
+  - button "确认执行"

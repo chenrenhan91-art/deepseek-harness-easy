@@ -1,8 +1,9 @@
 /**
  * Models settings and product-onboarding plugin, browser half. It registers
- * the Models page plus the ordered internal-testing and official-DeepSeek
- * onboarding dialogs, whose UI shares this package's modal wrapper. The Host
- * settings and credential contracts stay behind their existing wire APIs.
+ * the Models page plus the ordered onboarding steps: the internal-testing
+ * notice in this package's modal, then the first-run API-key page that owns
+ * the whole screen. The Host settings and credential contracts stay behind
+ * their existing wire APIs.
  * Export discipline:
  * packages/client/AGENTS.md.
  */
@@ -18,8 +19,8 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import { ModelsSection } from './ModelsSection.tsx'
 import type { ModelsSectionInjected } from './ModelsSection.tsx'
-import { DeepSeekOnboardingDialog } from './DeepSeekOnboardingDialog.tsx'
-import type { DeepSeekOnboardingInjected } from './DeepSeekOnboardingDialog.tsx'
+import { ApiKeyOnboarding } from './ApiKeyOnboarding.tsx'
+import type { ApiKeyOnboardingInjected } from './ApiKeyOnboarding.tsx'
 import { WelcomeNotice } from './WelcomeNotice.tsx'
 import type { WelcomeNoticeInjected } from './WelcomeNotice.tsx'
 import { refreshWelcomeIfLoaded, WelcomeNoticeStore } from './welcome-store.ts'
@@ -79,7 +80,7 @@ export function apply(ctx: ClientContext): void {
     api: connection.api,
     t,
   })
-  const deepSeekOnboardingInjected = (): DeepSeekOnboardingInjected => ({
+  const deepSeekOnboardingInjected = (): ApiKeyOnboardingInjected => ({
     controller,
     hooks: { models: controller.store },
     api: connection.api,
@@ -133,5 +134,5 @@ export function apply(ctx: ClientContext): void {
     id: 'deepseek-official',
     order: 0,
     inject: deepSeekOnboardingInjected,
-  }, DeepSeekOnboardingDialog))
+  }, ApiKeyOnboarding))
 }

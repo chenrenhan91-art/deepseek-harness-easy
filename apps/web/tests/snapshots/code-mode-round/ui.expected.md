@@ -1,55 +1,64 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - 'button "Using ONE run_code program: run" [disabled]'
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: "Using ONE run_code program: run bash `echo CODE_ROUND_OK`, then read the file missing.txt catching its error in the program. Return an object with both outcomes. Then reply DONE and stop. {{clock}}"
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
-  - img
-  - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- 'button "Think The user wants me to write a single `run_code` program that:"':
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: "Think The user wants me to write a single `run_code` program that:"
-- button "Code Run bash echo and catch missing file read":
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
   - img
   - img
-  - text: Code Run bash echo and catch missing file read
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
+- 'button "思考 The user wants me to write a single `run_code` program that:"':
+  - img
+  - img
+  - text: "思考 The user wants me to write a single `run_code` program that:"
+- button "运行代码 Run bash echo and catch missing file read":
+  - img
+  - img
+  - text: 运行代码 Run bash echo and catch missing file read
 - img
-- text: Bash Echo CODE_ROUND_OK Failed
-- 'button "Read Error: cannot read \"{{cwd}}/workspace/missing.txt\": not found"':
+- text: 执行命令 Echo CODE_ROUND_OK 失败
+- 'button "读取文件 Error: cannot read \"{{cwd}}/workspace/missing.txt\": not found"':
   - img
-  - text: "Read Error: cannot read \"{{cwd}}/workspace/missing.txt\": not found"
-- button "Think The program ran successfully. Let me now reply DONE as instructed.":
+  - text: "读取文件 Error: cannot read \"{{cwd}}/workspace/missing.txt\": not found"
+- button "上下文注入 time-context":
   - img
   - img
-  - text: Think The program ran successfully. Let me now reply DONE as instructed.
+  - text: 上下文注入 time-context
+- button "思考 The program ran successfully. Let me now reply DONE as instructed.":
+  - img
+  - img
+  - text: 思考 The program ran successfully. Let me now reply DONE as instructed.
 - paragraph: DONE
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "7% of context used"
-- button "Send message" [disabled]
-- text: 1 turns · 2 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 52% Input 17.2K tok · Output 252 tok
+- button "上下文已用 7%"
+- button "发送消息" [disabled]
+- text: 1 轮 · 2 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 52% 输入 17.2K tok · 输出 252 tok

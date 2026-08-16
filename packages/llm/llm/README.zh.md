@@ -26,7 +26,7 @@
 
 `LlmRuntime` 将最终适配器选择、同步分发、迭代器构造和迭代期间的失败，统一转换为流协议唯一的终止形式：`finish { kind: 'error' | 'aborted', failure }`。部分增量输出后发生失败时，内容块可能仍未闭合；消费方会丢弃这些不完整输出。`llm/stream` middleware、嵌套调用、适配器清理和下游消费方的错误仍会抛出，因为它们属于插件或消费方失败，而非模型请求结果。已准备调用会暴露随其确切适配器注册一同捕获的不可变重试策略；完全由 middleware 处理的路由没有服务策略。
 
-询问端点属于配置期针对**草稿**的操作，以 settings namespace 而非提供方路由为键——界面正在新增的提供方还不存在，也就没有路由可点名。但请求仍可**点名**它正在编辑的路由，而已经描述该路由的适配器会用自己的知识作答，无需联网；路由名称和 `baseURL` 至少需要提供一项。除此之外，请求携带端点、协议，以及一条 harness 只用于这一次询问、绝不存储的凭据。这里既不读取也不写入 settings 或 credentials；返回内容是界面可以提供给用户采纳的候选元数据，而不是已注册的 catalog。`LlmDiscoveredModel` 除 `id` 外每个字段都是可选的，因为大多数提供方列表只公布 id；采纳其中一条的界面仍要补上其适配器所需的容量。重复与不可用的 id 会被丢弃，无人服务的 namespace 以 `NO_DISCOVERY` 失败，既不点名路由也不给端点的请求以 `INVALID_DISCOVERY` 失败。
+询问端点属于配置期针对**草稿**的操作，以 settings namespace 而非提供方路由为键——界面正在新增的提供方还不存在，也就没有路由可点名。但请求仍可**点名**它正在编辑的路由；已注册的 discovery 是用自己的知识作答还是去问端点，由适配器自己决定，而承担密钥探针的适配器必须去问。路由名称和 `baseURL` 至少需要提供一项。除此之外，请求携带端点、协议，以及一条 harness 只用于这一次询问、绝不存储的凭据。这里既不读取也不写入 settings 或 credentials；返回内容是界面可以提供给用户采纳的候选元数据，而不是已注册的 catalog。`LlmDiscoveredModel` 除 `id` 外每个字段都是可选的，因为大多数提供方列表只公布 id；采纳其中一条的界面仍要补上其适配器所需的容量。重复与不可用的 id 会被丢弃，无人服务的 namespace 以 `NO_DISCOVERY` 失败，既不点名路由也不给端点的请求以 `INVALID_DISCOVERY` 失败。
 
 提供方和模型元数据用于发现，不构成路由白名单。`registerAdapter()` 仍拥有提供方路由的排他性，并为每条路由捕获适配器的重试策略；适配器可以接受未出现在 `listModels()` 中的模型 id，消费方不得仅因模型未列出而拒绝请求。返回的 selector 元数据已分离；无效或重复的适配器条目会以 `INVALID_ADAPTER` 或 `INVALID_CATALOG` 失败。
 
@@ -66,6 +66,10 @@
 ### API 密钥校验（`api-key.ts`）
 
 每个要把凭据放进 HTTP 标头的适配器，使用前都以同一套规则校验它。`normalizeApiKey(raw)` 会先去除首尾空白，然后接受任意非空的可打印 ASCII 值（`/^[\x21-\x7E]+$/`，不含空格），或通过 `ApiKeyRejection`（`'empty'` | `'illegalCharacters'`）说明拒绝原因。这些结果一并包含在 `ApiKeyCheck` 中。缺失从不参与校验：调用方会在询问之前自行判断是否提供了值——未点名凭据的 profile 会转由提供方自身的环境发现或 OAuth 完成认证。
+
+### 读取模型清单（`model-listing.ts`）
+
+每个询问 OpenAI 兼容 `GET /models` 的适配器读到的都是同一份回复，因此共用的两半放在这里，而请求本身仍归各适配器所有——只有它知道自己的端点、协议，以及该送哪条凭据。`modelListingUrl(baseURL)` 以前缀方式追加 `/models`，而不是按 URL 解析，因此 `https://gateway.example/openai/v1` 这类部署路径能保住自己的路径段。`readModelListing(response, url)` 在四兆字节上限下读取正文（上限按实际收到的字节数施加，声明长度只做首次检查、从不采信），解析后逐条映射，遇到没有可用 id 的条目跳过而不是让整份清单失败。正文超限、不是 JSON、或没有 `data` 数组，都会以 `DISCOVERY_FAILED` 失败并点名该端点。
 
 ### 类
 

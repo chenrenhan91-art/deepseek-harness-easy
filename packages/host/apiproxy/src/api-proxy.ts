@@ -13,7 +13,7 @@ import type {} from '@deepseek-ai/dsh-agent-presets/types'
 import { AttachmentError } from '@deepseek-ai/dsh-attachment'
 import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
 import { contentHasImage, createUserMessage, freezeMessage, ReasoningEffortId } from '@deepseek-ai/dsh-llm'
-import { errorChain } from '@deepseek-ai/dsh-llm'
+import { errorChain, INVALID_CREDENTIAL_CODE, isHarnessError } from '@deepseek-ai/dsh-llm'
 import type { ContentBlock, MessageSource } from '@deepseek-ai/dsh-llm'
 import { isAppendSurfaceEvent, isJsonValue } from '@deepseek-ai/dsh-session'
 import type { JsonValue, Session, SessionEvent, SessionEventMap, SessionHeader, SessionId, UserMessage } from '@deepseek-ai/dsh-session'
@@ -379,6 +379,19 @@ async function buildModelCatalog(ctx: Context): Promise<{
 /** Wrap an error result echoing the request's rpcId. */
 function err<T>(request: RpcRequest<unknown>, error: RpcError): RpcResponse<T> {
   return { rpcId: request.rpcId, result: { ok: false, error } }
+}
+
+/**
+ * Which of the two things a caller can fix a failed interrogation blames.
+ * @param error - the value `ctx.llm.discoverModels` threw.
+ * @returns `invalid-credential` when the key supplied for the probe is what
+ * failed, `endpoint-unusable` for every other refusal.
+ */
+function discoveryReason(error: unknown): 'invalid-credential' | 'endpoint-unusable' {
+  const code = isHarnessError(error) ? error.code : ''
+  return code === INVALID_CREDENTIAL_CODE || code === 'MISSING_CREDENTIAL'
+    ? 'invalid-credential'
+    : 'endpoint-unusable'
 }
 
 /**
@@ -1220,11 +1233,20 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
    *
    * A deployment with no preset roster composes nothing and every session
    * shares the host composition, which is the behavior before presets existed.
+   *
+   * A `recorded` id comes from a session log. When the roster no longer
+   * supplies it, the unnamed default is composed instead so a restart can
+   * still open the session. An explicit create or select id still fails loud.
    * @param presetId - the requested preset, or `undefined` for the default.
+   * @param origin - `recorded` when the id was read from a session log.
    * @returns the id to record on the header (absent without a roster) and the setup callback.
-   * @throws when the roster supplies no such preset.
+   * @throws when the roster supplies no such preset (and, for a recorded id,
+   * when the unnamed default is absent too).
    */
-  async function composeAgent(presetId: string | undefined): Promise<{
+  async function composeAgent(
+    presetId: string | undefined,
+    origin: 'named' | 'recorded' = 'named',
+  ): Promise<{
     agentPreset?: string
     setup: (agentCtx: Context) => Promise<void>
   }> {
@@ -1237,7 +1259,17 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         },
       }
     }
-    const resolvedId = (await presets.resolve(presetId)).id
+    const available = (await presets.list()).map(preset => preset.id)
+    // Membership, not `instanceof`: a second package copy would miss
+    // `UnknownPresetError` and rethrow the exact "preset not found" the
+    // browser surfaces as `resume failed`.
+    const wanted = presetId !== undefined && !available.includes(presetId)
+      ? origin === 'recorded' ? undefined : presetId
+      : presetId
+    if (wanted !== undefined && !available.includes(wanted)) {
+      throw new UnknownPresetError(wanted, available)
+    }
+    const resolvedId = (await presets.resolve(wanted)).id
     return {
       agentPreset: resolvedId,
       setup: async (agentCtx: Context) => {
@@ -1267,7 +1299,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
   const agentFor = createApiRemoteAgentResolver(ctx, {
     agentOptions,
     setup: async ({ meta, events }) =>
-      (await composeAgent(resolveSessionPreset({ header: meta, events }))).setup,
+      (await composeAgent(resolveSessionPreset({ header: meta, events }), 'recorded')).setup,
   })
 
   /** Send one transient frame to every connected mux consumer. */
@@ -1657,7 +1689,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           return (await ctx.agents.resume({
             resumeSessionId: sessionId,
             agentOptions: agentOptions(),
-            setup: (await composeAgent(storedPreset)).setup,
+            setup: (await composeAgent(storedPreset, 'recorded')).setup,
           })).agent
         }
 
@@ -2418,7 +2450,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         // those tools, and composing anything else would strand the tool calls
         // it already carries. Now that no model-facing row sits in the host
         // plane, composing nothing would leave the child with no tools at all.
-        const forkComposition = await composeAgent(resolveSessionPreset(source))
+        const forkComposition = await composeAgent(resolveSessionPreset(source), 'recorded')
         try {
           await ctx.agents.create({
             sessionId: childId,
@@ -3065,14 +3097,23 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
       async list(request) {
         const presets = ctx.get('agentPresets')
         if (presets === undefined) return ok(request, { presets: [], authorable: false, hasDocument: false })
-        const defaultId = presets.defaultId
+        const listed = await presets.list()
+        let defaultId: string | undefined
+        try {
+          defaultId = (await presets.resolve()).id
+        } catch (error: unknown) {
+          // Swallows only an unknown unnamed default: the list still answers,
+          // and no row claims to be the default a nameless create would mount.
+          if (!(error instanceof UnknownPresetError)) throw error
+        }
         return ok(request, {
-          presets: (await presets.list()).map(preset => ({
+          presets: listed.map(preset => ({
             id: preset.id,
             trust: preset.trust,
-            isDefault: preset.id === defaultId,
+            isDefault: defaultId !== undefined && preset.id === defaultId,
             ...preset.name === undefined ? {} : { name: preset.name },
             ...preset.description === undefined ? {} : { description: preset.description },
+            ...preset.icon === undefined ? {} : { icon: preset.icon },
             ...preset.broken === undefined ? {} : { broken: preset.broken },
           })),
           authorable: presets.authorable,
@@ -3420,7 +3461,11 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           return err(request, {
             code: 'model-discovery-failed',
             message: error instanceof Error ? error.message : String(error),
-            details: { settingsNs, ...baseURL === undefined ? {} : { baseURL } },
+            details: {
+              settingsNs,
+              ...baseURL === undefined ? {} : { baseURL },
+              reason: discoveryReason(error),
+            },
           })
         }
       },

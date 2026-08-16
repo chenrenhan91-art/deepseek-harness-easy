@@ -8,7 +8,7 @@ import { en, zh, type SidebarKey } from './locales.ts'
 
 export type {
   SidebarFooterActionOwnerProps, SidebarRootComponentProps, SidebarRootInjected,
-  SidebarSectionOwnerProps, SidebarSettingsOwnerProps,
+  SidebarSectionOwnerProps, SidebarSessionActionOwnerProps, SidebarSettingsOwnerProps,
 } from './contract/slots.ts'
 export type { SidebarKey } from './locales.ts'
 
@@ -46,6 +46,7 @@ export function apply(ctx: ClientContext): void {
       // registers the foot trigger + settings panel.
       children: {
         'sidebar.workspaces': { kind: 'single', scope: 'root' },
+        'sidebar.session.action': { kind: 'list', scope: 'session-maybe' },
         'sidebar.settings': { kind: 'single', scope: 'root' },
         'sidebar.footer.action': { kind: 'list', scope: 'root' },
       },

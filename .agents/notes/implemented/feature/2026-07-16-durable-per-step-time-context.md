@@ -12,7 +12,7 @@ A process-local refresh cache makes displayed time depend on state that cannot s
 
 ## Decision
 
-`@deepseek-ai/dsh-time-context` is an opt-in function plugin in `packages/context/time-context/`. Default compositions leave its disclosure and token cost disabled; the Schedule Web overlay mounts it so the model can interpret otherwise-unqualified dates and times in the browser zone attached to the current request.
+`@deepseek-ai/dsh-time-context` is an opt-in function plugin in `packages/context/time-context/`. Headless default compositions leave its disclosure and token cost disabled; the shipped Web composition mounts it so the model can interpret otherwise-unqualified dates and times in the browser zone attached to the current request.
 
 The plugin prepends an `agent/pre-step` listener and delegates first. When the downstream decision enters and a reading is due, it combines that decision's final messages with durable user messages already in the open turn, derives browser-zone provenance from exact `user-rpc` sources, and appends one reading to the decision. Rejection, listener failure, or an already-aborted signal records nothing. Steering claimed after the current batch keeps ordinary next-step ownership and receives a fresh reading when that step enters.
 
@@ -24,7 +24,7 @@ The resolved browser zone also formats the reading's timestamp. Mixed or unavail
 
 Each reading uses the exact snapshot source `{ kind: 'plugin', plugin: 'time-context', form: 'snapshot', sections: [{ name: 'time-context', text: <same text> }] }`. The invariant companion checks the snapshot shape, re-derives current-turn browser provenance from the original user-rpc messages, and validates the rendered timestamp zone and elapsed baseline.
 
-The optional `refreshIntervalMs` config is a non-negative safe integer. Omission or `0` injects on every eligible entered step. A positive value scans raw Session events for the latest plugin reading and injects when none exists, wall time moved backward, or the event is old enough. The event timestamp governs after compaction and resume without a process-local cache. The Schedule Web overlay omits the interval so every request step gets current browser guidance.
+The optional `refreshIntervalMs` config is a non-negative safe integer. Omission or `0` injects on every eligible entered step. A positive value scans raw Session events for the latest plugin reading and injects when none exists, wall time moved backward, or the event is old enough. The event timestamp governs after compaction and resume without a process-local cache. The shipped Web composition omits the interval so every request step gets current browser guidance.
 
 ### Text and elapsed baselines
 

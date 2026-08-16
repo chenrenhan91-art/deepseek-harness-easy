@@ -238,6 +238,26 @@
     },
     {
       "doc": "docs/subsystems/schedule.md",
+      "symbol": "DailyScheduleRecord",
+      "source": "packages/schedule/schedule/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/schedule.md",
+      "symbol": "WeeklyScheduleRecord",
+      "source": "packages/schedule/schedule/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/schedule.md",
+      "symbol": "DailyInput",
+      "source": "packages/schedule/schedule/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/schedule.md",
+      "symbol": "WeeklyInput",
+      "source": "packages/schedule/schedule/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/schedule.md",
       "symbol": "LocalAtInput",
       "source": "packages/schedule/schedule/src/types.ts"
     },
@@ -249,6 +269,11 @@
     {
       "doc": "docs/subsystems/schedule.md",
       "symbol": "OneShotScheduleRecord",
+      "source": "packages/schedule/schedule/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/schedule.md",
+      "symbol": "RecurringScheduleRecord",
       "source": "packages/schedule/schedule/src/types.ts"
     },
     {
@@ -299,6 +324,16 @@
     {
       "doc": "docs/subsystems/schedule.md",
       "symbol": "ScheduleView",
+      "source": "packages/schedule/schedule/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/schedule.md",
+      "symbol": "ScheduleProjectionItem",
+      "source": "packages/schedule/schedule/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/schedule.md",
+      "symbol": "ScheduleProjection",
       "source": "packages/schedule/schedule/src/types.ts"
     },
     {

@@ -151,10 +151,10 @@ describe('web e2e: inline-code mentions of produced files', () => {
     const mentions = page.locator('[class*="markdown"] code button')
     await expect.poll(() => mentions.count(), { timeout: 10_000 }).toBe(1)
     expect(await mentions.first().innerText()).toBe('report.html')
-    expect(await mentions.first().getAttribute('aria-label')).toBe('Open site/report.html')
+    expect(await mentions.first().getAttribute('aria-label')).toBe('打开 site/report.html')
     expect(await mentions.first().getAttribute('title')).toBe('site/report.html')
     // The turn still ends with its produced-files row (all three writes).
-    expect(await page.getByText('Produced', { exact: true }).count()).toBe(1)
+    expect(await page.getByText('产物', { exact: true }).count()).toBe(1)
 
     expect(tripwire.pageErrors).toEqual([])
     expect(tripwire.warnings).toEqual([])

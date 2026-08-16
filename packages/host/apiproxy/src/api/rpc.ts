@@ -84,8 +84,18 @@ export interface RpcErrorDetailsMap {
    * or answered with something else. The message is the adapter's own text —
    * it is what the form shows before falling back to hand-entry — and the
    * details name the endpoint asked, never the credential offered.
+   *
+   * `reason` separates the one failure whose fix is the key the caller just
+   * supplied (`invalid-credential`: absent, unusable, or refused) from every
+   * other one (`endpoint-unusable`), so a surface using this call as a key
+   * probe can say which of the two the user has to correct without parsing
+   * the adapter's message.
    */
-  'model-discovery-failed': { settingsNs: string; baseURL?: string }
+  'model-discovery-failed': {
+    settingsNs: string
+    baseURL?: string
+    reason: 'invalid-credential' | 'endpoint-unusable'
+  }
   'title-invalid': { sessionId: SessionId }
   'fork-unavailable': { sessionId: SessionId }
   'subagent-parent-unavailable': { parentSessionId: SessionId }

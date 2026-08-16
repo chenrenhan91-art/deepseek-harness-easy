@@ -12,7 +12,7 @@ The two launch paths also have different configuration owners. Web mounts a per-
 
 ## Decision
 
-Both shipped minimal profiles expose exactly persistent `bash` and `str_replace_editor`, mount no context-compaction provider, suppress every `dsh-system-prompt` runtime-context contribution for fresh sessions, and run the editor against `@deepseek-ai/dsh-fs-local`. The Web preset isolates `ctx.fs` inside the agent entry and mounts `fs-local` beside the editor, so other Web agents retain the host filesystem provider. Its persona remains the fixed complete prompt owned by the earlier [minimal-preset composition decision](../bug-fix/2026-08-10-minimal-preset-owns-rl-composition.md) and applies runtime-context suppression only to that agent scope. The standalone spine forwards the same setting to its process-owned system-prompt service. Sandbox and approval services remain mounted and enforce their policies; only their model-facing dynamic context is absent.
+The standalone JSON-RPC [`minimal.cordis.yml`](../../../../examples/jsonrpc-agent/minimal.cordis.yml) exposes exactly persistent `bash` and `str_replace_editor`, mounts no context-compaction provider, suppresses every `dsh-system-prompt` runtime-context contribution for fresh sessions, and runs the editor against `@deepseek-ai/dsh-fs-local`. Web no longer ships a `minimal` preset; beginner modes mount `dsh-tool-fs` instead ([beginner Web workbench](./2026-08-15-beginner-web-workbench.md), [minimal-preset composition](../bug-fix/2026-08-10-minimal-preset-owns-rl-composition.md)). The standalone spine forwards runtime-context suppression to its process-owned system-prompt service. Sandbox and approval services remain mounted and enforce their policies; only their model-facing dynamic context is absent.
 
 The standalone [`minimal.cordis.yml`](../../../../examples/jsonrpc-agent/minimal.cordis.yml) remains a complete JSON-RPC process composition. It mounts `dsh-sdk-jsonrpc-server`, the local PTY and subprocess services required by persistent Bash, `fs-local`, the two tool consumers, and uncompressed JSONL persistence. It does not mount `token-meter`, `compaction-basic`, `fs-sandbox`, or `fs-observation-policy`. Persistent Bash still consumes the deployment's danger-full-access sandbox policy; the editor is not confined by that policy.
 
@@ -20,9 +20,7 @@ The standalone [`minimal.cordis.yml`](../../../../examples/jsonrpc-agent/minimal
 
 ## Verification
 
-The Web replay boots the complete Web host, creates the agent through the preset service, and asserts that the scoped filesystem is bare, no scoped compaction service exists, no system-prompt-owned runtime-context message was appended, and the assembled request contains exactly the fixed prompt and two tools. It then executes persistent Bash and the editor against the real scoped services.
-
-The SDK replay boots the real JSON-RPC agent process through the SDK client, injects an environment-selected prompt, asserts the assembled prompt, exact two-tool catalog, and absence of every system-prompt-owned runtime-context message, and executes both tools. Python SDK bundled-runtime coverage initializes the standalone configuration through each available packaged carrier with environment-selected model, model capacity, and prompt values. Cordis validation checks that both configurations resolve their declared plugins and configuration fields.
+The SDK replay boots the real JSON-RPC agent process through the SDK client, injects an environment-selected prompt, asserts the assembled prompt, exact two-tool catalog, and absence of every system-prompt-owned runtime-context message, and executes both tools. Python SDK bundled-runtime coverage initializes the standalone configuration through each available packaged carrier with environment-selected model, model capacity, and prompt values. Cordis validation checks that the configuration resolves its declared plugins and configuration fields.
 
 ## Alternatives considered
 

@@ -1,17 +1,15 @@
 /**
- * The preset picker both surfaces render: a menu of presets over a button
+ * The preset picker the settings row renders: a menu of presets over a button
  * naming the current one.
  *
- * The settings row and the composer seat differ in where they sit, what they
- * call the current value, and when they refuse a pick — not in how the picker
- * itself behaves. Trust is the one thing the list always says: a locally
- * authored preset is exactly as privileged as the plugins it names, so the
- * label marks it rather than presenting every preset as shipped and vetted.
+ * Trust is the one thing the list always says: a locally authored preset is
+ * exactly as privileged as the plugins it names, so the label marks it rather
+ * than presenting every preset as shipped and vetted.
  */
 
 import { IconChevronDownOutline14, Menu } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { AgentPresetOption } from './settings-store.ts'
-import { presetDisplayText, type AgentPresetSettingsKey } from './locales.ts'
+import type { AgentPresetSettingsKey } from './locales.ts'
 
 /** What one surface passes to the shared picker. */
 export interface PresetMenuProps {
@@ -51,11 +49,11 @@ export function PresetMenu({
       open={open}
       onClose={() => { onOpenChange(false) }}
       items={options.map((option) => {
-        const name = presetDisplayText(option, t).name
+        // The id is addressing, not a label, except where the preset published
+        // no display name.
+        const name = option.name ?? option.id
         return {
           id: option.id,
-          // All preset surfaces resolve copy the same way; the id is addressing,
-          // not a label, except where no display name exists.
           label: option.trust === 'user' ? `${name} · ${t('userTrust')}` : name,
         }
       })}

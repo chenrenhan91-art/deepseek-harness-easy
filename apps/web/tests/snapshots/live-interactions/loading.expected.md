@@ -1,28 +1,33 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Reply with a one-sentence description" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: Reply with a one-sentence description of event sourcing, then stop. {{clock}}
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
+  - img
+  - img
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
 - paragraph: partial
 - status: Deep diving...
-- textbox "Message the agent"
-- button "Commands":
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Stop generating"
+- button "停止生成"

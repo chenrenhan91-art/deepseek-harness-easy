@@ -1,53 +1,58 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Reply with a one-sentence description" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: Reply with a one-sentence description of event sourcing, then stop. {{clock}}
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
+  - img
+  - img
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
 - paragraph: partial
-- text: Stopped
-- button "Copy":
+- text: 已停止
+- button "复制":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: {{clock}} Ran for {{duration}}
-- button "2 queued messages" [expanded]
+- text: {{clock}} 用时 {{duration}}
+- button "2 条排队消息" [expanded]
 - list:
   - listitem:
     - text: Edited queue item
-    - button "Edit queued message":
+    - button "编辑排队消息":
       - img
-    - tooltip "Edit queued message"
-    - button "Remove queued message":
+    - tooltip "编辑排队消息"
+    - button "删除排队消息":
       - img
-    - button "Steer queued message" [disabled]:
+    - button "插话发送" [disabled]:
       - img
   - listitem:
     - text: Queue item preserved after stop
-    - button "Edit queued message":
+    - button "编辑排队消息":
       - img
-    - button "Remove queued message":
+    - button "删除排队消息":
       - img
-    - button "Steer queued message" [disabled]:
+    - button "插话发送" [disabled]:
       - img
-- textbox "Message the agent"
-- button "Commands":
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: 1 turns · 1 steps
+- button "发送消息" [disabled]
+- text: 1 轮 · 1 步

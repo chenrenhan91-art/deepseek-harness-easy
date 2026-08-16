@@ -13,6 +13,7 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import { IconSearchOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { ConversationKey } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallViewProps } from '../../contract/slots.ts'
 import { searchCardModel } from '../models/search-card-model.ts'
@@ -23,9 +24,9 @@ import { CONVERSATION_NS as NS } from '../../locale.ts'
 /** Full row props: the toolview runtime share plus the standard locale seat. */
 type SearchRowProps = ToolCallViewProps & PropsLocale<'conversation'>
 
-const SEARCH_TITLES: Record<string, string> = {
-  grep: 'Grep',
-  glob: 'Glob',
+const SEARCH_TITLE_KEYS: Record<string, ConversationKey> = {
+  grep: 'tool.title.grep',
+  glob: 'tool.title.glob',
 }
 
 /**
@@ -36,7 +37,7 @@ const SEARCH_TITLES: Record<string, string> = {
  * settled call with no search card surfaces its model-facing text through
  * ToolRow's Output section, since the keyed SearchRow owns this render slot.
  */
-export function SearchRow({ toolName, block, inspect, t }: SearchRowProps) {
+export function SearchRow({ toolName, block, t }: SearchRowProps) {
   const model = toolRowModel(toolName, block)
   const search = searchCardModel(block)
   return (
@@ -45,7 +46,7 @@ export function SearchRow({ toolName, block, inspect, t }: SearchRowProps) {
       variant={model.variant}
       toolName={toolName}
       icon={<IconSearchOutline16 size={14} />}
-      title={SEARCH_TITLES[toolName] ?? model.title}
+      title={t(SEARCH_TITLE_KEYS[toolName] ?? model.titleKey)}
       // The result view's replacement title outranks the args-derived summary,
       // matching the terminal card's description precedence.
       summary={search?.title ?? model.summary}
@@ -60,7 +61,6 @@ export function SearchRow({ toolName, block, inspect, t }: SearchRowProps) {
       errorSummary={model.errorSummary}
       search={search}
       state={model.state}
-      inspect={inspect}
     />
   )
 }

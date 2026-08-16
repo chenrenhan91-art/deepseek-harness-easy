@@ -1,4 +1,4 @@
-- listbox "Trigger suggestions":
-  - text: Skills
+- listbox "触发候选建议":
+  - text: 技能
   - option "policy-shared Available to both model and user invocation" [selected]
-  - option "policy-user-only user-only · Available only to user invocation"
+  - option "policy-user-only 仅用户 · Available only to user invocation"

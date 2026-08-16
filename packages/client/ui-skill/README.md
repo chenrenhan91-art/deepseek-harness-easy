@@ -12,7 +12,7 @@ The `/client` exports are the plugin body (`apply`/`inject`) only; the source ob
 
 ## Skill tool row
 
-The browser plugin also registers the `skill` wire name in `ui-tool`'s keyed `tool.call.toolview` slot. A collapsed row renders the 14-pixel skill document-and-sparkle glyph, `Skill` title, separator, and requested skill name with the same neutral hierarchy as the Bash row; running calls carry the transcript shimmer, failures replace the name with the first error line, and interrupted calls use the warning state. A settled row expands as one whole-row disclosure into a bounded `Instructions` card containing the exact durable tool output, with the standard trajectory `Inspect` affordance when available. The row derives its name, lifecycle, and body only from the frozen call/result slice supplied by `ui-tool`, never from the current catalog, so replay remains stable when installed skills or their descriptions change.
+The browser plugin also registers the `skill` wire name in `ui-tool`'s keyed `tool.call.toolview` slot. A collapsed row renders the 14-pixel skill document-and-sparkle glyph, localized `技能` / `Skill` title, separator, and requested skill name with the same neutral hierarchy as the Bash row; running calls carry the transcript shimmer, failures replace the name with the first error line, and interrupted calls use the warning state. A settled row expands as one whole-row disclosure into a bounded `Instructions` card containing the exact durable tool output. The row derives its name, lifecycle, and body only from the frozen call/result slice supplied by `ui-tool`, never from the current catalog, so replay remains stable when installed skills or their descriptions change.
 
 ## Model Experience
 

@@ -12,7 +12,7 @@ Web `minimal` preset 与独立 JSON-RPC minimal 组合对外提供持久 `bash` 
 
 ## 决策
 
-两种随附 minimal profile 都只对外提供持久 `bash` 与 `str_replace_editor`，不挂载上下文压缩提供方，为新建会话抑制每个 `dsh-system-prompt` runtime-context 贡献，并让编辑器使用 `@deepseek-ai/dsh-fs-local`。Web preset 在 agent entry 内隔离 `ctx.fs`，将 `fs-local` 与编辑器一起挂载，因此其他 Web agent 仍使用宿主文件系统提供方。其 persona 继续采用较早的 [minimal preset 组合决策](../bug-fix/2026-08-10-minimal-preset-owns-rl-composition.md)所拥有的固定 complete 提示词，并仅为该 agent 作用域实施 runtime-context 抑制。独立 spine 将同一设置转发给其进程拥有的 system-prompt 服务。沙箱与批准服务仍保持挂载并强制其策略；只有它们面向模型的动态上下文缺席。
+独立 JSON-RPC 的 [`minimal.cordis.yml`](../../../../examples/jsonrpc-agent/minimal.cordis.yml) 只对外提供持久 `bash` 与 `str_replace_editor`，不挂载上下文压缩提供方，为新建会话抑制每个 `dsh-system-prompt` runtime-context 贡献，并让编辑器使用 `@deepseek-ai/dsh-fs-local`。Web 不再随附 `minimal` preset；新手模式改为挂载 `dsh-tool-fs`（[新手 Web 工作台](./2026-08-15-beginner-web-workbench.md)，[minimal-preset 组合](../bug-fix/2026-08-10-minimal-preset-owns-rl-composition.md)）。独立 spine 将 runtime-context 抑制转发给其进程拥有的 system-prompt 服务。沙箱与批准服务仍保持挂载并强制其策略；只有它们面向模型的动态上下文缺席。
 
 独立的 [`minimal.cordis.yml`](../../../../examples/jsonrpc-agent/minimal.cordis.yml) 仍是完整的 JSON-RPC 进程组合。它挂载 `dsh-sdk-jsonrpc-server`、持久 Bash 所需的本地 PTY 和子进程服务、`fs-local`、两个工具消费方，以及未压缩的 JSONL 持久化。它不挂载 `token-meter`、`compaction-basic`、`fs-sandbox` 或 `fs-observation-policy`。持久 Bash 仍消费部署的 danger-full-access 沙箱策略；编辑器不受该策略限制。
 
@@ -20,9 +20,7 @@ Web `minimal` preset 与独立 JSON-RPC minimal 组合对外提供持久 `bash` 
 
 ## 验证
 
-Web 回放会启动完整 Web 宿主，通过 preset 服务创建 agent，并断言作用域文件系统为裸后端、不存在作用域压缩服务、没有追加 system-prompt 拥有的 runtime-context 消息，而且组装请求只包含固定提示词与两个工具。随后，它通过真实作用域服务执行持久 Bash 和编辑器。
-
-SDK 回放通过 SDK 客户端启动真实 JSON-RPC agent 进程，注入由环境选择的提示词，断言组装提示词与精确双工具目录，另外断言不存在任何 system-prompt 拥有的 runtime-context 消息，并执行两个工具。Python SDK 内置运行时覆盖会通过每种可用的打包载体，使用环境选择的模型、模型容量和提示词值初始化独立配置。Cordis 校验会检查两份配置能否解析声明的插件和配置字段。
+SDK 回放通过 SDK 客户端启动真实 JSON-RPC agent 进程，注入由环境选择的提示词，断言组装提示词与精确双工具目录，另外断言不存在任何 system-prompt 拥有的 runtime-context 消息，并执行两个工具。Python SDK 内置运行时覆盖会通过每种可用的打包载体，使用环境选择的模型、模型容量和提示词值初始化独立配置。Cordis 校验会检查该配置能否解析声明的插件和配置字段。
 
 ## 考虑过的替代方案
 

@@ -53,13 +53,13 @@ describe.skipIf(MODE === 'record')('web e2e: dedicated Skill tool row', () => {
   it('expands the loaded skill to its exact recorded instructions', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-skill-tool-row'))
     const call = page.locator('[data-tool="skill"]')
-    const row = call.getByRole('button', { name: 'Skill snapshot-skill' })
+    const row = call.getByRole('button', { name: '技能 snapshot-skill' })
     await expect.poll(() => row.getAttribute('aria-expanded')).toBe('false')
     expect(await call.getByText('snapshot-skill', { exact: true }).count()).toBe(1)
 
     await row.click()
     await expect.poll(() => row.getAttribute('aria-expanded')).toBe('true')
-    await call.getByText('Instructions', { exact: true }).waitFor()
+    await call.getByText('说明', { exact: true }).waitFor()
     const output = call.locator('pre')
     await output.waitFor()
     expect(await output.textContent()).toContain('<skill_content name="snapshot-skill">')

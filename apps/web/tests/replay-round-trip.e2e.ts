@@ -143,7 +143,7 @@ describe('web e2e: fresh round trip through the real assembly', () => {
     await expect(page.getByRole('textbox').first().isVisible()).resolves.toBe(true)
     expect(await page.getByText('WEB_E2E_OK', { exact: false }).count()).toBeGreaterThanOrEqual(1)
     await page.getByRole('button', {
-      name: 'Select model, current DeepSeek-V4-Flash',
+      name: '选择模型，当前 DeepSeek-V4-Flash',
     }).waitFor({ timeout: 10_000 })
     const snapshot = await captureStableAria(page, '[class*="centerCol"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(UI_EXPECTED, snapshot, MODE)
@@ -155,7 +155,7 @@ describe('web e2e: fresh round trip through the real assembly', () => {
     // tier pins the same gesture against FixtureApiClient; this one runs on
     // mux-frame-fed state). Runs after the golden capture so the committed
     // aria surface stays the untouched settled state.
-    const think = page.getByRole('button', { name: /^Think/ }).first()
+    const think = page.getByRole('button', { name: /^思考/ }).first()
     expect(await think.getAttribute('aria-expanded')).toBe('false')
     await think.click()
     await expect.poll(() => think.getAttribute('aria-expanded'), { timeout: 5_000 }).toBe('true')

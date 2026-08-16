@@ -15,7 +15,7 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import { CommandUiRuntime } from './service.ts'
 import type { PopupSelectInjected } from './PopupSelectView.tsx'
 import { PopupSelectView } from './PopupSelectView.tsx'
-import { en, zh, type CommandKey } from './locales.ts'
+import { en, NS, zh, type CommandKey } from './locales.ts'
 
 export { CommandUiRuntime } from './service.ts'
 export { CommandDirectory } from './directory.ts'
@@ -40,9 +40,6 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     command: CommandKey
   }
 }
-
-/** Dictionary namespace owned by this plugin. */
-const NS = 'command'
 
 /** Required services: the '/' source registry, session scopes, commands Remote, and locale registry. */
 export const inject = ['inputTriggers', 'sessions', 'remote', 'remote.commands', 'locale']

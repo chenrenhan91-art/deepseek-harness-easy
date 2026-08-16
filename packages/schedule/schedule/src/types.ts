@@ -49,6 +49,58 @@ export interface EveryScheduleRecord {
   readonly scheduledAt: string
 }
 
+/** Durable daily reminder at a local clock time in an explicit IANA zone. */
+export interface DailyScheduleRecord {
+  /** Session-local stable identity. */
+  readonly id: ScheduleId
+  /** Rule discriminator for a daily local-clock reminder. */
+  readonly kind: 'daily'
+  /** Trimmed reminder content supplied at creation. */
+  readonly prompt: string
+  /** Local wall-clock time `HH:mm:ss`. */
+  readonly time: string
+  /** Canonical UTC or IANA Area/Location zone. */
+  readonly timeZone: string
+  /** Next local-clock occurrence not yet dispatched, as UTC. */
+  readonly scheduledAt: string
+}
+
+/** Durable weekly reminder at a local clock time on selected ISO weekdays. */
+export interface WeeklyScheduleRecord {
+  /** Session-local stable identity. */
+  readonly id: ScheduleId
+  /** Rule discriminator for a weekly local-clock reminder. */
+  readonly kind: 'weekly'
+  /** Trimmed reminder content supplied at creation. */
+  readonly prompt: string
+  /** Local wall-clock time `HH:mm:ss`. */
+  readonly time: string
+  /** Canonical UTC or IANA Area/Location zone. */
+  readonly timeZone: string
+  /** Sorted unique ISO weekdays, Monday = 1 through Sunday = 7. */
+  readonly weekdays: readonly number[]
+  /** Next matching local-clock occurrence not yet dispatched, as UTC. */
+  readonly scheduledAt: string
+}
+
+/** Local daily selector accepted by `schedule_create`. */
+export interface DailyInput {
+  /** Local wall-clock time `HH:mm` or `HH:mm:ss`. */
+  readonly time: string
+  /** Explicit UTC or IANA Area/Location zone. */
+  readonly time_zone: string
+}
+
+/** Local weekly selector accepted by `schedule_create`. */
+export interface WeeklyInput {
+  /** Local wall-clock time `HH:mm` or `HH:mm:ss`. */
+  readonly time: string
+  /** Explicit UTC or IANA Area/Location zone. */
+  readonly time_zone: string
+  /** ISO weekdays, Monday = 1 through Sunday = 7. */
+  readonly weekdays: readonly number[]
+}
+
 /** Structured local-calendar input accepted by `schedule_create`. */
 export interface LocalAtInput {
   /** Four-digit ISO calendar date. */
@@ -65,8 +117,11 @@ export type AtInput = string | LocalAtInput
 /** One-shot record variants that terminate on an id-only dispatch. */
 export type OneShotScheduleRecord = AfterScheduleRecord | AtScheduleRecord
 
+/** Recurring record variants that dispatch with `acceptedAt` and stay active. */
+export type RecurringScheduleRecord = EveryScheduleRecord | DailyScheduleRecord | WeeklyScheduleRecord
+
 /** The v1 durable reminder record union. */
-export type ScheduleRecord = OneShotScheduleRecord | EveryScheduleRecord
+export type ScheduleRecord = OneShotScheduleRecord | RecurringScheduleRecord
 
 /** Creates one durable reminder record. */
 export interface ScheduleCreateChange {
@@ -89,7 +144,7 @@ export interface OneShotScheduleDispatchChange {
   readonly id: ScheduleId
 }
 
-/** Records one fixed-rate decision and advances directly past missed occurrences. */
+/** Records one recurring decision and advances directly past missed occurrences. */
 export interface EveryScheduleDispatchChange {
   readonly version: 1
   readonly operation: 'dispatch'
@@ -209,6 +264,63 @@ export type ScheduleDeleteResult =
 
 /** Canonical `schedule_delete` value. */
 export type ScheduleDeleteValue = ScheduleDeleteResult | ScheduleToolError
+
+/** One active reminder in the `schedule` projection, without wall-clock state. */
+export type ScheduleProjectionItem =
+  | {
+    readonly id: string
+    readonly kind: 'after'
+    readonly prompt: string
+    readonly scheduledAt: string
+    readonly afterSeconds: number
+  }
+  | {
+    readonly id: string
+    readonly kind: 'at'
+    readonly prompt: string
+    readonly scheduledAt: string
+  }
+  | {
+    readonly id: string
+    readonly kind: 'every'
+    readonly prompt: string
+    readonly scheduledAt: string
+    readonly everySeconds: number
+  }
+  | {
+    readonly id: string
+    readonly kind: 'daily'
+    readonly prompt: string
+    readonly scheduledAt: string
+    readonly time: string
+    readonly timeZone: string
+  }
+  | {
+    readonly id: string
+    readonly kind: 'weekly'
+    readonly prompt: string
+    readonly scheduledAt: string
+    readonly time: string
+    readonly timeZone: string
+    readonly weekdays: readonly number[]
+  }
+
+/**
+ * Session-local reminder list folded from `schedule/change`. Capability
+ * absence is the key's absence, never an empty value. `scheduled` / `overdue`
+ * stay a wall-clock read in the UI, not a durable field.
+ */
+export interface ScheduleProjection {
+  /** Active records in create order. */
+  readonly items: readonly ScheduleProjectionItem[]
+}
+
+declare module '@deepseek-ai/dsh-session-projection/types' {
+  interface SessionProjectionMap {
+    /** Active Session-local reminders folded from `schedule/change`. */
+    schedule: ScheduleProjection
+  }
+}
 
 declare module '@deepseek-ai/dsh-session/types' {
   interface SessionEventMap {

@@ -1,55 +1,64 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - 'button "Plan a small change: add" [disabled]'
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - img
 - text: "plan Plan mode on. Use /plan off to leave. Plan a small change: add a --greeting flag to a CLI. Do not read or write any files. Call exit_plan_mode with a short plan of at most five bullet points. Once the plan is approved, reply with the single word DONE and stop. {{clock}}"
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
-  - img
-  - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- 'button "Think The user wants me to plan a small change to add a `--greeting` flag to a CLI. They explicitly told me not to read or write any files, and to call exit_plan_mode with a short plan. Let me do that directly."':
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: "Think The user wants me to plan a small change to add a `--greeting` flag to a CLI. They explicitly told me not to read or write any files, and to call exit_plan_mode with a short plan. Let me do that directly."
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
+  - img
+  - img
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
+- 'button "思考 The user wants me to plan a small change to add a `--greeting` flag to a CLI. They explicitly told me not to read or write any files, and to call exit_plan_mode with a short plan. Let me do that directly."':
+  - img
+  - img
+  - text: "思考 The user wants me to plan a small change to add a `--greeting` flag to a CLI. They explicitly told me not to read or write any files, and to call exit_plan_mode with a short plan. Let me do that directly."
 - paragraph:
   - text: Since the user has explicitly asked me not to read or write any files and to go straight to planning, I'll proceed with
   - code: exit_plan_mode
   - text: .
-- 'button "Tool call exit_plan_mode · # Add `--greeting` flag to CLI"':
+- 'button "工具调用 exit_plan_mode · # Add `--greeting` flag to CLI"':
   - img
   - img
-  - text: "Tool call exit_plan_mode · # Add `--greeting` flag to CLI"
-- 'button "Think The plan was approved. The user''s last instruction says: \"Once the plan is approved, reply with the single word DONE and stop.\" So I should just reply with DONE and stop."':
+  - text: "工具调用 exit_plan_mode · # Add `--greeting` flag to CLI"
+- button "上下文注入 time-context":
   - img
   - img
-  - text: "Think The plan was approved. The user's last instruction says: \"Once the plan is approved, reply with the single word DONE and stop.\" So I should just reply with DONE and stop."
+  - text: 上下文注入 time-context
+- 'button "思考 The plan was approved. The user''s last instruction says: \"Once the plan is approved, reply with the single word DONE and stop.\" So I should just reply with DONE and stop."':
+  - img
+  - img
+  - text: "思考 The plan was approved. The user's last instruction says: \"Once the plan is approved, reply with the single word DONE and stop.\" So I should just reply with DONE and stop."
 - paragraph: DONE
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "4% of context used"
-- button "Send message" [disabled]
-- text: 1 turns · 2 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 51% Input 10.2K tok · Output 346 tok
+- button "上下文已用 4%"
+- button "发送消息" [disabled]
+- text: 1 轮 · 2 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 51% 输入 10.2K tok · 输出 346 tok

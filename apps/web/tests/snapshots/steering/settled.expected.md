@@ -1,53 +1,62 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Use the ask_user_question tool to" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: Use the ask_user_question tool to ask me exactly one question with id "checkpoint", question "Ready to continue?", header "Checkpoint", and options labeled "Yes" and "No". After I answer, reply with one short sentence acknowledging my answer and stop. {{clock}}
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
-  - img
-  - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- button "Think The user wants me to use the ask_user_question tool to ask them a specific question with the given parameters. Let me do exactly that.":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Think The user wants me to use the ask_user_question tool to ask them a specific question with the given parameters. Let me do exactly that.
-- button "Ask question 1/1 answered":
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
   - img
   - img
-  - text: Ask question 1/1 answered
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
+- button "思考 The user wants me to use the ask_user_question tool to ask them a specific question with the given parameters. Let me do exactly that.":
+  - img
+  - img
+  - text: 思考 The user wants me to use the ask_user_question tool to ask them a specific question with the given parameters. Let me do exactly that.
+- button "提问 1/1 已回答":
+  - img
+  - img
+  - text: 提问 1/1 已回答
 - text: "Interjection: include the word BANANA in your final reply. {{clock}}"
-- button "Copy":
+- button "复制":
   - img
-- button "Think The user selected \"Yes\" and wants me to include the word \"BANANA\" in my final reply. Let me acknowledge their answer.":
+- button "上下文注入 time-context":
   - img
   - img
-  - text: Think The user selected "Yes" and wants me to include the word "BANANA" in my final reply. Let me acknowledge their answer.
+  - text: 上下文注入 time-context
+- button "思考 The user selected \"Yes\" and wants me to include the word \"BANANA\" in my final reply. Let me acknowledge their answer.":
+  - img
+  - img
+  - text: 思考 The user selected "Yes" and wants me to include the word "BANANA" in my final reply. Let me acknowledge their answer.
 - paragraph: Great, let's move forward. BANANA!
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "6% of context used"
-- button "Send message" [disabled]
-- text: 1 turns · 2 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 98% Input 15.8K tok · Output 156 tok
+- button "上下文已用 6%"
+- button "发送消息" [disabled]
+- text: 1 轮 · 2 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 98% 输入 15.8K tok · 输出 156 tok

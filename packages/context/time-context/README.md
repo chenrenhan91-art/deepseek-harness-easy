@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-Opt-in durable context with the current zoned time, the browser zone attached to the open request, and elapsed time sampled during model-request preparation. Default compositions leave it disabled; the Schedule Web overlay mounts it so the model can interpret otherwise-unqualified dates and times in the user's browser zone. Decision record: [the durable time-context Agent Note](../../../.agents/notes/implemented/feature/2026-07-16-durable-per-step-time-context.md).
+Opt-in durable context with the current zoned time, the browser zone attached to the open request, and elapsed time sampled during model-request preparation. Headless default compositions leave it disabled; the shipped Web composition mounts it so the model can interpret otherwise-unqualified dates and times in the user's browser zone. Decision record: [the durable time-context Agent Note](../../../.agents/notes/implemented/feature/2026-07-16-durable-per-step-time-context.md).
 
 ## Config
 
@@ -30,7 +30,7 @@ The plugin prepends an `agent/pre-step` listener and delegates first. When an in
 
 Each reading uses the exact snapshot source `{ kind: 'plugin', plugin: 'time-context', form: 'snapshot', sections: [{ name: 'time-context', text: <same text> }] }`. The `./invariant` companion validates that shape, re-derives the current-turn browser policy from the original `user-rpc` messages, and checks the timestamp zone and elapsed baseline.
 
-Positive-interval scheduling scans raw durable Session events for the latest plugin-attributed message, including a reading shadowed by compaction. It therefore survives resume without a process-local cache. A positive interval can intentionally let a later request reuse existing history without a fresh reading; the Schedule Web overlay omits the interval.
+Positive-interval scheduling scans raw durable Session events for the latest plugin-attributed message, including a reading shadowed by compaction. It therefore survives resume without a process-local cache. A positive interval can intentionally let a later request reuse existing history without a fresh reading; the shipped Web composition omits the interval.
 
 Step 1 measures from the latest preceding durable user, assistant, or tool-result message. The prompt proposed for that step has not been appended yet. Later steps measure from the preceding time-context event in the same turn. Missing baselines report `unavailable`, and backward wall-clock movement clamps elapsed time to zero.
 

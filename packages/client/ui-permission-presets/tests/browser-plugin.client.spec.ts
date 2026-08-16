@@ -126,8 +126,8 @@ describe('ui-permission browser plugin', () => {
     const again = await c.ui.options(proj, new AbortController().signal)
     expect(again.find(option => option.id === 'workspace-write')?.active).toBe(true)
     expect(again.find(option => option.id === 'read-only')?.detail).toBe('Reads only.')
-    // Kebab-case names title-case; non-kebab host-configured names pass through.
-    expect(again.map(option => option.label)).toEqual(['Read Only', 'Workspace Write', 'Full access'])
+    // Host-supplied names render as-is; machine keys stay machine keys.
+    expect(again.map(option => option.label)).toEqual(['read-only', 'workspace-write', 'danger-full-access'])
     expect(again.find(option => option.id === 'danger-full-access')?.confirmation).toEqual({
       title: 'Enable Full access?',
       description: accessEn['confirm.description'],

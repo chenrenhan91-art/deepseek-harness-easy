@@ -45,20 +45,9 @@ function permissionGlyph(value: string): ReactNode | undefined {
   return permissionGlyphs[value]
 }
 
-/**
- * Display transform: kebab-case machine names render as title-case labels
- * (`workspace-write` → `Workspace Write`); non-kebab host-configured names
- * pass through. Full access intentionally overrides the machine-name
- * transform so both permission surfaces use the product label `Full access`;
- * the warning body remains locale-aware.
- */
-function displayName(name: string): string {
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(name)) return name
-  return name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
-}
-
+/** Host-supplied label; the Web assembly writes Chinese names into the preset table. */
 function optionLabel(option: PermissionSelectValue['options'][number]): string {
-  return option.value === FULL_ACCESS ? 'Full access' : displayName(option.name)
+  return option.name
 }
 
 export interface PermissionSelectProps {
@@ -138,7 +127,7 @@ export function PermissionSelect({ value, locked, command, t }: PermissionSelect
           <button
             type="button"
             className={css.trigger}
-            aria-label={t('input.accessMode', { name: current === undefined ? displayName(currentValue) : optionLabel(current) })}
+            aria-label={t('input.accessMode', { name: current === undefined ? currentValue : optionLabel(current) })}
             title={current?.description}
             disabled={locked || busy}
             onClick={() => { setOpen(!open) }}
@@ -146,7 +135,7 @@ export function PermissionSelect({ value, locked, command, t }: PermissionSelect
             {permissionGlyph(currentValue) !== undefined && (
               <span className={css.triggerIcon} aria-hidden>{permissionGlyph(currentValue)}</span>
             )}
-            <span className={css.triggerLabel}>{current === undefined ? displayName(currentValue) : optionLabel(current)}</span>
+            <span className={css.triggerLabel}>{current === undefined ? currentValue : optionLabel(current)}</span>
             {/* Same glyph + open rotation as the sibling ModelSelect trigger. */}
             <span className={clsx(css.chevron, open && css.chevronOpen)} aria-hidden>
               <IconChevronDownOutline14 />

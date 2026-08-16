@@ -1,45 +1,36 @@
 - banner:
-  - navigation "Session hierarchy":
-    - button "workspace" [disabled]
+  - navigation "会话层级":
+    - button "Reply with a one-sentence description" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
-- group "Command input": /goal Keep the composer context panels aligned
-- 'button "goal Goal created Status: active Objective: Keep the composer context panels aligned Rounds: 0/256 Activation: armed Commands: /goal edit <objective>, /goal pause, /goal clear"':
+- text: Reply with a one-sentence description of event sourcing, then stop. {{clock}}
+- button "复制":
+  - img
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: "goal Goal created Status: active Objective: Keep the composer context panels aligned Rounds: 0/256 Activation: armed Commands: /goal edit <objective>, /goal pause, /goal clear"
-- button "Context injection goal":
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
   - img
   - img
-  - text: Context injection goal
-- button "Context injection @deepseek-ai/dsh-system-prompt":
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
   - img
   - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
+  - text: 上下文注入 time-context
 - paragraph: partial
 - status: Deep diving...
-- region "To-dos":
-  - button "To-dos 1 completed · 1 in progress"
-- img
-- text: Ongoing Goal Keep the composer context panels aligned
-- button "Pause goal":
+- region "任务":
+  - button "任务 1 已完成 · 1 进行中"
+- button "2 条排队消息"
+- textbox "Cmd/Ctrl+Enter 插话发送全部排队消息"
+- button "命令":
   - img
-- button "Edit goal":
-  - img
-- button "Clear goal":
-  - img
-- button "2 queued messages"
-- textbox "Cmd/Ctrl+Enter steers all queued messages"
-- button "Commands":
-  - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Stop generating"
+- button "停止生成"

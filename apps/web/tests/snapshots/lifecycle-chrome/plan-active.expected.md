@@ -1,43 +1,66 @@
-- button "New session"
-- button "Collapse sidebar":
+- button "新建会话"
+- button "收起侧边栏":
   - img
-- button "New session":
+- button "新建会话":
   - img
-  - text: New Session
-- text: Workspaces
-- button "Search sessions":
+  - text: 新会话
+- button "定时任务"
+- text: 工作区
+- button "搜索会话":
   - img
-- textbox "Search sessions..."
-- button "View options":
+- textbox "搜索会话…"
+- button "视图选项":
   - img
-- button "Add workspace":
+- button "添加工作区":
   - img
-- tree "Sessions":
+- tree "会话":
   - treeitem "workspace" [expanded]:
     - img
     - text: workspace
-  - treeitem "New Session" [selected]
-- button "Settings":
+  - treeitem "新会话" [selected]
+- button "设置":
   - img
-  - text: Settings
-- text: Into the Unknown Preview
-- button "Choose workspace":
+  - text: 设置
+- text: 探索未至之境 预览版
+- button "选择工作区":
   - img
   - text: workspace
   - img
-- button "Standard mode":
+- textbox "描述你想要构建的内容"
+- button "命令":
   - img
-  - text: Standard mode
-  - img
-- textbox "Describe what you want to build"
-- button "Commands":
-  - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Plan mode on, press to turn off": Plan
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "plan mode 已开启，按下关闭": Plan
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: Details
-- button "Close details"
-- text: Click a tool row in the message flow to view its details
+- button "发送消息" [disabled]
+- text: 你想让它帮你做什么？
+- radiogroup "你想让它帮你做什么？":
+  - radio "做网页 做一个能直接打开的网页、落地页或小工具":
+    - img
+    - text: 做网页 做一个能直接打开的网页、落地页或小工具
+  - radio "写作 公众号、周报、简历、邮件，帮你写也帮你改":
+    - img
+    - text: 写作 公众号、周报、简历、邮件，帮你写也帮你改
+  - radio "表格数据 整理 Excel 和 CSV，做统计、去重、出图":
+    - img
+    - text: 表格数据 整理 Excel 和 CSV，做统计、去重、出图
+  - radio "文件整理 批量改名、分类归档、格式转换、找重复文件":
+    - img
+    - text: 文件整理 批量改名、分类归档、格式转换、找重复文件
+  - radio "学习答疑 把复杂的事讲明白，陪你一步步搞懂" [checked]:
+    - img
+    - text: 学习答疑 把复杂的事讲明白，陪你一步步搞懂
+  - radio "做 PPT 从一句话到能直接讲的成稿":
+    - img
+    - text: 做 PPT 从一句话到能直接讲的成稿
+  - radio "电脑自动化 定时抓取、批量处理，你只看结果":
+    - img
+    - text: 电脑自动化 定时抓取、批量处理，你只看结果
+  - radio "学编程 带着你改一个能跑起来的小项目":
+    - img
+    - text: 学编程 带着你改一个能跑起来的小项目
+- text: 选一个，然后在上面的框里说出你要做的事。发送前都可以换。 详情
+- button "关闭详情"
+- text: 点击消息流中的工具行查看详情

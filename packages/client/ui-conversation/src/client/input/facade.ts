@@ -46,6 +46,8 @@ export interface SessionInputDeps {
   steerQueue?: (() => void) | undefined
   /** The plain-message sink (send choreography / materialize fork — the hub owns it). */
   defaultSink(text: string, imageIds: readonly DraftAttachmentId[], mode: InputSubmitMode): void
+  /** Notice text for a rejected submit that reported nothing; absent shows the key. */
+  commandFailedText?: (() => string) | undefined
 }
 
 /** Guard tier from the machine phase. */
@@ -82,7 +84,7 @@ export class SessionInputShell implements SessionInput {
 
   // Real wall clock: the typing-run merge window must actually expire in
   // production (the machine's no-clock default is a constant for pure tests).
-  private readonly core = new InputMachine({ now: () => Date.now() })
+  private readonly core: InputMachine
   private noticeSeq = 0
   private lastDraft = ''
   private imageIds: readonly DraftAttachmentId[] = []
@@ -91,6 +93,10 @@ export class SessionInputShell implements SessionInput {
   private mirrorFn: ((text: string) => void) | undefined
 
   constructor(private readonly deps: SessionInputDeps) {
+    this.core = new InputMachine({
+      now: () => Date.now(),
+      ...(deps.commandFailedText !== undefined ? { commandFailedText: deps.commandFailedText } : {}),
+    })
     this.state = createSnapshotStore<InputState>(this.compose())
     deps.queue?.subscribe(() => { this.publish() })
   }

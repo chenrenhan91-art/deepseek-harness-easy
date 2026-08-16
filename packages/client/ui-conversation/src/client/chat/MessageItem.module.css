@@ -244,6 +244,12 @@
   font: var(--dsw-font-markdown-code-block-small);
 }
 
+.turnErrorTopUp {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--dsw-alias-state-business-primary);
+}
+
 .maxTokensTitle {
   margin-right: 6px;
   color: var(--dsw-alias-state-warn-primary);

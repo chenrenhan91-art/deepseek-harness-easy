@@ -1,17 +1,17 @@
 - region "Which color do you prefer?":
   - text: Pick one
   - heading "Which color do you prefer?" [level=2]
-  - button "Dismiss all questions":
+  - button "放弃整组问题":
     - img
   - group:
     - checkbox "Blue": Blue A cool recessive hue that reads as calm and trustworthy in long reading sessions and dense dashboards.
     - checkbox "Green": Green A restful mid-spectrum hue with the highest perceived brightness, easiest on the eye over long sessions.
-    - textbox "Type your answer"
-  - button "Previous question" [disabled]:
+    - textbox "输入你的答案"
+  - button "上一题" [disabled]:
     - img
   - text: 1 / 1
-  - button "Next question" [disabled]:
+  - button "下一题" [disabled]:
     - img
   - status
-  - button "Skip this question"
-  - button "Submit" [disabled]
+  - button "跳过本题"
+  - button "提交" [disabled]

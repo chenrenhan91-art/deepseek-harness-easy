@@ -103,7 +103,7 @@ describe.skipIf(MODE === 'record')('web e2e: user-explicit skill invocation thro
 
     // The menu lists the user-only skill (its only entry point) before enter.
     await composer.fill(`/${SKILL_NAME}`)
-    const menu = page.getByRole('listbox', { name: 'Trigger suggestions' })
+    const menu = page.getByRole('listbox', { name: '触发候选建议' })
     await expect.poll(
       () => menu.getByRole('option', { name: new RegExp(SKILL_NAME) }).count(),
       { timeout: 10_000 },
@@ -122,7 +122,7 @@ describe.skipIf(MODE === 'record')('web e2e: user-explicit skill invocation thro
     // The rendered body arrives as a context-injection row named after the
     // skill; expanding it reveals the canonical <skill_content> block, and
     // the user's text is NOT folded into it.
-    const injectionRow = page.getByRole('button', { name: `Context injection ${SKILL_NAME}` })
+    const injectionRow = page.getByRole('button', { name: `上下文注入 ${SKILL_NAME}` })
     await injectionRow.waitFor({ timeout: 15_000 })
     await injectionRow.click()
     const injectionBody = page

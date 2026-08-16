@@ -9,7 +9,7 @@
  */
 import type { Context } from '@deepseek-ai/cordis'
 import type {
-  RpcResult, SessionId, SubagentAddress,
+  RpcResult, SessionId, SubagentAddress, WorkspaceId,
 } from '@deepseek-ai/dsh-api-remotes/client'
 import type { HostObservable, SessionMaybeProvideInfo } from '@deepseek-ai/dsh-client-ui-slots'
 import type { AgentContext } from '../agents/scope.ts'
@@ -63,6 +63,13 @@ export interface ISessions {
    */
   refreshSubagents(parentSessionId: SessionId): Promise<void>
 
+  /**
+   * Create a session on the host.
+   * @param opts - target workspace or working directory, an optional
+   * caller-owned id, and the preset the new session should compose from.
+   * @returns the new session id.
+   */
+  create(opts?: { workspaceId?: WorkspaceId; cwd?: string; sessionId?: SessionId; agentPreset?: string }): Promise<SessionId>
   /**
    * Record the composition one session now runs. The agent-preset seat calls
    * this after a successful blank-session switch, so the header label moves

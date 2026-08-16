@@ -4,7 +4,7 @@
 
 import { useState, type KeyboardEvent, type ReactNode } from 'react'
 import {
-  IconChevronDownOutline14, IconInspectOutline12, IconSkillOutline16, StateDot,
+  IconChevronDownOutline14, IconSkillOutline16, StateDot,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
@@ -114,7 +114,7 @@ function stateStatus(state: SkillRowState, t: SkillRowProps['t']): string | null
  * @param props - keyed toolview payload plus the skill locale seat.
  * @returns the dedicated skill row.
  */
-export function SkillRow({ block, inspect, t }: SkillRowProps) {
+export function SkillRow({ block, t }: SkillRowProps) {
   const model = skillRowModel(block)
   const [expanded, setExpanded] = useState(false)
   const expandable = model.output !== null
@@ -146,7 +146,7 @@ export function SkillRow({ block, inspect, t }: SkillRowProps) {
       >
         <span className={css.leading}>{leading}</span>
         {status !== null ? <span className={css.visuallyHidden}>{status}</span> : null}
-        <span className={css.title}>Skill</span>
+        <span className={css.title}>{t('row.title')}</span>
         <span className={css.separator} aria-hidden />
         <span className={model.errorSummary === null ? css.summary : `${css.summary} ${css.errorSummary}`}>
           {summary}
@@ -158,12 +158,6 @@ export function SkillRow({ block, inspect, t }: SkillRowProps) {
             <div className={css.instructionsHeader}>{t('row.instructions')}</div>
             <pre className={css.instructions} data-error={model.state === 'error' || undefined}>{model.output}</pre>
           </section>
-          {inspect !== undefined ? (
-            <button type="button" className={css.inspectButton} onClick={inspect}>
-              <IconInspectOutline12 />
-              Inspect
-            </button>
-          ) : null}
         </div>
       ) : null}
     </div>

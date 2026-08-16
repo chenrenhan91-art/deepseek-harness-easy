@@ -1,42 +1,47 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "/user-invoke-demo and confirm the fixtur" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: /user-invoke-demo and confirm the fixture wiring {{clock}}
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
-  - img
-  - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- button "Context injection user-invoke-demo":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Context injection user-invoke-demo
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
+  - img
+  - img
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 user-invoke-demo":
+  - img
+  - img
+  - text: 上下文注入 user-invoke-demo
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
 - paragraph: USER_INVOKE_REPLY acknowledged; following the injected skill.
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "0% of context used"
-- button "Send message" [disabled]
-- text: 1 turns · 1 steps LLM {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 0% Input 256 tok · Output 16 tok
+- button "上下文已用 0%"
+- button "发送消息" [disabled]
+- text: 1 轮 · 1 步 LLM {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 0% 输入 256 tok · 输出 16 tok

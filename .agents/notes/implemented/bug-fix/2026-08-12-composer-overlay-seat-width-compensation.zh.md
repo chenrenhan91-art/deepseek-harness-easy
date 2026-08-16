@@ -36,4 +36,4 @@ trajectory 表格让这个代价显形：整行分隔线在面板右边缘前 8p
 
 ## 测试
 
-`apps/web/tests/composer-tab-geometry.e2e.ts` 仍断言输入卡在标签页间保持位置，并新增断言拆分：Chat 滚动容器保持 `scrollbar-gutter: stable` 与非零槽宽，覆盖分支解析为 `auto` 且槽宽为零。控制级联随机制改变：现在移除座位的 `right` 补偿（而非移除该分支上 Chat 从未有过的槽），测得同样的 4px 位移，证明相等的矩形并非从未到达布局的标签页切换。提交的 golden 记录两种状态。
+Web 不再随附 Trajectory，因此双标签几何 e2e 已退役（[新手 Web 工作台](../feature/2026-08-15-beginner-web-workbench.md)）。Chat 仍保持 `scrollbar-gutter: stable`。任何选用编辑器 overlay 的视图仍使用补偿；只组合 Chat 时，浏览器车道不再测量那道分叉。

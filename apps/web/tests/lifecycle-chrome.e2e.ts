@@ -61,16 +61,17 @@ describe('web e2e: lifecycle & chrome (workspace flow / reload / dark mode)', ()
     await scaffold?.close()
   })
 
-  it.skipIf(MODE === 'record')('opens the shared slash menu from plus with only Command candidates', async () => {
+  it.skipIf(MODE === 'record')('opens the shared slash menu from plus with Command and Skill candidates', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-command-menu-launcher'))
-    const launcher = page.getByRole('button', { name: 'Commands' })
+    const launcher = page.getByRole('button', { name: '命令' })
     await launcher.click()
-    const menu = page.getByRole('listbox', { name: 'Trigger suggestions' })
+    const menu = page.getByRole('listbox', { name: '触发候选建议' })
     await menu.waitFor({ timeout: 10_000 })
     const snapshot = await captureStableAria(page, '[role="listbox"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(COMMAND_MENU_EXPECTED, snapshot, MODE)
-    expect(snapshot).toContain('text: Commands')
-    expect(snapshot).not.toContain('text: Skills')
+    expect(snapshot).toContain('text: 命令')
+    expect(snapshot).toContain('text: 技能')
+    expect(snapshot).toContain('vision')
     expect(snapshot).not.toContain('text: Subagents')
     const launchedBox = await menu.boundingBox()
     await page.locator('textarea').first().press('Escape')
@@ -87,7 +88,7 @@ describe('web e2e: lifecycle & chrome (workspace flow / reload / dark mode)', ()
     )).toBeLessThan(1)
     await input.fill('/cpt')
     await expect.poll(() => menu.getByRole('option').allTextContents()).toEqual([
-      'compactCompact older conversation history',
+      'compact压缩较早的对话历史',
     ])
     const fuzzySnapshot = await captureStableAria(page, '[role="listbox"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(FUZZY_COMMAND_MENU_EXPECTED, fuzzySnapshot, MODE)
@@ -104,13 +105,13 @@ describe('web e2e: lifecycle & chrome (workspace flow / reload / dark mode)', ()
       await activePage.waitForSelector('[class*="frame"]', { timeout: 30_000 })
       await connectFreshWorkspace(activePage, activeScaffold.workspaceCwd)
       const input = activePage.locator('textarea').first()
-      await activePage.getByRole('button', { name: 'Commands' }).click()
-      const menu = activePage.getByRole('listbox', { name: 'Trigger suggestions' })
+      await activePage.getByRole('button', { name: '命令' }).click()
+      const menu = activePage.getByRole('listbox', { name: '触发候选建议' })
       await menu.waitFor({ timeout: 10_000 })
-      await menu.getByRole('option', { name: 'plan Enter or leave plan mode' }).click()
+      await menu.getByRole('option', { name: 'plan 进入或退出 plan mode' }).click()
       await expect.poll(() => input.inputValue()).toBe('/plan ')
       await input.press('Enter')
-      const planButton = activePage.getByRole('button', { name: 'Plan mode on, press to turn off' })
+      const planButton = activePage.getByRole('button', { name: 'plan mode 已开启，按下关闭' })
       await planButton.waitFor({ timeout: 10_000 })
       // The golden encodes an empty composer, and the button arriving does not
       // mean the submitted text is gone yet: under load the capture can catch
@@ -160,7 +161,7 @@ describe('web e2e: lifecycle & chrome (workspace flow / reload / dark mode)', ()
     }
     // The blank frame renders the hero, not the resident composer: the
     // headline plus the guidance placeholder are the empty state's anchors.
-    await expect.poll(() => page.getByText('Into the Unknown', { exact: false }).count(), { timeout: 15_000 }).toBe(1)
+    await expect.poll(() => page.getByText('探索未至之境', { exact: false }).count(), { timeout: 15_000 }).toBe(1)
     const input = page.locator('textarea').first()
     await input.waitFor({ timeout: 10_000 })
     if (MODE !== 'record') {

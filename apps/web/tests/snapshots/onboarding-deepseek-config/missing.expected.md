@@ -1,8 +1,16 @@
-- dialog "添加一个 API Key 开始使用":
-  - heading "添加一个 API Key 开始使用" [level=2]
-  - paragraph: 配置 DeepSeek 官方模型，即可开始使用。
-  - text: API 密钥
-  - textbox "API 密钥":
-    - /placeholder: 输入 API 密钥
-  - button "稍后配置"
-  - button "保存并继续" [disabled]
+- heading "先连上模型，再开始" [level=1]
+- paragraph: 只需设置一次：助手由 DeepSeek 提供思考能力，API Key 就是它向你计费的凭据。
+- heading "第一步 · 领一个 Key" [level=2]
+- paragraph: 登录开放平台 → 创建 API Key → 需要付费时点「去充值」。API 按量扣费，没余额 Key 也跑不动。Key 只显示一次，请立刻复制。
+- link "去创建 API Key":
+  - /url: https://platform.deepseek.com/api_keys
+- link "去充值（官方）":
+  - /url: https://platform.deepseek.com/top_up
+- heading "第二步 · 粘贴并验证" [level=2]
+- paragraph: 我们会用这串 Key 向 DeepSeek 要一次模型清单，填错会当场提示，而不是等到你发第一句话。
+- textbox "API 密钥":
+  - /placeholder: 输入 API 密钥
+- button "验证并开始" [disabled]
+- heading "开始前请知悉" [level=2]
+- paragraph: 助手会直接读写这台电脑上的文件、执行命令、访问网络，过程中不再逐条询问。请只在自己的电脑上使用，重要资料先备份。
+- button "稍后再说"

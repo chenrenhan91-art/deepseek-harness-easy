@@ -136,15 +136,63 @@ describe('the default preset as a user setting', () => {
     expect((await ctx.agentPresets.resolve()).id).toBe('standard')
   })
 
-  it('reports an unknown user default only when a session tries to use it', async () => {
+  it('uses the deployment default when the user default is absent from the roster', async () => {
     const { ctx } = await harness()
 
     // Storing it succeeds — the roster is a live directory, so a name that is
-    // absent now may exist by the time a session asks for it.
+    // absent now may exist by the time a session asks for it. A nameless
+    // resolve must not fail every new session on that stale setting: the
+    // composition default is the layer underneath.
     await ctx.settings.update(NS, { default: 'no-such-preset' })
 
-    await expect(ctx.agentPresets.resolve())
+    expect(ctx.agentPresets.defaultId).toBe('no-such-preset')
+    expect((await ctx.agentPresets.resolve()).id).toBe('standard')
+    await expect(ctx.agentPresets.resolve('no-such-preset'))
       .rejects.toThrow(/preset "no-such-preset" not found/)
+  })
+
+  it('uses the deployment default when a retired shipped id is named explicitly', async () => {
+    const home = await mkdtemp(join(tmpdir(), 'dsh-preset-retired-'))
+    const settingsFile = join(home, 'settings.yaml')
+    await writeFile(settingsFile, '{}\n')
+    const studyDir = join(home, 'study')
+    await mkdir(studyDir)
+    await writeFile(join(studyDir, COMPOSITION_FILE), '- id: alpha\n  name: contribute.js\n')
+    const ctx = new Context()
+    ctx.baseUrl = pathToFileURL(home).href + '/'
+    await ctx.plugin(Loader)
+    ctx.loader.builtins.include = Include
+    await ctx.plugin(FileSettingsProvider, { path: settingsFile, watch: false })
+    await ctx.plugin(AgentPresets, {
+      default: 'study',
+      roots: [{ path: home, trust: 'system' }],
+      includeUserRoot: false,
+    })
+
+    // Resume, select, and mount all call resolve with the recorded id. The
+    // beginner roster deleted these names; failing them would keep every
+    // leftover session unopenable.
+    expect((await ctx.agentPresets.resolve('standard')).id).toBe('study')
+    expect((await ctx.agentPresets.resolve('code')).id).toBe('study')
+    await expect(ctx.agentPresets.resolve('no-such-preset'))
+      .rejects.toThrow(/preset "no-such-preset" not found/)
+  })
+
+  it('still fails unnamed resolve when the deployment default is absent too', async () => {
+    const home = await mkdtemp(join(tmpdir(), 'dsh-preset-stale-empty-'))
+    const settingsFile = join(home, 'settings.yaml')
+    await writeFile(settingsFile, '{}\n')
+    const ctx = new Context()
+    ctx.baseUrl = pathToFileURL(FIXTURES).href + '/'
+    await ctx.plugin(Loader)
+    ctx.loader.builtins.include = Include
+    await ctx.plugin(FileSettingsProvider, { path: settingsFile, watch: false })
+    await ctx.plugin(AgentPresets, { default: 'standard', roots: [], includeUserRoot: false })
+    await ctx.settings.update(NS, { default: 'no-such-preset' })
+
+    // Both names are gone: the user default and the composition default.
+    await expect(ctx.agentPresets.resolve())
+      .rejects.toThrow(/preset "no-such-preset" not found \(available: none\)/)
   })
 })
 

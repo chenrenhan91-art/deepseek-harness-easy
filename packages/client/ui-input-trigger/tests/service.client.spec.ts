@@ -352,7 +352,7 @@ describe('track', () => {
 })
 
 describe('programmatic source launcher', () => {
-  it('opens only the requested source and reuses its ordinary pick span', async () => {
+  it('opens every source on the trigger and reuses the ordinary pick span', async () => {
     const command = readySource('/', 'command', [{ name: 'goal' }])
     const skill = readySource('/', 'skill', [{ name: 'review' }])
     const { controller } = controllerBench([command.source, skill.source])
@@ -370,7 +370,10 @@ describe('programmatic source launcher', () => {
     expect(controller.menu.getSnapshot()).toMatchObject({
       open: true,
       hit,
-      groups: [{ source: 'command', status: 'ready', items: [{ name: 'goal' }] }],
+      groups: [
+        { source: 'command', status: 'ready', items: [{ name: 'goal' }] },
+        { source: 'skill', status: 'ready', items: [{ name: 'review' }] },
+      ],
     })
     controller.pick('command', 0)
     expect(command.picks[0]).toMatchObject({ via: 'menu', span: hit.span })

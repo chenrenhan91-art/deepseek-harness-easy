@@ -53,7 +53,7 @@ describe('AppRoot', () => {
       status.set('@deepseek-ai/dsh-client-ui-layout', 'failed')
       status.set('ok', 'active')
     })
-    expect(getByText('Failed to load plugins')).toBeTruthy()
+    expect(getByText('加载插件失败')).toBeTruthy()
     expect(getByText('@deepseek-ai/dsh-client-ui-layout')).toBeTruthy()
     expect(queryByTestId('real-ui')).toBeNull()
   })
@@ -61,7 +61,7 @@ describe('AppRoot', () => {
   it('renders the boot failure report even when no entry projected failed', () => {
     const { error, getByText, queryByTestId } = mount()
     act(() => { error.set('web boot: 1 entry did not activate\nx: pending (waiting for service: y)') })
-    expect(getByText('Failed to load plugins')).toBeTruthy()
+    expect(getByText('加载插件失败')).toBeTruthy()
     expect(getByText(/waiting for service/)).toBeTruthy()
     expect(queryByTestId('real-ui')).toBeNull()
   })

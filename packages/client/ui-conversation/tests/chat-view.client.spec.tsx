@@ -154,7 +154,6 @@ function makeHarness(init?: Partial<ConversationSnapshot>) {
   const openDetails = vi.fn<(t: SelectionTarget) => void>()
   const openFile = vi.fn<(path: string) => void>()
   const loadOlder = vi.fn()
-  const inspectCall = vi.fn<(callId: string) => void>()
   // In-memory scroll memory matching the apply.ts per-session map contract.
   let savedScroll: ReturnType<ChatViewSlotProps['chatScroll']['read']> = null
   const chatScroll: ChatViewSlotProps['chatScroll'] = {
@@ -172,7 +171,6 @@ function makeHarness(init?: Partial<ConversationSnapshot>) {
     block: ToolCallBlock
     selectedCallId: string | undefined
     openFile: ChatNodeOwnerProps['openFile']
-    inspectCall: ChatNodeOwnerProps['inspectCall']
   }> = []
   const renderCommandSlot = ((_key: string, _owner: object, opts?: { fallback?: React.ReactNode }) =>
     opts?.fallback ?? null) as unknown as React.ComponentProps<typeof CommandNodeView>['renderSlot']
@@ -242,7 +240,6 @@ function makeHarness(init?: Partial<ConversationSnapshot>) {
           block,
           selectedCallId: nodeOwner.selectedCallId,
           openFile: nodeOwner.openFile,
-          inspectCall: nodeOwner.inspectCall,
         }
         toolOwners.push(tool)
         return (
@@ -284,7 +281,6 @@ function makeHarness(init?: Partial<ConversationSnapshot>) {
     openFile,
     loadOlder,
     loadImage: vi.fn(() => Promise.reject(new Error('not used'))),
-    inspectCall,
     chatScroll,
     forkAt,
     // Absent-service default; mention tests override with a real resolver.
@@ -294,7 +290,7 @@ function makeHarness(init?: Partial<ConversationSnapshot>) {
   }
   const setSelection = (next: SelectionTarget | null): void => { chat.actions.select(next) }
   return {
-    set, ChatView, props, openDetails, openFile, loadOlder, inspectCall,
+    set, ChatView, props, openDetails, openFile, loadOlder,
     chatScroll, forkAt, setSelection, toolOwners,
   }
 }
@@ -590,6 +586,17 @@ describe('ChatView', () => {
     ])
   })
 
+  it('points a QUOTA turn failure at the official top-up page', () => {
+    const h = makeHarness({
+      nodes: [user(1, 'try'), { ...turnError(2, 'QUOTA'), message: 'HTTP 402: insufficient_quota' }],
+    })
+    const view = render(<h.ChatView {...h.props} />)
+    const status = view.getByRole('status')
+    expect(status.textContent).toContain('账户余额不足，请先充值后再试。')
+    expect(view.getByRole('link', { name: '去充值（官方）' }).getAttribute('href'))
+      .toBe('https://platform.deepseek.com/top_up')
+  })
+
   it('renders the max-tokens notice with localized guidance, distinct from turn errors', () => {
     const h = makeHarness({ nodes: [user(1, 'try'), assistant(2, 'truncated'), turnMaxTokens(3)] })
     const view = render(<h.ChatView {...h.props} />)
@@ -598,14 +605,6 @@ describe('ChatView', () => {
       '已达到输出 token 上限回答被截断，已有输出保留在对话中。发送“继续”可让模型接着输出。',
     ])
     expect(view.queryByText('本轮运行失败')).toBeNull()
-  })
-
-  it('hands the trajectory callback to the Tool seat', () => {
-    const h = makeHarness({
-      nodes: [toolResult(3, 'a')],
-    })
-    render(<h.ChatView {...h.props} />)
-    expect(h.toolOwners[0]?.inspectCall).toBe(h.inspectCall)
   })
 
   it('shows assistant IconActions only on the last content message of each turn', () => {
@@ -968,7 +967,6 @@ describe('ChatView', () => {
     const owner = calls[0]?.owner as RoutedChatNodeOwner
     expect((owner.node.data as { readonly root: ToolCallBlock }).root).toBe(block)
     expect(owner.openFile).toBe(h.openFile)
-    expect(owner.inspectCall).toBe(h.inspectCall)
   })
 
   it('prepend preserves a semantic row; a trailing user node force-scrolls', () => {
@@ -1321,7 +1319,7 @@ describe('ChatView', () => {
     expect(view.queryByText('正在压缩…')).toBeNull()
     expect(view.queryByText('上下文已压缩')).toBeNull()
     expect(view.getByText('已压缩 16 条历史记录（约 11309 tokens）')).toBeTruthy()
-    const row = view.getByRole('button', { name: /compact/ })
+    const row = view.getByRole('button', { name: /压缩上下文/ })
     expect(row.getAttribute('aria-expanded')).toBe('false')
     expect(row.querySelector('[data-compaction-icon="context"]')).not.toBeNull()
     expect(row.querySelector('[data-compaction-disclosure="collapsed"]')).not.toBeNull()

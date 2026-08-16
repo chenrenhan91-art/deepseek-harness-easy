@@ -1,33 +1,29 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - 'button "Run two shell commands: wait" [disabled]'
-  - button "Session log":
-    - text: Session log
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
-- text: "Run two shell commands: wait for cancellation, then write skipped.txt. {{date}} {{clock}}"
-- button "Copy":
+- text: "Run two shell commands: wait for cancellation, then write skipped.txt. {{clock}}"
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- 'button "Failed Bash Error: tool call aborted" [expanded]':
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- 'button "失败 执行命令 Error: tool call aborted" [expanded]':
   - img
-  - text: "Failed Bash Error: tool call aborted"
-- text: "IN { \"command\": \"node -e \\\"require('node:fs').writeFileSync('started.txt', 'started'); setInterval(() => {}, 1000)\\\"\", \"description\": \"Wait until cancellation\" } OUT Error: tool call aborted"
-- button "Inspect"
-- 'button "Failed Bash Error: tool call aborted before dispatch"':
+  - text: "失败 执行命令 Error: tool call aborted"
+- text: "输入 { \"command\": \"node -e \\\"require('node:fs').writeFileSync('started.txt', 'started'); setInterval(() => {}, 1000)\\\"\", \"description\": \"Wait until cancellation\" } 输出 Error: tool call aborted"
+- 'button "失败 执行命令 Error: tool call aborted before dispatch"':
   - img
-  - text: "Failed Bash Error: tool call aborted before dispatch"
-- textbox "Message the agent"
-- button "Commands":
+  - text: "失败 执行命令 Error: tool call aborted before dispatch"
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：工作区可写": 工作区可写
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: 1 turns · 1 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 0% Input 10 tok · Output 10 tok
+- button "发送消息" [disabled]
+- text: 1 轮 · 1 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 0% 输入 10 tok · 输出 10 tok

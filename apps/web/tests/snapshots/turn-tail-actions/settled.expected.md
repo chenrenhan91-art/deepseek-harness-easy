@@ -1,45 +1,54 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Begin your reply with the" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: Begin your reply with the plain sentence "Reading the workspace now." as text, and in that same message call the bash tool with the command "echo alpha". After the tool result, reply with the single word DONE and stop. {{clock}}
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
-  - img
-  - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- button "Think The user wants me to begin with \"Reading the workspace now.\" and call bash with \"echo alpha\" in the same message. Then after the tool result, reply with the single word DONE and stop.":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Think The user wants me to begin with "Reading the workspace now." and call bash with "echo alpha" in the same message. Then after the tool result, reply with the single word DONE and stop.
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
+  - img
+  - img
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
+- button "思考 The user wants me to begin with \"Reading the workspace now.\" and call bash with \"echo alpha\" in the same message. Then after the tool result, reply with the single word DONE and stop.":
+  - img
+  - img
+  - text: 思考 The user wants me to begin with "Reading the workspace now." and call bash with "echo alpha" in the same message. Then after the tool result, reply with the single word DONE and stop.
 - paragraph: Reading the workspace now.
-- button "Bash Print alpha to stdout":
+- button "执行命令 Print alpha to stdout":
   - img
   - img
-  - text: Bash Print alpha to stdout
+  - text: 执行命令 Print alpha to stdout
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
 - paragraph: partial
-- text: Stopped
-- button "Copy":
+- text: 已停止
+- button "复制":
   - img
-- tooltip "Copy"
-- button "Branch into a new conversation":
+- tooltip "复制"
+- button "在新对话中分支":
   - img
-- text: {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "6% of context used"
-- button "Send message" [disabled]
-- text: 1 turns · 2 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 0% Input 7.8K tok · Output 109 tok
+- button "上下文已用 6%"
+- button "发送消息" [disabled]
+- text: 1 轮 · 2 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 0% 输入 7.8K tok · 输出 109 tok

@@ -2,6 +2,7 @@
  * Sidebar slot contract: the registrant-side props composition for the
  * layout-owned `sidebar` slot, plus the holes this shell declares. The shell
  * owns column geometry (fold state machine, brand row, New Session);
+ * optional actions under New Session occupy `sidebar.session.action`;
  * everything between the section header and the list bottom is the
  * `sidebar.workspaces` registrant's (ui-workspace), and the foot is the
  * `sidebar.settings` registrant's (ui-settings), followed by optional footer
@@ -22,6 +23,13 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      * registers the browser.
      */
     'sidebar.workspaces': { kind: 'single'; scope: 'root'; owner: SidebarSectionOwnerProps }
+    /**
+     * Optional actions under New Session, above the workspace/session
+     * browser. Declared by this package's 'sidebar' entry; each action
+     * receives the column state and the current-session-optional kit so a
+     * page can read a session projection without occupying the conversation.
+     */
+    'sidebar.session.action': { kind: 'list'; scope: 'session-maybe'; owner: SidebarSessionActionOwnerProps }
     /**
      * The settings seat at the sidebar foot. Declared by this package's
      * 'sidebar' entry; ui-settings registers its trigger row + modal panel.
@@ -45,6 +53,12 @@ export interface SidebarSectionOwnerProps {
   wide: boolean
   /** Rail icons request expansion; the browser rides the wide flip for focus. */
   expandSidebar: () => void
+}
+
+/** Owner share of an action rendered under New Session. */
+export interface SidebarSessionActionOwnerProps {
+  /** Whether the sidebar renders wide content (false = 56px rail). */
+  wide: boolean
 }
 
 /**
@@ -85,5 +99,5 @@ export type SidebarRootInjected = {
  */
 export type SidebarRootComponentProps =
   PropsRuntime<'sidebar'>
-  & PropsRenderSlots<'sidebar.workspaces' | 'sidebar.settings' | 'sidebar.footer.action'>
+  & PropsRenderSlots<'sidebar.workspaces' | 'sidebar.session.action' | 'sidebar.settings' | 'sidebar.footer.action'>
   & SidebarRootInjected & PropsLocale<'sidebar'>

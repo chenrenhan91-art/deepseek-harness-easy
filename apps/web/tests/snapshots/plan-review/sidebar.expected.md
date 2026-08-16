@@ -1,1 +1,1 @@
-- 'treeitem "Plan awaiting review Plan a small change: add now" [selected]'
+- 'treeitem "计划待审 Plan a small change: add 刚刚" [selected]'

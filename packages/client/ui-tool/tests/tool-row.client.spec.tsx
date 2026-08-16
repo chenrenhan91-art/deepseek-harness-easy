@@ -53,9 +53,9 @@ describe('tool-call-model', () => {
     // Every define/run pair the model makes puts a row in the flow, so the
     // generic "Tool call · cordis_run · dyn-1" fallback is user-visible slop.
     const titleOf = (name: string) => toolRowModel(name, running({ name, argsRaw: '{"id":"dyn-1"}' }))
-    expect(titleOf('cordis_run').title).toBe('Run Cordis Plugin')
-    expect(titleOf('cordis_stop').title).toBe('Stop Cordis Plugin')
-    expect(titleOf('cordis_undefine').title).toBe('Remove Cordis Plugin')
+    expect(titleOf('cordis_run').titleKey).toBe('tool.title.cordisRun')
+    expect(titleOf('cordis_stop').titleKey).toBe('tool.title.cordisStop')
+    expect(titleOf('cordis_undefine').titleKey).toBe('tool.title.cordisRemove')
     // An owned title takes the tool name out of the summary slot, leaving the
     // package id as the only mutable text.
     expect(titleOf('cordis_run').summary).toBe('dyn-1')
@@ -68,20 +68,20 @@ describe('tool-call-model', () => {
     // title here would be a second answer to what the card already renders.
     const model = toolRowModel('cordis_define', running({ name: 'cordis_define', argsRaw: '{"name":"clock"}' }))
     expect(model.variant).toBe('others')
-    expect(model.title).toBe('Tool call')
+    expect(model.titleKey).toBe('tool.title.others')
   })
 
   it('has dropped the v2 mount verbs that no longer exist', () => {
     // Keeping them would be a mapping for a tool nothing can call.
     expect(classifyTool('cordis_mount')).toBe('others')
-    expect(toolRowModel('cordis_mount', running({ name: 'cordis_mount', argsRaw: '{}' })).title).toBe('Tool call')
-    expect(toolRowModel('cordis_unmount', running({ name: 'cordis_unmount', argsRaw: '{}' })).title).toBe('Tool call')
+    expect(toolRowModel('cordis_mount', running({ name: 'cordis_mount', argsRaw: '{}' })).titleKey).toBe('tool.title.others')
+    expect(toolRowModel('cordis_unmount', running({ name: 'cordis_unmount', argsRaw: '{}' })).titleKey).toBe('tool.title.others')
   })
 
   it('gives the pwsh shell row the bash family treatment with its own title', () => {
     const m = toolRowModel('pwsh', running())
     expect(m.variant).toBe('bash')
-    expect(m.title).toBe('Pwsh')
+    expect(m.titleKey).toBe('tool.title.pwsh')
   })
 
   it('derives state across running/ok/error/interrupted', () => {
@@ -93,7 +93,7 @@ describe('tool-call-model', () => {
 
   it('derives the bash summary from description over command', () => {
     const m = toolRowModel('bash', running())
-    expect(m.title).toBe('Bash')
+    expect(m.titleKey).toBe('tool.title.bash')
     expect(m.summary).toBe('List files')
     expect(toolRowModel('bash', running({ argsRaw: '{"command":"pwd"}' })).summary).toBe('pwd')
   })
@@ -178,7 +178,7 @@ describe('tool-call-model', () => {
       argsRaw: '{"what":"api","name":"tools"}',
     }))).toMatchObject({
       variant: 'read',
-      title: 'Inspect',
+      titleKey: 'tool.title.inspect',
       summary: 'api',
     })
     expect(toolRowModel('cordis_run', running({
@@ -186,14 +186,14 @@ describe('tool-call-model', () => {
       argsRaw: '{"id":"dyn-2"}',
     }))).toMatchObject({
       variant: 'others',
-      title: 'Run Cordis Plugin',
+      titleKey: 'tool.title.cordisRun',
       summary: 'dyn-2',
     })
     expect(toolRowModel('cordis_undefine', result({
       call: { name: 'cordis_undefine', argsRaw: '{"id":"dyn-2"}' },
     }))).toMatchObject({
       variant: 'others',
-      title: 'Remove Cordis Plugin',
+      titleKey: 'tool.title.cordisRemove',
       summary: 'dyn-2',
     })
   })
@@ -335,17 +335,12 @@ describe('ToolRow', () => {
     expect(view.container.querySelector('[class*="fileLink"]')).toBeNull()
   })
 
-  it('the expanded body carries a hover Inspect pill that fires the callback', () => {
-    const inspect = vi.fn()
-    const view = render(<ToolRow {...rowProps} inspect={inspect} />)
-    // Collapsed: no pill.
-    expect(view.queryByText('Inspect')).toBeNull()
+  it('expanding keeps the body a sibling of the header row', () => {
+    const view = render(<ToolRow {...rowProps} />)
     fireEvent.click(view.getByRole('button', { name: /Bash/ }))
-    const pill = view.getByText('Inspect')
-    fireEvent.click(pill)
-    expect(inspect).toHaveBeenCalledTimes(1)
-    // The pill click must not collapse the row (body is a .row sibling).
-    expect(view.getByRole('button', { name: /Bash/ }).getAttribute('aria-expanded')).toBe('true')
+    const header = view.getByRole('button', { name: /Bash/ })
+    expect(header.getAttribute('aria-expanded')).toBe('true')
+    expect(header.querySelector('[class*="bodyWrap"]')).toBeNull()
   })
 
   it('no inspect callback, no pill', () => {
@@ -354,22 +349,22 @@ describe('ToolRow', () => {
     expect(view.queryByText('Inspect')).toBeNull()
   })
 
-  it('the expanded card gutter-labels each section it carries (IN / OUT)', () => {
+  it('the expanded card gutter-labels each section it carries (input / output)', () => {
     const both = render(<ToolRow {...rowProps} output="result text" />)
     fireEvent.click(both.getByRole('button'))
-    expect(both.getByText('IN')).toBeTruthy()
-    expect(both.getByText('OUT')).toBeTruthy()
+    expect(both.getByText('输入')).toBeTruthy()
+    expect(both.getByText('输出')).toBeTruthy()
     expect(both.getByText('result text')).toBeTruthy()
     cleanup()
     const inputOnly = render(<ToolRow {...rowProps} />)
     fireEvent.click(inputOnly.getByRole('button'))
-    expect(inputOnly.getByText('IN')).toBeTruthy()
-    expect(inputOnly.queryByText('OUT')).toBeNull()
+    expect(inputOnly.getByText('输入')).toBeTruthy()
+    expect(inputOnly.queryByText('输出')).toBeNull()
     cleanup()
     const outputOnly = render(<ToolRow {...rowProps} body={null} output="only out" />)
     fireEvent.click(outputOnly.getByRole('button'))
-    expect(outputOnly.queryByText('IN')).toBeNull()
-    expect(outputOnly.getByText('OUT')).toBeTruthy()
+    expect(outputOnly.queryByText('输入')).toBeNull()
+    expect(outputOnly.getByText('输出')).toBeTruthy()
     expect(outputOnly.getByText('only out')).toBeTruthy()
   })
 })
@@ -381,7 +376,7 @@ describe('GenericToolCard', () => {
 
   it('renders the classified variant row from the frozen slice', () => {
     const view = render(<GenericToolCard {...props('bash', result())} />)
-    expect(view.getByText('Bash')).toBeTruthy()
+    expect(view.getByText('执行命令')).toBeTruthy()
     expect(view.getByText('List files')).toBeTruthy()
     expect(view.container.querySelector('[data-variant="bash"]')).not.toBeNull()
   })
@@ -390,7 +385,7 @@ describe('GenericToolCard', () => {
     const view = render(
       <GenericToolCard {...props('todo_write', running({ name: 'todo_write', argsRaw: '{"note":"x"}' }))} />,
     )
-    expect(view.getByText('Tool call')).toBeTruthy()
+    expect(view.getByText('工具调用')).toBeTruthy()
     expect(view.container.querySelector('[data-variant="others"]')).not.toBeNull()
     expect(view.container.querySelector('[data-state="running"]')).not.toBeNull()
   })
@@ -402,7 +397,7 @@ describe('GenericToolCard', () => {
         argsRaw: '{"file_path":"src/x.ts","old_string":"before","new_string":"after"}',
       }))} />,
     )
-    expect(view.getByText('Edit')).toBeTruthy()
+    expect(view.getByText('修改文件')).toBeTruthy()
     expect(view.getByText('src/x.ts')).toBeTruthy()
     expect(view.container.querySelector('[data-variant="edit"]')).not.toBeNull()
     expect(view.container.querySelector('svg')).not.toBeNull()
@@ -415,18 +410,10 @@ describe('GenericToolCard', () => {
         argsRaw: '{"file_path":"src/x.ts","content":"hello"}',
       }))} />,
     )
-    expect(view.getByText('Write')).toBeTruthy()
+    expect(view.getByText('写入文件')).toBeTruthy()
     expect(view.getByText('src/x.ts')).toBeTruthy()
     expect(view.container.querySelector('[data-variant="write"]')).not.toBeNull()
     expect(view.container.querySelector('svg')).not.toBeNull()
-  })
-
-  it('passes the owner inspect callback through to the expanded row pill', () => {
-    const inspect = vi.fn()
-    const view = render(<GenericToolCard {...props('bash', result())} inspect={inspect} />)
-    fireEvent.click(view.getByRole('button', { name: /Bash/ }))
-    fireEvent.click(view.getByText('Inspect'))
-    expect(inspect).toHaveBeenCalledTimes(1)
   })
 
   it('file-path summary click reaches openFile; bash summary does not', () => {

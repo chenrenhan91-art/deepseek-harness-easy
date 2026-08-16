@@ -1,11 +1,17 @@
 /**
- * Agent-scoped durable one-shot and fixed-rate reminders over the session event log.
+ * Agent-scoped durable one-shot, fixed-rate, and local-clock reminders over the session event log.
  * @module @deepseek-ai/dsh-schedule
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import type {} from '@deepseek-ai/dsh-session-persistence'
+// Type-only: resolves `ctx.commands` for the optional command child.
+import type {} from '@deepseek-ai/dsh-commands'
+// Type-only: resolves ctx.sessionProjections for the optional unit child.
+import type {} from '@deepseek-ai/dsh-session-projection'
+import { registerScheduleCommand } from './commands.ts'
+import { scheduleProjectionDefinition } from './projection.ts'
 import { ScheduleRuntime } from './runtime.ts'
 import { registerScheduleTools } from './tools.ts'
 
@@ -17,17 +23,23 @@ export {
   ScheduleInputError,
   ScheduleLogError,
   allocateScheduleId,
+  applyScheduleEvent,
   createAfterScheduleRecord,
   createAtScheduleRecord,
+  createDailyScheduleRecord,
   createEveryScheduleRecord,
+  createWeeklyScheduleRecord,
   decodeScheduleChange,
   foldScheduleEvents,
+  isOneShotScheduleRecord,
   renderReminderFraming,
   renderEveryReminderBatchFraming,
+  resolveCalendarOccurrence,
   resolveEveryOccurrence,
   scheduleView,
 } from './domain.ts'
 export { registerScheduleTools } from './tools.ts'
+export { scheduleProjectionDefinition } from './projection.ts'
 
 /** Cordis function-plugin name. */
 export const name = 'schedule'
@@ -39,14 +51,24 @@ type OwnerCleanup = () => void | Promise<void>
 /** Install Schedule only for root agents published after this plugin loads. */
 export function apply(ctx: Context): void {
   const runtimes = new Map<Agent, OwnerCleanup>()
+  const drivers = new WeakMap<Agent, () => void>()
   let stopping = false
+
+  ctx.inject(['sessionProjections'], (projectionCtx) => {
+    projectionCtx.sessionProjections.register(scheduleProjectionDefinition)
+  })
+  ctx.inject(['commands'], (commandCtx) => {
+    registerScheduleCommand(commandCtx, ctx, drivers)
+  })
 
   ctx.effect(() => {
     const stopCreated = ctx.on('agent/created', ({ agent }) => {
       if (stopping || runtimes.has(agent) || !ctx.agents.roots().includes(agent)) return
       const runtime = new ScheduleRuntime(ctx, agent)
+      const requestDrive = (): void => { runtime.requestDrive() }
+      drivers.set(agent, requestDrive)
       const cleanup: OwnerCleanup = agent.ctx.effect(() => {
-        const disposeTools = registerScheduleTools(ctx, agent.ctx, agent, () => { runtime.requestDrive() })
+        const disposeTools = registerScheduleTools(ctx, agent.ctx, agent, requestDrive)
         const stopStatus = agent.ctx.on('agent/status', ({ status }) => {
           if (status === 'idle' && agent.session.events.some(event => event.type === 'schedule/change')) {
             runtime.requestDrive()
@@ -59,6 +81,7 @@ export function apply(ctx: Context): void {
           try {
             await runtime.dispose()
           } finally {
+            drivers.delete(agent)
             if (runtimes.get(agent) === cleanup) runtimes.delete(agent)
           }
         }

@@ -33,7 +33,10 @@ import { discoverPresets, USER_PRESET_DIR } from './discovery.ts'
 import { copyComposition, deleteComposition, readComposition } from './authoring.ts'
 import { mountPreset, serviceForAgent, standingMountFor } from './mount.ts'
 import { PresetExistsError } from './authoring.ts'
-import { PresetMountError, UnknownPresetError, type AgentPreset, type Config, type PresetRoot } from './preset.ts'
+import {
+  PresetMountError, RETIRED_SHIPPED_PRESET_IDS, UnknownPresetError,
+  type AgentPreset, type Config, type PresetRoot,
+} from './preset.ts'
 import type {} from './types.ts'
 
 /** Settings namespace carrying the user's chosen default preset. */
@@ -63,7 +66,7 @@ export {
   PresetNotWritableError, readComposition, writableRoot,
 } from './authoring.ts'
 export { resolveSessionPreset, type PresetBearingSession } from './session.ts'
-export { PresetMountError, UnknownPresetError } from './preset.ts'
+export { PresetMountError, RETIRED_SHIPPED_PRESET_IDS, UnknownPresetError } from './preset.ts'
 export type { AgentPreset, Config, PresetRoot, PresetTrust } from './preset.ts'
 
 declare module '@deepseek-ai/cordis' {
@@ -206,18 +209,30 @@ export class AgentPresets extends Service {
    * A broken preset resolves — deleting one, reading one, and reporting one
    * all need the row — and the mounting paths refuse it AFTER resolution
    * through {@link resolveMountable}.
+   *
+   * An unnamed resolve (`id` omitted) that finds no row for {@link defaultId}
+   * retries {@link Config.default}. A settings document can name a preset the
+   * roster no longer supplies; every session that names none would otherwise
+   * fail to start. An explicit id that is one of the retired shipped names
+   * ({@link RETIRED_SHIPPED_PRESET_IDS}) does the same, because resume, select,
+   * and mount all go through this method and a leftover `standard` session
+   * would otherwise fail every one of them. Any other explicit id still fails loud.
    * @param id - the preset id, or `undefined` for {@link defaultId}.
    * @returns the resolved preset.
-   * @throws when no configured root supplies that id.
+   * @throws when no configured root supplies that id (and, for an unnamed
+   * resolve, when the deployment default is absent too).
    */
   async resolve(id?: string): Promise<AgentPreset> {
-    const wanted = id ?? this.defaultId
     const presets = await this.list()
+    const wanted = id ?? this.defaultId
     const found = presets.find(preset => preset.id === wanted)
-    if (found === undefined) {
-      throw new UnknownPresetError(wanted, presets.map(preset => preset.id))
+    if (found !== undefined) return found
+    const retired = id !== undefined && RETIRED_SHIPPED_PRESET_IDS.has(id)
+    if ((id === undefined || retired) && wanted !== this.config.default) {
+      const fallback = presets.find(preset => preset.id === this.config.default)
+      if (fallback !== undefined) return fallback
     }
-    return found
+    throw new UnknownPresetError(wanted, presets.map(preset => preset.id))
   }
 
   /**

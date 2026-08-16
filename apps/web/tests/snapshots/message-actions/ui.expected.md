@@ -1,63 +1,60 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Use the read tool twice" [disabled]
-  - button "Session log":
-    - text: Session log
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
-- text: "Use the read tool twice in one assistant message: read a.txt and b.txt. Then reply with the single word DONE and stop. 7/25 {{clock}}"
-- button "Copy":
+- text: "Use the read tool twice in one assistant message: read a.txt and b.txt. Then reply with the single word DONE and stop. {{clock}}"
+- button "复制":
   - img
-- tooltip "Copy"
-- button "Think The user wants me to read a.txt and b.txt, then reply with \"DONE\". Let me do both reads in parallel.":
+- tooltip "复制"
+- button "思考 The user wants me to read a.txt and b.txt, then reply with \"DONE\". Let me do both reads in parallel.":
   - img
   - img
-  - text: Think The user wants me to read a.txt and b.txt, then reply with "DONE". Let me do both reads in parallel.
+  - text: 思考 The user wants me to read a.txt and b.txt, then reply with "DONE". Let me do both reads in parallel.
 - paragraph: I will read both files before answering.
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation" [disabled]:
+- button "在新对话中分支" [disabled]:
   - img
-- text: Available only on the last message of a completed turn 7/25 {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- button "Read a.txt":
+- text: 仅可从已完成轮次的最后一条消息分支 {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- button "读取文件 a.txt":
   - img
   - img
-  - text: Read
+  - text: 读取文件
   - button "a.txt"
-- button "Read b.txt":
+- button "读取文件 b.txt":
   - img
   - img
-  - text: Read
+  - text: 读取文件
   - button "b.txt"
-- button "Think Both files have been read. a.txt contains \"alpha\" and b.txt contains \"beta\". I'll now reply with DONE as instructed.":
+- button "思考 Both files have been read. a.txt contains \"alpha\" and b.txt contains \"beta\". I'll now reply with DONE as instructed.":
   - img
   - img
-  - text: Think Both files have been read. a.txt contains "alpha" and b.txt contains "beta". I'll now reply with DONE as instructed.
-- text: Stopped Now give the final answer. 7/25 {{clock}}
-- button "Copy":
+  - text: 思考 Both files have been read. a.txt contains "alpha" and b.txt contains "beta". I'll now reply with DONE as instructed.
+- text: 已停止 Now give the final answer. {{clock}}
+- button "复制":
   - img
 - paragraph: DONE
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}}
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}}
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：工作区可写": 工作区可写
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: 2 turns · 3 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 98% Input 7.8K tok · Output 103 tok
+- button "发送消息" [disabled]
+- text: 2 轮 · 3 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 98% 输入 7.8K tok · 输出 103 tok

@@ -81,11 +81,11 @@ describe('web e2e: plan review takeover round trip', () => {
     await card.waitFor({ timeout: MODE === 'record' ? 120_000 : 30_000 })
     // The plan-review request must NOT land on the generic question flow.
     expect(await page.locator('[data-question-key]').count()).toBe(0)
-    await expect.poll(() => card.getByText('Plan review').count(), { timeout: 10_000 }).toBeGreaterThan(0)
+    await expect.poll(() => card.getByText('计划待审').count(), { timeout: 10_000 }).toBeGreaterThan(0)
 
     const selectedRow = page.locator('[role="treeitem"][aria-selected="true"]')
     await expect.poll(() => selectedRow.locator('[data-state="warning"]').count(), { timeout: 10_000 }).toBe(1)
-    await expect.poll(() => selectedRow.getByText('Plan awaiting review', { exact: true }).count(), { timeout: 10_000 }).toBe(1)
+    await expect.poll(() => selectedRow.getByText('计划待审', { exact: true }).count(), { timeout: 10_000 }).toBe(1)
 
     if (MODE !== 'record') {
       const snapshot = await captureStableAria(page, '[data-plan-review-key]', scaffold.workspaceCwd)
@@ -94,7 +94,7 @@ describe('web e2e: plan review takeover round trip', () => {
       await compareOrRefreshGolden(SIDEBAR_EXPECTED, sidebar, MODE)
     }
 
-    await card.getByRole('button', { name: 'Approve' }).click()
+    await card.getByRole('button', { name: '确认执行' }).click()
 
     const sessionId = await settled
     if (MODE === 'record') {

@@ -16,7 +16,7 @@ describe('invariant companion', () => {
   })
 
   it('node-half apply tolerates a Host without settings', () => {
-    nodeApply(new Context())
+    nodeApply(new Context(), {})
   })
 
   it('client apply provides ctx.locale seeded with the zh/en common namespace', async () => {

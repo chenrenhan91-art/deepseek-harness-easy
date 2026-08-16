@@ -6,6 +6,15 @@ DeepSeek Harness（`dsh`）是由 [DeepSeek AI](https://deepseek.com) 开发的�
 
 它采用**一切皆插件**的架构，并由 [Cordis](https://github.com/cordiverse/cordis) 驱动，其设计参见论文 [_A Programming Paradigm for Spatiotemporal Composability_](https://github.com/cordiverse/paper)。
 
+## 从 Release 下载即开（macOS / Windows）
+
+1. 打开仓库的 [Releases](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases)，按电脑下载 `DeepSeek-Harness-macOS.zip` 或 `DeepSeek-Harness-Windows.zip`。不要下载源码 ZIP。
+2. 解压到**桌面**，会看到 DeepSeek Harness 图标。
+3. 点图标：后台起本地服务，浏览器打开工作台 `http://127.0.0.1:3080`。
+4. 没有 Key：整页说明「先绑定 API」；两个按钮——**去创建 API Key**、**去充值（官方）**。粘贴 Key 后当场验证，通过即可用。
+
+第一次打开可能要过 Gatekeeper 或 SmartScreen（未签名）。压缩包较大，因为内含便携 Node。请解压到桌面；本包不会安装到 `/Applications`。已经安装 Node 的开发者可以继续用下面的 `npx` 或源码路径。
+
 ## 开发者预览
 
 DeepSeek Harness 目前处于 _开发者预览_ 阶段，正在快速迭代。**未来将出现破坏兼容性的变更。**
@@ -20,15 +29,15 @@ DeepSeek Harness 目前处于 _开发者预览_ 阶段，正在快速迭代。**
 npx @deepseek-ai/dsh web
 ```
 
-该命令会启动 Web UI，默认地址为 `http://127.0.0.1:3080`。详见 [Web UI 指南](docs/user/guide/index.md)。
+该命令会启动 Web UI，默认地址为 `http://127.0.0.1:3080`。首次启动时在整页引导中粘贴 DeepSeek API 密钥，选择工作区，点一张模式卡片，然后发送任务。详见 [Web UI 指南](docs/user/guide/index.md)。
 
 ### 从源码运行
 
 如需从仓库源码运行：
 
 ```sh
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
+git clone https://github.com/chenrenhan91-art/deepseek-harness-easy.git
+cd deepseek-harness-easy
 pnpm install
 pnpm run build
 pnpm dsh web

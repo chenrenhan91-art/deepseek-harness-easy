@@ -1,0 +1,16 @@
+- paragraph: 到点后会在这个对话里自动做这件事。请保持 DeepSeek Harness 开着。
+- text: 做什么？
+- textbox "做什么？":
+  - /placeholder: 例如：检查构建
+- text: 重复
+- group "重复":
+  - button "每天" [pressed]
+  - button "每周"
+- text: 时间
+- textbox "时间": {{clock}}
+- button "开始定时任务" [disabled]
+- list:
+  - listitem: 已设置
+  - listitem:
+    - text: Check the build 每天 {{clock}} · {{n}}小时后
+    - button "取消"

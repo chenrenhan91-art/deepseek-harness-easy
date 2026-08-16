@@ -122,10 +122,12 @@ export class InputMachine {
   private pasteSeq = 0
   private readonly mergeWindowMs: number
   private readonly now: () => number
+  private readonly commandFailedText: () => string
 
   constructor(options: InputMachineOptions = {}) {
     this.mergeWindowMs = options.mergeWindowMs ?? 1000
     this.now = options.now ?? (() => 0)
+    this.commandFailedText = options.commandFailedText ?? (() => 'command.failed')
   }
 
   /** Read-only snapshot of the machine state (queue always empty at this tier). */
@@ -524,7 +526,7 @@ export class InputMachine {
         ? [{ type: 'notice', level: ev.outcome.kind === 'error' ? 'error' : 'info', text: ev.outcome.text }]
         : []
     }
-    const text = ev.message ?? ev.outcome?.text ?? 'command failed'
+    const text = ev.message ?? ev.outcome?.text ?? this.commandFailedText()
     // Drift guard: keep the enter-time draft (same claim) only while the
     // live draft still equals it; user input typed during flight wins.
     // Claimed re-entry additionally requires the watch to hold — an

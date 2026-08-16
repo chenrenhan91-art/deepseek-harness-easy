@@ -372,7 +372,8 @@ const TOOL_PACKAGES: ToolPackage[] = [
     scope: ctx => catalogChildScopes.get(ctx) as Agent,
     note:
       'Registered only inside live root Agent scopes created after the opt-in Schedule plugin loads. '
-      + 'Version 1 accepts after_seconds, explicit absolute at, and bounded fixed-rate every_seconds, '
+      + 'Version 1 accepts after_seconds, explicit absolute at, bounded fixed-rate every_seconds, '
+      + 'and local-clock daily and weekly rules, '
       + 'and discloses session-local delivery; '
       + 'management reads and mutations require the shared Session persistence barrier.',
   },

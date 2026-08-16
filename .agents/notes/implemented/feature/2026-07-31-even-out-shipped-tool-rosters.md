@@ -38,17 +38,9 @@ The layer that would make MCP a default is the one this repository does not have
 
 ## Testing
 
-`apps/cli/tests/shipped-composition.e2e.ts` booted the shipped tree through the real Loader in a pseudo-terminal and read the tool names out of the `request/header` the session log persisted, so the assertion was the catalog the model was actually sent. Its `--config` overlay, `composition-keyless-tail.cordis.yml`, provided test isolation only: a network-free adapter and workspace-local session artifacts.
-
-That tail also inserted `composition-settled.ts`, which announced settled Loader activation on the terminal stream. The TUI rendered as soon as its own fiber started, so a prompt typed at the banner could reach the loop while tool rows and persistence were still activating and assemble a partial catalog; gating the smoke's first prompt on that marker made the assertion deterministic.
-
-The same smoke also pins the TUI execution posture from the same artifact. Those sandbox-schema and initial-permission assertions belong to the [workspace-write default decision](2026-07-31-workspace-write-surface-default.md), independently of this roster.
-
-[`apps/web/tests/shipped-composition.e2e.ts`](../../../../apps/web/tests/shipped-composition.e2e.ts) covers the Web surface in the built lane, asserting its catalog, that its access default is untouched, and that `workspace-write`'s writable roots include the temp directories — a trap that makes sandbox tests lie when the workspace sits under `/tmp` ([`roots.ts`](../../../../packages/sandbox/sandbox/src/roots.ts)).
+The TUI composition smoke that once read tool names from a persisted `request/header` is not in the tree. Web coverage lives in [`apps/web/tests/shipped-composition.e2e.ts`](../../../../apps/web/tests/shipped-composition.e2e.ts): it asserts the beginner catalog (plus packaged `glob`/`grep`), that `permissionPresets.defaultPreset` is `danger-full-access`, and that `workspace-write`'s writable roots include the temp directories — a trap that makes sandbox tests lie when the workspace sits under `/tmp` ([`roots.ts`](../../../../packages/sandbox/sandbox/src/roots.ts)). Process `sandboxPolicy.defaultMode` remains `workspace-write` until a session pins the Web default ([beginner Web workbench](./2026-08-15-beginner-web-workbench.md)).
 
 `glob` and `grep` are asserted as fixed members rather than a host-dependent pair: `dsh-tool-fs-search` spawns the packaged ripgrep binary and registers both tools unconditionally, so the pair is always present.
-
-Beyond the committed tests, both surfaces were driven against a real key from the built `apps/cli/lib/bin.js` under plain Node. Every mounted tool executed successfully, including `ralph` and `web_search`; the model never reached `cordis_*` or `mcp_*`, fell back to `grep` when asked for LSP navigation, and used a background `bash` task when asked for a persistent terminal.
 
 ## Alternatives considered
 
@@ -62,8 +54,6 @@ Beyond the committed tests, both surfaces were driven against a real key from th
 
 ## Consequences
 
-The same model gets the same tools on both surfaces, and the difference that existed for no recorded reason is gone. The tests assert the twenty unconditional names exactly and pin `glob` and `grep` as fixed members on both sides, so a later change that alters only one surface fails a check instead of shipping quietly; the [session-search-not-shipped-default decision](2026-08-02-session-search-not-shipped-default.md) is exactly such a later change, and both tests moved with it.
+The Web catalog is the beginner subset plus packaged `glob`/`grep`; host expert tools stay disabled on the Web patch ([beginner Web workbench](./2026-08-15-beginner-web-workbench.md)). A later change that alters only one surface still fails the Web composition check instead of shipping quietly.
 
-`apps/cli` gained five workspace dependencies: four the shipped tree mounted, plus `dsh-mcp-client`, which it does not mount and which exists so an installed `dsh` can. Four remain — the [session-search-not-shipped-default decision](2026-08-02-session-search-not-shipped-default.md) removed `@deepseek-ai/dsh-tool-session-query` along with its row.
-
-Execution policy stays independent of the roster. The [shared workspace-write decision](2026-07-31-workspace-write-surface-default.md) owns both surfaces' sandboxed executors and default permission; changing that policy does not add or remove a tool.
+Execution policy stays independent of the roster. The [shared workspace-write decision](2026-07-31-workspace-write-surface-default.md) owns the sandboxed executors; the beginner workbench owns Web's `danger-full-access` session default. Changing that policy does not add or remove a tool.

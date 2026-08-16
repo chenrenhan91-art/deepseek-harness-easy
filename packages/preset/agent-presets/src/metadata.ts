@@ -36,6 +36,13 @@ export interface PresetMetadata {
    * can read in capability order while authored ones stay alphabetical.
    */
   readonly order?: number
+  /**
+   * Which glyph a picker draws for this preset. The set of names is the
+   * picker's, not this package's: an unknown one is passed through and the
+   * surface falls back to its own default, for the same reason a malformed
+   * name never blocks a mount.
+   */
+  readonly icon?: string
 }
 
 /** A non-empty trimmed string, or undefined for anything else. */
@@ -77,10 +84,12 @@ export async function readPresetMetadata(directory: string): Promise<PresetMetad
   const order = typeof record.order === 'number' && Number.isFinite(record.order)
     ? record.order
     : undefined
+  const icon = text(record.icon)
   return {
     ...name === undefined ? {} : { name },
     ...description === undefined ? {} : { description },
     ...order === undefined ? {} : { order },
+    ...icon === undefined ? {} : { icon },
   }
 }
 
@@ -96,10 +105,14 @@ export function renderPresetMetadata(metadata: PresetMetadata): string | undefin
   const name = text(metadata.name)
   const description = text(metadata.description)
   const { order } = metadata
-  if (name === undefined && description === undefined && order === undefined) return undefined
+  const icon = text(metadata.icon)
+  if (name === undefined && description === undefined && order === undefined && icon === undefined) {
+    return undefined
+  }
   return yaml.dump({
     ...name === undefined ? {} : { name },
     ...description === undefined ? {} : { description },
     ...order === undefined ? {} : { order },
+    ...icon === undefined ? {} : { icon },
   }, { lineWidth: -1 })
 }

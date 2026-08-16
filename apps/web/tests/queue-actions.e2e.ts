@@ -96,7 +96,7 @@ describe('web e2e: queue row actions', () => {
       await input.fill(text)
       await input.press('Enter')
     }
-    const queueHeader = page.getByRole('button', { name: '2 queued messages' })
+    const queueHeader = page.getByRole('button', { name: '2 条排队消息' })
     await expect.poll(() => queueHeader.getAttribute('aria-expanded'), { timeout: 10_000 })
       .toBe('false')
     const collapsedSnapshot = await captureStableAria(
@@ -107,7 +107,7 @@ describe('web e2e: queue row actions', () => {
     await compareOrRefreshGolden(COLLAPSED_EXPECTED, collapsedSnapshot, MODE)
     await queueHeader.click()
     await expect.poll(
-      () => page.getByRole('button', { name: 'Remove queued message' }).count(),
+      () => page.getByRole('button', { name: '删除排队消息' }).count(),
       { timeout: 10_000 },
     ).toBe(2)
 
@@ -132,16 +132,16 @@ describe('web e2e: queue row actions', () => {
     await page.setViewportSize({ width: 1680, height: 1000 })
 
     const editRow = page.getByText(EDIT, { exact: true }).locator('..')
-    await editRow.getByRole('button', { name: 'Edit queued message' }).click()
-    const editor = page.getByRole('textbox', { name: 'Edit queued message' })
+    await editRow.getByRole('button', { name: '编辑排队消息' }).click()
+    const editor = page.getByRole('textbox', { name: '编辑排队消息' })
     await editor.fill(EDITED)
     const editingSnapshot = await captureStableAria(page, '[class*="centerCol"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(EDITING_EXPECTED, editingSnapshot, MODE)
-    await page.getByRole('button', { name: 'Save queued message' }).click()
+    await page.getByRole('button', { name: '保存排队消息' }).click()
     await page.getByText(EDITED, { exact: true }).waitFor()
 
     const removeRow = page.getByText(REMOVE, { exact: true }).locator('..')
-    await removeRow.getByRole('button', { name: 'Remove queued message' }).click()
+    await removeRow.getByRole('button', { name: '删除排队消息' }).click()
     await expect.poll(() => page.getByText(REMOVE, { exact: true }).count()).toBe(0)
 
     const snapshot = await captureStableAria(page, '[class*="centerCol"]', scaffold.workspaceCwd)
@@ -153,15 +153,15 @@ describe('web e2e: queue row actions', () => {
     await input.fill(TAIL)
     await input.press('Enter')
     await expect.poll(
-      () => page.getByRole('button', { name: 'Remove queued message' }).count(),
+      () => page.getByRole('button', { name: '删除排队消息' }).count(),
       { timeout: 10_000 },
     ).toBe(2)
 
-    await page.getByRole('button', { name: 'Stop generating' }).click()
+    await page.getByRole('button', { name: '停止生成' }).click()
     await firstSettled
-    await expect.poll(() => page.getByRole('button', { name: 'Stop generating' }).count())
+    await expect.poll(() => page.getByRole('button', { name: '停止生成' }).count())
       .toBe(0)
-    await expect.poll(() => page.getByRole('button', { name: 'Remove queued message' }).count())
+    await expect.poll(() => page.getByRole('button', { name: '删除排队消息' }).count())
       .toBe(2)
 
     const preservedSnapshot = await captureStableAria(page, '[class*="centerCol"]', scaffold.workspaceCwd)
@@ -179,7 +179,7 @@ describe('web e2e: queue row actions', () => {
     await expect.poll(() => page.locator('[data-queue-dock]').count()).toBe(0)
   }, 120_000)
 
-  it.skipIf(MODE === 'record')('orders Todo before Goal and Queue on one responsive card column', async () => {
+  it.skipIf(MODE === 'record')('orders Todo before Queue on one responsive card column', async () => {
     overrideDir = await mkdtemp(join(tmpdir(), 'dsh-web-context-layout-'))
     const readyFile = join(overrideDir, '.hang-ready')
     const overridePath = join(overrideDir, 'replay.override.json')
@@ -198,10 +198,9 @@ describe('web e2e: queue row actions', () => {
 
     const input = page.locator('textarea').first()
     const settled = scaffold.whenTurnSettled()
-    await input.fill('/goal Keep the composer context panels aligned')
+    await input.fill(ACTIVE_PROMPT)
     await input.press('Enter')
     await expect.poll(() => existsSync(readyFile), { timeout: 15_000 }).toBe(true)
-    await page.locator('[data-goal-bar]').waitFor({ timeout: 10_000 })
 
     const sessions = scaffold.ctx.sessions.list()
     expect(sessions).toHaveLength(1)
@@ -217,7 +216,7 @@ describe('web e2e: queue row actions', () => {
       await input.fill(text)
       await input.press('Enter')
     }
-    const queueHeader = page.getByRole('button', { name: '2 queued messages' })
+    const queueHeader = page.getByRole('button', { name: '2 条排队消息' })
     await expect.poll(() => queueHeader.getAttribute('aria-expanded'), { timeout: 10_000 })
       .toBe('false')
 
@@ -231,15 +230,10 @@ describe('web e2e: queue row actions', () => {
     const expectAlignedContextPanels = async () => {
       const queuePanelBox = await page.locator('[data-queue-dock] > div').boundingBox()
       const todoBox = await page.locator('[data-testid="todo-panel"]').boundingBox()
-      const goalBox = await page.locator('[data-goal-bar] > div').boundingBox()
       expect(queuePanelBox).not.toBeNull()
       expect(todoBox).not.toBeNull()
-      expect(goalBox).not.toBeNull()
-      expect(todoBox!.y).toBeLessThan(goalBox!.y)
-      expect(goalBox!.y).toBeLessThan(queuePanelBox!.y)
-      expect(todoBox!.x).toBeCloseTo(goalBox!.x, 1)
+      expect(todoBox!.y).toBeLessThan(queuePanelBox!.y)
       expect(todoBox!.x).toBeCloseTo(queuePanelBox!.x, 1)
-      expect(todoBox!.width).toBeCloseTo(goalBox!.width, 1)
       expect(todoBox!.width).toBeCloseTo(queuePanelBox!.width, 1)
     }
     await expectAlignedContextPanels()
@@ -248,15 +242,13 @@ describe('web e2e: queue row actions', () => {
     await page.setViewportSize({ width: 1680, height: 1000 })
 
     await queueHeader.click()
-    const removeButtons = page.getByRole('button', { name: 'Remove queued message' })
+    const removeButtons = page.getByRole('button', { name: '删除排队消息' })
     await expect.poll(() => removeButtons.count(), { timeout: 10_000 }).toBe(2)
     await removeButtons.first().click()
     await expect.poll(() => removeButtons.count(), { timeout: 10_000 }).toBe(1)
     await removeButtons.first().click()
     await expect.poll(() => page.locator('[data-queue-dock]').count(), { timeout: 10_000 }).toBe(0)
-    await page.getByRole('button', { name: 'Clear goal' }).click()
-    await expect.poll(() => page.locator('[data-goal-bar]').count(), { timeout: 10_000 }).toBe(0)
-    await page.getByRole('button', { name: 'Stop generating' }).click()
+    await page.getByRole('button', { name: '停止生成' }).click()
     await settled
 
     expect(turnEndReasons(sessionEvents)).toEqual(['aborted'])

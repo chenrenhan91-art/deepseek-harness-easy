@@ -68,10 +68,10 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     'conversation.session.header.utilities': { kind: 'list'; scope: 'session'; owner: ConversationHeaderActionOwnerProps }
     /**
      * The conversation view ring: one list entry per view tab (chat here;
-     * trajectory/waterfall from ui-trajectory), rendered one-at-a-time by
-     * the session body via `only: <active id>`. Declared by this package's
-     * body entry (declaring is claiming). Session scope: views read the
-     * conversation snapshot through the standard kit.
+     * further tabs from other plugins), rendered one-at-a-time by the session
+     * body via `only: <active id>`. Declared by this package's body entry
+     * (declaring is claiming). Session scope: views read the conversation
+     * snapshot through the standard kit.
      */
     'conversation.view': { kind: 'list'; scope: 'session'; owner: ConvViewOwnerProps }
     /** Final business node renderer, dispatched by `ChatConversationViewNode.kind`. */
@@ -138,11 +138,12 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      */
     'conversation.hero.workspace': { kind: 'single'; scope: 'root'; owner: EmptyWorkspaceOwnerProps }
     /**
-     * The agent-preset chip beside the workspace picker on the new-session
-     * screen. Root scope: no session exists yet, so the choice is staged for
-     * the next one rather than applied to a current one.
+     * The mode grid under the composer card on the new-session screen: the
+     * full-width seat where the user picks what kind of agent to talk to.
+     * Root scope: no session exists yet, so the choice is staged for the next
+     * one rather than applied to a current one.
      */
-    'conversation.hero.agentPreset': { kind: 'single'; scope: 'root'; owner: HeroAgentPresetOwnerProps }
+    'conversation.hero.modes': { kind: 'single'; scope: 'root'; owner: HeroModesOwnerProps }
     // 'conversation.input.overlay' merges in ui-input-trigger (the dependency
     // direction is the hard constraint — ui-input-trigger cannot import
     // this package, while this package's input contract already imports
@@ -240,9 +241,9 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   }
 }
 
-/** Owner share of the hero agent-preset chip: the shell supplies nothing. */
-export interface HeroAgentPresetOwnerProps {
-  /** Marker field: the chip owns its own roster, staging, and menu state. */
+/** Owner share of the hero mode grid: the shell supplies nothing. */
+export interface HeroModesOwnerProps {
+  /** Marker field: the grid owns its own roster and staging. */
   children?: never
 }
 
@@ -277,17 +278,11 @@ export interface InputZone {
 }
 
 /**
- * View-slot owner share: the cross-view inspect handoff (otherwise views need
- * nothing from the render site — sessionId and the snapshot hook arrive as
- * framework-standard props; tool rows go through each view's own declared
- * toolview hole).
+ * View-slot owner share. Views need nothing from the render site — sessionId
+ * and the snapshot hook arrive as framework-standard props, and tool rows go
+ * through each view's own declared toolview hole.
  */
-export interface ConvViewOwnerProps {
-  /** One-shot inspect request from another view (chat's Inspect button); null when idle. */
-  inspect?: { callId: CallId } | null
-  /** Acknowledge the inspect request once applied (clears the store field). */
-  onInspectDone?: () => void
-}
+export type ConvViewOwnerProps = Record<never, never>
 
 /**
  * Optional prose file-mention provider, consumed via `ctx.get('chatFileMentions')`
@@ -359,7 +354,6 @@ export interface ChatNodeOwnerProps {
   /** Session workspace root; Tool summaries display paths relative to it. */
   cwd?: string | undefined
   openFile: (path: string) => void
-  inspectCall: (callId: CallId) => void
   forkAt: (seq: number) => void
   /** Resolve a session-authorized historical image for inline display. */
   loadImage: (attachment: ImageAttachmentRef) => Promise<string>
@@ -402,7 +396,7 @@ export type CommandRowProps = PropsRuntime<'conversation.chat.commandview'>
  * conversation snapshot by the runtime merge, sessionId, useSessions).
  * Entries declaring the shared store or an inject face compose their shares
  * on top (the chat entry's {@link ChatViewSlotProps}); store-less pure
- * readers (ui-trajectory) take this base alone.
+ * readers take this base alone.
  */
 export type ConvViewProps = PropsRuntime<'conversation.view'>
 
@@ -574,7 +568,7 @@ export type ConversationSlotProps =
     | 'conversation.input.dock' | 'conversation.composer.dock'
     | 'conversation.input.left' | 'conversation.input.right'
     | 'conversation.hero.workspace'
-    | 'conversation.hero.agentPreset'
+    | 'conversation.hero.modes'
   >
   & InjectFace<ConversationInjected>
   & PropsLocale<'conversation'>
@@ -683,8 +677,6 @@ export interface ChatViewInjected {
   loadOlder: () => void
   /** Resolve a session-authorized historical image for inline display. */
   loadImage: (attachment: ImageAttachmentRef) => Promise<string>
-  /** Hand a call off to the trajectory view: write the one-shot inspect target and switch tabs. */
-  inspectCall: (callId: CallId) => void
   /**
    * Per-session scroll memory surviving view switches (in-memory, never
    * persisted): the view saves on every scroll and restores on remount; a

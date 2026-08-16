@@ -152,7 +152,7 @@ describe('Schedule tool protocol', () => {
     expect(value(await execute(test, 'schedule_create', { prompt: 'x', after_seconds: 1, at: 'later' })))
       .toEqual({
         code: 'invalid_selector',
-        message: 'schedule_create accepts exactly one of after_seconds, at, or every_seconds.',
+        message: 'schedule_create accepts exactly one of after_seconds, at, every_seconds, daily, or weekly.',
       })
     expect(value(await execute(test, 'schedule_create', { prompt: 'x', every_seconds: 1.5 })))
       .toEqual({ code: 'invalid_rule', message: 'every_seconds must be a safe integer.' })
@@ -253,6 +253,29 @@ describe('Schedule tool protocol', () => {
         scheduledAt: '2026-08-07T01:30:00.000Z',
       },
     ])
+  })
+
+  it('creates and lists daily and weekly calendar records', async () => {
+    const test = await harness()
+    expect(value(await execute(test, 'schedule_create', {
+      prompt: '  check build  ', daily: { time: '09:00', time_zone: 'UTC' },
+    }))).toEqual(expect.objectContaining({
+      id: 'schedule-1',
+      kind: 'daily',
+      prompt: 'check build',
+      time: '09:00:00',
+      timeZone: 'UTC',
+      state: 'scheduled',
+      deliveryMode: 'session-local',
+    }))
+    expect(value(await execute(test, 'schedule_create', {
+      prompt: 'write report', weekly: { time: '09:00', time_zone: 'UTC', weekdays: [1, 5] },
+    }))).toEqual(expect.objectContaining({
+      id: 'schedule-2',
+      kind: 'weekly',
+      weekdays: [1, 5],
+      state: 'scheduled',
+    }))
   })
 
   it('creates and lists a fixed-rate record', async () => {

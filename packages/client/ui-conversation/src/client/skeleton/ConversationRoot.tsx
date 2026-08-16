@@ -119,7 +119,6 @@ export function ConversationRoot({
         },
         onClose: () => { setPickerOpen(false) },
       })}
-      {renderSlot('conversation.hero.agentPreset', {})}
     </div>
   )
 
@@ -163,6 +162,11 @@ export function ConversationRoot({
       {hero && heroWorkspaceRow}
       {zone !== undefined && renderSlot('conversation.input.dock', zone)}
       {inputBar}
+      {/* Under the card, not beside the workspace chip: picking what the agent
+          is good at is the first screen's main act, and a grid needs the full
+          column width. Rendered without a wrapper so an unoccupied seat costs
+          no stack gap — the outlet anchor is `display: contents`. */}
+      {hero && renderSlot('conversation.hero.modes', {})}
     </div>
   )
 

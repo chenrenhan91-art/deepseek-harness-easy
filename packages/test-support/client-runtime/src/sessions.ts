@@ -185,7 +185,7 @@ export class TestSessions implements ISessions {
   /** Calls observed on the service-level face, newest last. */
   readonly calls: {
     method: 'open' | 'openSubagent' | 'setSubagentCatalogOpen' | 'refreshSubagents'
-      | 'clear' | 'search' | 'fork'
+      | 'create' | 'clear' | 'search' | 'fork'
     args: unknown[]
   }[] = []
 
@@ -438,6 +438,27 @@ export class TestSessions implements ISessions {
   refreshSubagents(parentSessionId: SessionId): Promise<void> {
     this.calls.push({ method: 'refreshSubagents', args: [parentSessionId] })
     return Promise.resolve()
+  }
+
+  /**
+   * Mint a blank fixture session the way production `sessions.create` does,
+   * so a mode-grid click that cannot recompose the current row has a target.
+   * @param opts - workspace, cwd, optional caller-owned id, and the preset
+   * the new session should compose from.
+   * @returns the new session id.
+   */
+  async create(opts: Parameters<ISessions['create']>[0] = {}): Promise<SessionId> {
+    this.calls.push({ method: 'create', args: [opts] })
+    const id = opts.sessionId ?? `s-new-${this.records.size + 1}` as SessionId
+    await this.add({
+      id,
+      summary: {
+        blank: true,
+        ...opts.cwd === undefined ? {} : { cwd: opts.cwd },
+        ...opts.agentPreset === undefined ? {} : { agentPreset: opts.agentPreset },
+      },
+    }, { current: false })
+    return id
   }
 
   /** Apply a confirmed preset switch into the fixture list, as production does. */

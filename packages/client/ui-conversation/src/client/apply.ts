@@ -207,7 +207,7 @@ export function apply(ctx: Context): void {
       'conversation.input.left': { kind: 'list', scope: 'session' },
       'conversation.input.right': { kind: 'list', scope: 'session' },
       'conversation.hero.workspace': { kind: 'single', scope: 'root' },
-      'conversation.hero.agentPreset': { kind: 'single', scope: 'root' },
+      'conversation.hero.modes': { kind: 'single', scope: 'root' },
     },
     inject: (sessionId: SessionId | undefined): ConversationInjected => ({
       hooks: { composerBlock: sessionId === undefined ? ABSENT_BLOCK : composerBlocks.storeFor(sessionId) },
@@ -401,12 +401,6 @@ export function apply(ctx: Context): void {
         },
         loadOlder: () => { void scoped.loadOlder() },
         loadImage: attachment => conversation.resolveImage(sessionId, attachment),
-        // Unregistered 'trajectory' id is safe: the tab ring falls back to
-        // the first view, and the untouched inspect target stays inert.
-        inspectCall: (callId) => {
-          actions.setInspect({ callId })
-          actions.setView('trajectory')
-        },
         chatScroll: {
           save: (position) => {
             if (position === null) chatScrollPositions.delete(sessionId)

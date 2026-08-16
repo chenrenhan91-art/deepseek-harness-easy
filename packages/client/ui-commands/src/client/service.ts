@@ -12,15 +12,18 @@ import type { Context } from '@deepseek-ai/cordis'
 // Type-only: pulls the ctx.remote merge and the forwarded-event key face
 // (`commands/change` rides the allowlist) into this program.
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
+import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type { CommandResult } from '@deepseek-ai/dsh-commands/types'
 import type { ClientContext, ISessions, SessionId } from '@deepseek-ai/dsh-client-runtime/client'
 import type {
   CandidateRequest, ClientSessionContext, CommandClaim, PickOutcome, InputTriggerCandidate, InputTriggerPick,
   SubmitOutcome,
 } from '@deepseek-ai/dsh-client-ui-input-trigger/client'
+import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { CommandContribution, CommandDecoration, CommandUiContract } from './contract.ts'
 import type { CommandDescriptor } from './directory.ts'
 import { CommandDirectory } from './directory.ts'
+import { NS, zh, type CommandKey } from './locales.ts'
 import { PopupSelectController } from './popup.ts'
 import type { TokenSegment } from './popup.ts'
 
@@ -122,6 +125,7 @@ export class CommandUiRuntime extends Service implements CommandUiContract {
 
   private readonly directory: CommandDirectory
   private readonly live: LiveState = { contributions: new Map(), decorations: new Map(), popups: new Map() }
+  private readonly t: TranslateNS<'command'> | undefined
 
   /**
    * @param ctx - owning root context (plugin fiber; the service registers
@@ -129,6 +133,7 @@ export class CommandUiRuntime extends Service implements CommandUiContract {
    */
   constructor(ctx: Context) {
     super(ctx, 'commandUi')
+    this.t = ctx.get('locale')?.bind(NS)
     this.directory = new CommandDirectory(async (sessionId) => {
       if (this.sessions().subagentAddress(sessionId) !== undefined) return []
       const result = await ctx.remote.commands.list(sessionId)
@@ -239,6 +244,20 @@ export class CommandUiRuntime extends Service implements CommandUiContract {
     }
   }
 
+  /**
+   * Overlay the active-locale menu caption when this package owns one for
+   * the Host command name; otherwise keep the Host catalog string.
+   * @param name - command name without the leading slash.
+   * @param fallback - Host catalog description.
+   * @returns the menu row description.
+   */
+  private hostDescription(name: string, fallback: string): string {
+    if (this.t === undefined) return fallback
+    const key = `description.${name}`
+    if (!Object.hasOwn(zh, key)) return fallback
+    return this.t(key as CommandKey)
+  }
+
   /** Menu candidates: host catalog + contribution availability, then position filtering and fuzzy name ranking. */
   private async candidates(session: ClientSessionContext, req: CandidateRequest): Promise<readonly InputTriggerCandidate[]> {
     const list = await this.directory.ensureReady(session.sessionId, req.signal)
@@ -246,7 +265,11 @@ export class CommandUiRuntime extends Service implements CommandUiContract {
     const seen = new Set<string>()
     for (const c of list) {
       seen.add(c.name)
-      rows.push({ name: c.name, description: c.description, ...(c.input !== undefined ? { hint: c.input.hint } : {}) })
+      rows.push({
+        name: c.name,
+        description: this.hostDescription(c.name, c.description),
+        ...(c.input !== undefined ? { hint: c.input.hint } : {}),
+      })
     }
     for (const contribution of this.live.contributions.values()) {
       if (!contribution.available(session)) continue

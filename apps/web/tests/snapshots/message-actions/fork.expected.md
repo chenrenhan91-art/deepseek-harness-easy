@@ -1,7 +1,7 @@
-- tree "Sessions":
-  - treeitem "Ungrouped" [expanded]:
+- tree "会话":
+  - treeitem "未分组" [expanded]:
     - img
-    - text: Ungrouped
-  - treeitem "Use the read tool twice (2) now" [selected]
-  - treeitem "Use the read tool twice (1) now"
-  - treeitem "Use the read tool twice 1min"
+    - text: 未分组
+  - treeitem "Use the read tool twice (2) 刚刚" [selected]
+  - treeitem "Use the read tool twice (1) 刚刚"
+  - treeitem "Use the read tool twice 1分钟"

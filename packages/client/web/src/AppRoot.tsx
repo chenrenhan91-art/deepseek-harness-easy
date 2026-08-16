@@ -44,12 +44,12 @@ export function AppRoot(props: AppRootProps) {
           ? (
             <>
               <div className={css.spinner} />
-              <div className={css.hint}>Loading plugins…</div>
+              <div className={css.hint}>正在加载插件…</div>
             </>
           )
           : (
             <div className={css.failed}>
-              <div className={css.failedTitle}>Failed to load plugins</div>
+              <div className={css.failedTitle}>加载插件失败</div>
               {failed.map(([id]) => <div key={id} className={css.failedItem}>{id}</div>)}
               {error !== undefined && <div className={css.failedItem}>{error}</div>}
             </div>

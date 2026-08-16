@@ -58,6 +58,12 @@ harness LLM（大语言模型）seam 的 DeepSeek chat-completions 适配器：�
 
 该插件还会在可配置提供方目录（`ctx.llm.listConfigurableProviders()`）中声明自己的路由：提供方为 `deepseek-official`，settings namespace 为 `llm-deepseek`，settings path 为空——整个分节就是 profile。配置界面借助该条目，把本适配器与休眠的 pi-ai 提供方一并呈现。
 
+## 端点询问与密钥探针
+
+该插件提供 `ctx.llm.registerModelDiscovery('llm-deepseek', …)`，以 bearer 认证向该路由的端点索取 OpenAI 兼容的 `GET /models` 清单。与由 catalog 作答的适配器不同，它**始终去问端点**，而不是背诵已配置的 catalog：那份 catalog 是部署配置，照它作答会把被拒的密钥报成可用的提供方；而开箱引导页在存储任何东西之前，运行的正是这一次调用作为密钥探针。草稿中的 `baseURL` 会覆盖已解析的端点；草稿密钥优先于已存储的那把，因为它才是被测对象，而不带密钥的草稿会像请求一样解析该路由自己的凭据——配置界面手上只有脱敏描述符，不解析就出去会把端点的 401 报成密钥错误。回复由 [`readModelListing`](../llm/README.md#reading-a-model-listing-model-listingts) 读取。
+
+401 或 403 以 `INVALID_CREDENTIAL` 失败；无法使用的探针密钥在构造标头之前就以同一个 code 被拒。其余每种失败——端点不可达、非 2xx 状态、清单读不出来——都以 `DISCOVERY_FAILED` 失败，正文读取之前或之中的取消则表现为 `ABORTED`。正是这一区分，让界面能说清用户该修的是密钥还是网络。
+
 ## 应用归因
 
 每个请求都携带 dsh-llm `attributionHeaders()` 的共享归因标头，即用于识别 harness 的必需 `User-Agent` 基线（见 [dsh-llm § 应用归因](../llm/README.md#app-attribution-attributionts)）。在该适配器约定（adapter contract）下，直接 DeepSeek 请求与 OpenAI 兼容 gateway 请求都不会获得提供方特定应用归因标头；OpenRouter 应用归因暂缓到未来的显式 OpenRouter 适配器或模式。`GenerateOptions.purpose` 为 `compaction` 的请求（dsh-compaction-basic 的辅助摘要调用）还会携带 `x-deepseek-harness-compact: 1`，让宿主可以将压缩流量与会话请求分开。

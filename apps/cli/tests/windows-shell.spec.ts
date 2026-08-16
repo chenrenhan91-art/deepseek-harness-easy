@@ -11,7 +11,7 @@
  */
 
 import { afterEach, describe, expect, it } from 'vitest'
-import { mkdtempSync, rmSync, readFileSync } from 'node:fs'
+import { mkdtempSync, readdirSync, rmSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -103,7 +103,11 @@ describe('the shipped shell composition (real bundle layers)', () => {
 describe('shipped agent presets gate both shell tools by platform', () => {
   const presetRoot = resolve(fileURLToPath(new URL('../package.json', import.meta.url)), '..', 'config', 'agent-presets')
 
-  it.each(['standard', 'code', 'cordis'])('preset %s gates its shell tool rows by platform', (preset) => {
+  const shipped = readdirSync(presetRoot, { withFileTypes: true })
+    .filter(child => child.isDirectory())
+    .map(child => child.name)
+
+  it.each(shipped)('preset %s gates its shell tool rows by platform', (preset) => {
     const entries: unknown = yaml.load(
       readFileSync(join(presetRoot, preset, 'agent.cordis.yml'), 'utf8'),
       { schema: entryListSchema },
@@ -119,19 +123,6 @@ describe('shipped agent presets gate both shell tools by platform', () => {
       const expression = (row.disabled as { __jsExpr: string }).__jsExpr
       expect(Boolean(evaluate({ process: { platform: 'win32' } }, expression)), `${id} on win32`).toBe(win32)
       expect(Boolean(evaluate({ process: { platform: 'linux' } }, expression)), `${id} on linux`).toBe(!win32)
-    }
-  })
-
-  it('minimal mounts no shell tool row at all (its shell is the PTY stack)', () => {
-    const entries: unknown = yaml.load(
-      readFileSync(join(presetRoot, 'minimal', 'agent.cordis.yml'), 'utf8'),
-      { schema: entryListSchema },
-    )
-    if (!Array.isArray(entries)) throw new TypeError('minimal preset must parse to an entry array')
-    for (const id of ['tool-bash', 'tool-pwsh']) {
-      expect(entries.some(entry => (
-        typeof entry === 'object' && entry !== null && (entry as Record<string, unknown>).id === id
-      )), `${id} must be absent from minimal`).toBe(false)
     }
   })
 })

@@ -300,6 +300,7 @@ describe('ConversationRoot resident composer', () => {
     expect(box.placeholder).not.toBe('select a model first')
     const modelSeat = b.seatOwners.filter(call => call.key === 'conversation.input.model').at(-1)?.owner
     expect(modelSeat).toEqual({ locked: true })
+    expect(b.slotCalls).not.toContain('conversation.hero.schedule')
   })
 
   it('keeps composer text in the machine, mirrors to the chat store, and submits through the sink', () => {
@@ -485,7 +486,9 @@ describe('ConversationRoot resident composer', () => {
     expect(b.slotCalls).toContain('conversation.hero.workspace')
     // The agent-preset chip sits in the same row, for the same reason: both
     // choices are only open before the first message.
-    expect(b.slotCalls).toContain('conversation.hero.agentPreset')
+    expect(b.slotCalls).toContain('conversation.hero.modes')
+    // The reminder option sits in the new-session chip row on the hero screen.
+    expect(b.slotCalls).not.toContain('conversation.hero.schedule')
   })
 
   it('prompt failure renders the promptError strip (ordinary failure, no transaction UI)', () => {

@@ -1,11 +1,10 @@
-// Web e2e scenarios: navigation & panes — the Trajectory view and timing
-// overview, its local details inspector, and sidebar search, all over ONE rich
-// two-turn seeded fixture rendered purely from the log (the seeded-history
-// pattern: zero model calls in replay, so every surface here is the client
-// fold + host history RPC, not replay binding). The seed is recorded live
-// under the standard discipline: turn 1 produces a bash call plus two
-// parallel reads in one assistant message (tool-call density for the
-// trajectory ledger/timing lanes), turn 2 a markdown-rich reply.
+// Web e2e scenarios: navigation & panes — sidebar search, session export,
+// and the terminal card, all over ONE rich two-turn seeded fixture rendered
+// purely from the log (the seeded-history pattern: zero model calls in replay,
+// so every surface here is the client fold + host history RPC, not replay
+// binding). The seed is recorded live under the standard discipline: turn 1
+// produces a bash call plus two parallel reads in one assistant message,
+// turn 2 a markdown-rich reply.
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
@@ -23,7 +22,6 @@ import { newEnglishPage, saveFailureShot } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./snapshots/navigation-panes', import.meta.url))
 const SEED = join(SNAPSHOT_DIR, 'seed.jsonl')
-const TRAJECTORY_EXPECTED = join(SNAPSHOT_DIR, 'trajectory.expected.md')
 const SEARCH_EXPECTED = join(SNAPSHOT_DIR, 'search-results.expected.md')
 const TERMINAL_EXPECTED = join(SNAPSHOT_DIR, 'terminal-card.expected.md')
 const MODE = webSnapshotMode()
@@ -57,19 +55,16 @@ async function ensureSeedOpen(page: Page): Promise<void> {
     await welcome.getByRole('button').click()
     await welcome.waitFor({ state: 'detached', timeout: 15_000 })
   }
-  const chat = page.getByRole('tab', { name: 'Chat', exact: true })
   // Search is a collapsed header action; expand it so the input is actionable.
-  const searchButton = page.getByRole('button', { name: 'Search sessions' })
+  const searchButton = page.getByRole('button', { name: '搜索会话' })
   if (await searchButton.getAttribute('aria-expanded') !== 'true') await searchButton.click()
-  const search = page.getByPlaceholder('Search sessions', { exact: false })
-  if (await chat.count() === 0) {
+  const search = page.getByPlaceholder('搜索会话', { exact: false })
+  if (await page.getByText('FIRST_DONE', { exact: true }).count() === 0) {
     await search.fill('WATERFALL')
-    const result = page.getByRole('tree', { name: 'Search results' }).getByRole('treeitem')
+    const result = page.getByRole('tree', { name: '搜索结果' }).getByRole('treeitem')
     await expect.poll(() => result.count(), { timeout: 15_000 }).toBe(1)
     await result.click()
-    await chat.waitFor({ timeout: 15_000 })
   }
-  await chat.click()
   await page.getByText('FIRST_DONE', { exact: true }).waitFor({ timeout: 15_000 })
   if (await search.inputValue() !== '') {
     await search.fill('')
@@ -128,8 +123,8 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
     // The frame mounts before the asynchronous session-list baseline lands.
     // Search must target the settled seeded row, not the startup input that
     // the ready projection replaces (the compact layout dropped group session
-    // counts; the Ungrouped bucket row is the barrier).
-    await page.getByText('Ungrouped', { exact: true }).waitFor({ timeout: 30_000 })
+    // counts; the 未分组 bucket row is the barrier).
+    await page.getByText('未分组', { exact: true }).waitFor({ timeout: 30_000 })
   }, 120_000)
 
   afterEach(async () => {
@@ -185,24 +180,24 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
   it.skipIf(MODE === 'record')('finds an unopened seeded session by message content and opens it', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-navigation-search'))
     // The API baselines can settle before React commits their projection. The
-    // seeded Ungrouped bucket row is the final user-visible barrier before
+    // seeded 未分组 bucket row is the final user-visible barrier before
     // editing search (the compact layout dropped group session counts).
-    await page.getByText('Ungrouped', { exact: true }).waitFor({ timeout: 30_000 })
+    await page.getByText('未分组', { exact: true }).waitFor({ timeout: 30_000 })
     // Search is a collapsed header action; expand it so the input is actionable.
-    const searchButton = page.getByRole('button', { name: 'Search sessions' })
+    const searchButton = page.getByRole('button', { name: '搜索会话' })
     if (await searchButton.getAttribute('aria-expanded') !== 'true') await searchButton.click()
-    const search = page.getByPlaceholder('Search sessions', { exact: false })
+    const search = page.getByPlaceholder('搜索会话', { exact: false })
     // The cold row has not been opened, so only the persisted log can satisfy
     // this query. First search lazily reconciles the SQLite content index.
     await search.fill('zzzqx-no-such-session')
-    await page.getByText('No matching sessions').waitFor({ timeout: 30_000 })
+    await page.getByText('无匹配会话').waitFor({ timeout: 30_000 })
     await expect.poll(
-      () => page.getByRole('tree', { name: 'Search results' }).getByRole('treeitem').count(),
+      () => page.getByRole('tree', { name: '搜索结果' }).getByRole('treeitem').count(),
       { timeout: 10_000 },
     ).toBe(0)
 
     await search.fill('WATERFALL')
-    const resultTree = page.getByRole('tree', { name: 'Search results' })
+    const resultTree = page.getByRole('tree', { name: '搜索结果' })
     const result = resultTree.getByRole('treeitem')
     await expect.poll(() => result.count(), { timeout: 30_000 }).toBe(1)
     await expect.poll(() => result.getByText('WATERFALL', { exact: false }).count(), {
@@ -218,80 +213,15 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
     await expect.poll(() => search.inputValue(), { timeout: 5_000 }).toBe('WATERFALL')
     await expect.poll(() => page.getByText('FIRST_DONE', { exact: true }).count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(1)
     await expect.poll(() => page.getByRole('heading', { name: 'Navigation Summary' }).count(), { timeout: 15_000 }).toBe(1)
-    await page.getByRole('button', { name: 'Clear search' }).click()
+    await page.getByRole('button', { name: '清除搜索' }).click()
     await expect.poll(() => search.inputValue(), { timeout: 5_000 }).toBe('')
     await expect.poll(() => page.locator('[role="treeitem"]').count(), { timeout: 10_000 }).toBeGreaterThanOrEqual(1)
   }, 90_000)
 
-  it.skipIf(MODE === 'record')('renders the trajectory ledger and opens its local record inspector', async () => {
-    onTestFailed(() => saveFailureShot(page, 'web-e2e-navigation-trajectory'))
-    await ensureSeedOpen(page)
-    await page.getByRole('tab', { name: 'Trajectory' }).click()
-    await page.waitForTimeout(100)
-    const overlayLayout = await page.getByRole('table').evaluate((table) => {
-      const host = table.closest('[data-conversation-scroll]')
-      const seat = host?.querySelector('[data-composer-seat]') ?? null
-      const pane = table.parentElement
-      return {
-        hostPosition: host === null ? null : getComputedStyle(host).position,
-        paneOverflowX: pane === null ? null : getComputedStyle(pane).overflowX,
-        paneScrollableWidth: pane === null ? null : pane.scrollWidth - pane.clientWidth,
-        seatPosition: seat === null ? null : getComputedStyle(seat).position,
-      }
-    })
-    expect(overlayLayout).toEqual({
-      hostPosition: 'relative',
-      paneOverflowX: 'hidden',
-      paneScrollableWidth: 0,
-      seatPosition: 'absolute',
-    })
-    expect({
-      pageErrors: tripwire.pageErrors,
-      slotErrors,
-      warnings: tripwire.warnings,
-    }).toEqual({
-      pageErrors: [],
-      slotErrors: [],
-      warnings: [],
-    })
-    // Turn rules partition the ledger without restoring a separate header row.
-    await expect.poll(() => page.locator('tr[data-turn-start="true"]').count(), { timeout: 15_000 }).toBe(2)
-    await expect.poll(() => page.getByRole('columnheader').count(), { timeout: 10_000 }).toBe(0)
-    await page.locator('tr[data-kind="tool"]').first().click()
-    const details = page.getByRole('complementary', { name: 'Event details' })
-    await expect.poll(() => details.count(), { timeout: 10_000 }).toBe(1)
-    expect(await details.getByRole('tabpanel').evaluate(panel => getComputedStyle(panel).overflowX))
-      .toBe('hidden')
-    await page.evaluate(() => { document.body.setAttribute('data-ds-dark-theme', '') })
-    const darkSummarySurfaces = await details.getByRole('heading', { name: 'Payload' }).evaluate(heading => ({
-      heading: getComputedStyle(heading).backgroundColor,
-      panel: getComputedStyle(heading.closest('[aria-label="Event details"]')!).backgroundColor,
-    }))
-    expect(darkSummarySurfaces.heading).toBe(darkSummarySurfaces.panel)
-    await page.evaluate(() => { document.body.removeAttribute('data-ds-dark-theme') })
-    await page.getByRole('tab', { name: 'Result' }).click()
-    await expect.poll(() => page.getByText('NAVIGATION_OK', { exact: false }).count(), { timeout: 10_000 }).toBeGreaterThanOrEqual(1)
-    const assistantSpan = page.locator('[data-timeline-span="message"][data-assistant-timing="true"]').first()
-    await assistantSpan.hover()
-    const timingTooltip = page.getByRole('tooltip')
-    await timingTooltip.waitFor({ timeout: 5_000 })
-    await expect.poll(() => timingTooltip.textContent(), { timeout: 5_000 }).toMatch(/TTFT .* Decoding/)
-    const assistantTimingStyle = await assistantSpan.evaluate(node => ({
-      background: getComputedStyle(node).backgroundImage,
-      ttft: getComputedStyle(node).getPropertyValue('--trajectory-assistant-ttft'),
-    }))
-    expect(assistantTimingStyle.background).toContain('linear-gradient')
-    expect(assistantTimingStyle.ttft).toMatch(/%$/)
-    const snapshot = (await captureStableAria(page, '[class*="viewArea"]', scaffold.workspaceCwd))
-      .split(SEED_ID).join('{{seededId}}')
-    await compareOrRefreshGolden(TRAJECTORY_EXPECTED, snapshot, MODE)
-    await details.getByRole('button', { name: 'Close details' }).click()
-  }, 60_000)
-
   it.skipIf(MODE === 'record')('downloads through the Session Header and /export with one dialog', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-navigation-export'))
     await ensureSeedOpen(page)
-    const exportButton = page.getByRole('button', { name: 'Session log' })
+    const exportButton = page.getByRole('button', { name: '会话日志' })
     expect(await exportButton.isDisabled()).toBe(false)
     const header = exportButton.locator('xpath=ancestor::header[1]')
     const [buttonBox, headerBox] = await Promise.all([
@@ -310,7 +240,7 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
     expect(response.status()).toBe(200)
     const download = await downloadPromise
     expect(download.suggestedFilename()).toMatch(/^dsh-session-.+\.zip$/)
-    const dialog = page.getByRole('dialog', { name: 'Session download started' })
+    const dialog = page.getByRole('dialog', { name: 'Session 导出已开始下载' })
     await dialog.waitFor({ timeout: 30_000 })
     // The real host streamed the ZIP; its root entry is the persisted log
     // text verbatim (the assembled seam: real route, real persistence read).
@@ -319,7 +249,7 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
     const content = strFromU8(files['session.jsonl'] as Uint8Array)
     expect(content.split('\n')[0]).toContain(SEED_ID)
     expect(content).toContain('FIRST_DONE')
-    await dialog.getByText('Close', { exact: true }).click()
+    await dialog.getByText('关闭', { exact: true }).click()
 
     const observer = await newEnglishPage(browser)
     const observerTripwire = watchConsole(observer)
@@ -342,7 +272,7 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
       assertBaselineSucceeded(observerSessionResponse, 'observer session.list'),
       assertBaselineSucceeded(observerWorkspaceResponse, 'observer workspace.list'),
     ])
-    await observer.getByText('Ungrouped', { exact: true }).waitFor({ timeout: 30_000 })
+    await observer.getByText('未分组', { exact: true }).waitFor({ timeout: 30_000 })
     await ensureSeedOpen(observer)
 
     try {
@@ -361,12 +291,12 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
       const exportDone = slashEvents.find(event =>
         event.type === 'command/done' && event.data.commandId === exportRun.data.commandId)
       expect(exportDone?.type).toBe('command/done')
-      await page.getByRole('dialog', { name: 'Session download started' }).waitFor({ timeout: 30_000 })
-      await page.getByRole('dialog', { name: 'Session download started' })
-        .getByText('Close', { exact: true }).click()
+      await page.getByRole('dialog', { name: 'Session 导出已开始下载' }).waitFor({ timeout: 30_000 })
+      await page.getByRole('dialog', { name: 'Session 导出已开始下载' })
+        .getByText('关闭', { exact: true }).click()
       await observer.getByText('Session log download requested.', { exact: true }).waitFor({ timeout: 30_000 })
       expect(observerDownloads).toBe(0)
-      expect(await observer.getByRole('dialog', { name: 'Session download started' }).count()).toBe(0)
+      expect(await observer.getByRole('dialog', { name: 'Session 导出已开始下载' }).count()).toBe(0)
       expect({
         pageErrors: observerTripwire.pageErrors,
         slotErrors: observerSlotErrors,
@@ -376,26 +306,6 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
       await observer.close()
     }
   }, 120_000)
-
-  it.skipIf(MODE === 'record')('focuses the ledger by dragging an overview interval', async () => {
-    onTestFailed(() => saveFailureShot(page, 'web-e2e-navigation-timeline'))
-    await ensureSeedOpen(page)
-    await page.getByRole('tab', { name: 'Trajectory' }).click()
-    const plot = page.getByLabel('Timeline overview; drag horizontally to focus events')
-    await plot.waitFor({ timeout: 15_000 })
-    const before = await page.locator('tr[data-kind]').count()
-    const box = await plot.boundingBox()
-    if (box === null) throw new Error('trajectory timeline plot has no layout box')
-    await page.mouse.move(box.x + box.width * 0.55, box.y + box.height / 2)
-    await page.mouse.down()
-    await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2)
-    await page.mouse.up()
-    await expect.poll(() => page.locator('tr[data-timeline-focus="outside"]').count(), { timeout: 10_000 })
-      .toBeGreaterThan(0)
-    await expect.poll(() => page.locator('tr[data-kind]').count(), { timeout: 10_000 }).toBe(before)
-    await plot.click({ button: 'right' })
-    await expect.poll(() => page.locator('tr[data-timeline-focus]').count(), { timeout: 10_000 }).toBe(0)
-  }, 60_000)
 
   it.skipIf(MODE === 'record')('bash and file-path rows leave the default details column closed', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-navigation-details'))
@@ -483,7 +393,7 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
       }
     })
     expect(dot.state).toBe('done')
-    expect(dot.label).toBe('Done')
+    expect(dot.label).toBe('已完成')
     expect(dot.beforePrompt).toBe(true)
     expect(dot.insideCard).toBe(true)
     expect(dot.leftOfPrompt).toBe(true)
@@ -500,14 +410,13 @@ describe('web e2e: navigation & panes over a rich seeded session', () => {
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
     await card.locator('[class*="_copyButton_"]').first().click()
     await expect.poll(() => card.locator('[class*="_copyButton_"]').first().textContent(), { timeout: 5_000 })
-      .toBe('Copied')
+      .toBe('复制成功')
     expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('NAVIGATION_OK')
   }, 60_000)
 
   it.skipIf(MODE === 'record')('keeps the recorded fixture inventory exact', async () => {
     await assertFixtureInventory(SNAPSHOT_DIR, [
-      'seed.jsonl', 'search-results.expected.md', 'trajectory.expected.md',
-      'terminal-card.expected.md',
+      'seed.jsonl', 'search-results.expected.md', 'terminal-card.expected.md',
     ])
   })
 })

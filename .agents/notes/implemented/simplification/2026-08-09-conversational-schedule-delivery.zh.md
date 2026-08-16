@@ -16,7 +16,7 @@ Schedule 已经通过将普通的 agent（智能体）后续轮次排入队列�
 
 `schedule/change` 仍是唯一持久 Schedule 状态。其 dispatch 操作记录后续轮次已同步入队，这会在 dispatch 持久化后阻止普通的重启回放。dispatch 不表示模型成功、用户确认或外部通知。入队与持久 dispatch 之间的狭窄崩溃窗口仍保留至少一次语义。
 
-Schedule 不公开呈现投影、Host 伴随数据、浏览器事件节点、按事件键控的 slot 或客户端渲染器。会话持久化保留共享的 `flush()` 约定，且不存在由 Schedule 驱动的成功事件。显式启用的 Web overlay 只加载 `@deepseek-ai/dsh-schedule`。
+Schedule 不公开交付回执投影、Host 伴随数据、浏览器事件节点、按事件键控的 slot 或交付渲染器。`schedule` 投影与新手定时任务页列出活动提醒；它们不确认 dispatch（[Web 新手 Schedule 界面](../feature/2026-08-15-web-beginner-schedule-surface.md)）。会话持久化保留共享的 `flush()` 约定，且不存在由 Schedule 驱动的成功事件。随附的 Web 组合会同时加载 `@deepseek-ai/dsh-schedule`、time-context 与该页。
 
 ## 已考虑的替代方案
 
@@ -30,10 +30,10 @@ Schedule 不公开呈现投影、Host 伴随数据、浏览器事件节点、按
 
 ## 验证
 
-包生命周期测试固定 idle 等待、maintenance 所有权、后续轮次先于 dispatch 的顺序、同步入队失败、与模型无关的 dispatch 和重启回放。组装后的 Web 场景为产生的 assistant 行生成快照，并断言已持久化的 Schedule dispatch 没有特殊 history view。源码与依赖审计会拒绝残留的已移除呈现符号、事件、sidecar、slot、渲染器包与 overlay 配置项。
+包生命周期测试固定 idle 等待、maintenance 所有权、后续轮次先于 dispatch 的顺序、同步入队失败、与模型无关的 dispatch 和重启回放。组装后的 Web 场景为产生的 assistant 行生成快照，并断言已持久化的 Schedule dispatch 没有特殊 history view。源码与依赖审计仍会拒绝已移除的回执符号、成功事件、sidecar、按事件键控的 slot 与回执渲染器。
 
 ## 后果
 
-- Schedule 的实现仅涉及其自身包、常规组合与目录接线；会话、持久化、Host、客户端运行时和对话 UI 不携带 Schedule 专属行为。
+- Schedule 交付仍留在其自身包与常规组合中；会话持久化与 Host 不携带回执协议。侧栏声明一个管理座位；定时任务页包占据该座位。
 - 用户只能通过对话中的普通模型响应看到提醒。失败的模型轮次仍是失败轮次，不会出现与之矛盾的成功回执。
 - 需要外部交付或交付确认的消费方必须采用另一条产品边界，并由其拥有自己的通知和确认语义。

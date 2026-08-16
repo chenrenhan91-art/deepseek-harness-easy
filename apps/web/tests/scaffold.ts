@@ -248,7 +248,7 @@ export interface LaunchOptions {
   }
   /**
    * Replace the roster the scaffold mounts by default (the shipped directory
-   * at `system` trust, default `standard`). Supply this only to change WHICH
+   * at `system` trust, default `study`). Supply this only to change WHICH
    * presets a scenario sees — a writable user root, a different default —
    * never to turn the roster on: without one every session composes an agent
    * with no tools, no persona, and no token meter, which is not a shape the
@@ -391,7 +391,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     {
       id: 'agent-presets',
       config: {
-        default: 'standard',
+        default: 'study',
         roots: [{ path: SHIPPED_PRESET_DIR, trust: 'system' }],
         includeUserRoot: false,
       },

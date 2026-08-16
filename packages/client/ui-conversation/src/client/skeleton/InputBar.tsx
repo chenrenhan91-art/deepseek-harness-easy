@@ -29,6 +29,7 @@ import type { DraftDecorations } from '../input/decorations.ts'
 import {
   attachmentErrorText, attachmentRailLabels, dropOverlayLabels, imageSizeText, lightboxLabels,
 } from '../image-labels.ts'
+import { DEEPSEEK_TOP_UP_URL, isQuotaFailure } from '../quota-failure.ts'
 import { ContextMeter } from './ContextMeter.tsx'
 import { PermissionSelect } from './PermissionSelect.tsx'
 import css from './InputBar.module.css'
@@ -99,7 +100,9 @@ export function InputBar({
     if (promptError === null) return
     showToast(promptError.error.code === 'attachment-error'
       ? attachmentErrorText(t, promptError.error.details.reason, imageLimits)
-      : `${promptError.error.message} (${promptError.error.code})`)
+      : isQuotaFailure(promptError.error.code, promptError.error.message)
+        ? `${t('message.quota')} ${t('message.quotaTopUp')}: ${DEEPSEEK_TOP_UP_URL}`
+        : `${promptError.error.message} (${promptError.error.code})`)
   }, [promptError, showToast, t, imageLimits])
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const cardRef = useRef<HTMLDivElement | null>(null)
@@ -199,7 +202,6 @@ export function InputBar({
   const revealSelectionFocus = (el: HTMLTextAreaElement): void => {
     // selectionStart/End are number|null in lib.dom; the type-aware lint program narrows them.
     const caret = el.selectionDirection === 'backward' ? el.selectionStart : el.selectionEnd
-    // oxlint-disable-next-line typescript/no-unnecessary-condition
     revealCaret(caret ?? el.value.length)
   }
 
@@ -344,8 +346,6 @@ export function InputBar({
     if (machineBusy) return // submitting is the read-only span; adjudicating holds the pending lock
     const next = e.target.value
     keyboard.setDraft(next)
-    // selectionStart is number|null in lib.dom; the type-aware lint program narrows it.
-    // oxlint-disable-next-line typescript/no-unnecessary-condition
     keyboard.track(next, e.target.selectionStart ?? next.length)
   }
 
@@ -357,13 +357,10 @@ export function InputBar({
   // too (one char = one step). Mouse selection of a chip is handled in the
   // backdrop click handler below. Undo/redo must NOT reach the browser: the
   // machine owns the transaction log.
-  // selectionStart/End are number|null in lib.dom; the type-aware lint program narrows them.
-  /* oxlint-disable typescript/no-unnecessary-condition */
   const selectionOf = (el: HTMLTextAreaElement) => ({
     start: el.selectionStart ?? 0,
     end: el.selectionEnd ?? el.selectionStart ?? 0,
   })
-  /* oxlint-enable typescript/no-unnecessary-condition */
 
   const onCopyOrCut = (e: React.ClipboardEvent<HTMLTextAreaElement>, cut: boolean): void => {
     if (input === undefined || keyboard === undefined) return // absent machine: no draft can be copied or cut

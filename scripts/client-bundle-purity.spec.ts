@@ -110,16 +110,16 @@ describe('client bundle debug artifacts', () => {
   })
 
   it('maps first-party sources to their repository package paths', () => {
-    const configs = clientConfigs('@deepseek-ai/dsh-client-ui-goal')
+    const configs = clientConfigs('@deepseek-ai/dsh-client-ui-schedule')
     const outputOptions = configs[0]?.outputOptions
     if (typeof outputOptions !== 'object' || outputOptions === null) throw new Error('client output options missing')
     const transform = outputOptions.sourcemapPathTransform
     if (transform === undefined) throw new Error('client sourcemap path transform missing')
 
-    const source = transform('../src/client/GoalBar.tsx', clientSourceMapPath('client/ui-goal'))
-    expect(source).toBe('../../../packages/client/ui-goal/src/client/GoalBar.tsx')
-    const resolved = new URL(source, 'https://dsh.test/plugins/@deepseek-ai/dsh-client-ui-goal/client.js.map')
-    expect(resolved.pathname).toBe('/packages/client/ui-goal/src/client/GoalBar.tsx')
+    const source = transform('../src/client/SchedulePage.tsx', clientSourceMapPath('client/ui-schedule'))
+    expect(source).toBe('../../../packages/client/ui-schedule/src/client/SchedulePage.tsx')
+    const resolved = new URL(source, 'https://dsh.test/plugins/@deepseek-ai/dsh-client-ui-schedule/client.js.map')
+    expect(resolved.pathname).toBe('/packages/client/ui-schedule/src/client/SchedulePage.tsx')
   })
 
   it('maps dual-face host sources to the host package group', () => {

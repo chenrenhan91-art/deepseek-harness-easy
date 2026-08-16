@@ -12,7 +12,7 @@ Discovery is unmemoized: `list()` and `resolve()` re-read the roots on every cal
 
 - `ctx.agentPresets.defaultId: string` The preset id mounted when a caller names none.
 - `ctx.agentPresets.list(): Promise<AgentPreset[]>` Every preset the configured roots currently supply, earlier root winning a duplicate id; broken presets included, each carrying its reason.
-- `ctx.agentPresets.resolve(id?): Promise<AgentPreset>` One preset by id, defaulting to `defaultId`. Throws naming the available ids when no root supplies it. A broken preset resolves — deleting, reading, and reporting one all need the row.
+- `ctx.agentPresets.resolve(id?): Promise<AgentPreset>` One preset by id, defaulting to `defaultId`. An unnamed resolve whose `defaultId` is absent from the roster retries `config.default`, so a settings document that still names a deleted shipped id does not fail every session that names none. An explicit id that is one of the retired shipped names (`standard`, `code`, `minimal`, `cordis`) does the same, so a leftover session recorded under those ids can still resume; any other explicit id still throws, naming the available ids. A broken preset resolves — deleting, reading, and reporting one all need the row.
 - `ctx.agentPresets.mount(agentCtx, id?): Promise<AgentPreset>` Compose one agent from a preset — ensure its standing mount (single-flight) and parent the agent's scope key to it — returning the preset for the caller to record. Refuses a broken preset up front with its discovery-reported reason, so every unloadable shape fails the same way before the loader is involved.
 - `ctx.agentPresets.composeFrom(agentCtx, parentCtx): string | undefined` Join one agent to the standing composition another already runs on, returning the preset id joined — `undefined` when the parent joined none, which is the rosterless deployment and not an error. A bind rather than a mount, so it is synchronous and has no composition failure mode; it still rejects a caller error (an unscoped context, or an agent that already joined).
 - `ctx.agentPresets.composedPreset(agentCtx): string | undefined` The preset one LIVE agent runs on, read from its scope chain rather than from its session — the only answer available for an agent whose durable header is still being built.
@@ -74,7 +74,7 @@ A preset may publish display text in an optional `preset.yml` beside its composi
 
 ```yaml
 name: 极简模式
-description: 仅提供持久 bash 与 str_replace_editor 的双工具编码 Agent。
+description: 只要最瘦的编码循环，或做对比实验
 ```
 
 It carries display text ONLY. `id` is the directory name and `trust` comes from the root the preset was discovered under, so neither is writable here — otherwise a locally authored preset could name itself into the shipped set. It is a separate file because the composition is a top-level list of plugin rows: YAML cannot carry sibling keys beside it, and a fake metadata row would hand the Loader something to load.
@@ -93,7 +93,7 @@ An absent root supplies no presets rather than failing: the user root does not e
 
 ### The writable root is this package's, the shipped root is the app's
 
-`<dshHome>/.agent-presets` is where a person's own presets live, the way `<dshHome>/skills` is where their own skills live ([`dsh-skill-filesystem`](../../skill/skill-filesystem/README.md)), so the roster derives it rather than waiting for a deployment to remember it — a launcher that configures nothing still finds and authors presets. It is appended AFTER every configured root, which keeps an earlier root winning a duplicate id: a shipped `standard` still shadows a home directory that claimed the name, and `copy()` refuses that id rather than landing a preset nothing would resolve.
+`<dshHome>/.agent-presets` is where a person's own presets live, the way `<dshHome>/skills` is where their own skills live ([`dsh-skill-filesystem`](../../skill/skill-filesystem/README.md)), so the roster derives it rather than waiting for a deployment to remember it — a launcher that configures nothing still finds and authors presets. It is appended AFTER every configured root, which keeps an earlier root winning a duplicate id: a shipped `study` still shadows a home directory that claimed the name, and `copy()` refuses that id rather than landing a preset nothing would resolve.
 
 The roots are resolved once, when the service is constructed. A root set that changed between a `list()` and the `copy()` acting on its answer would author into a directory the caller never saw.
 
@@ -107,7 +107,7 @@ When a settings provider is composed, this plugin registers the `agent-presets` 
 
 ```yaml
 agent-presets:
-  default: minimal
+  default: study
 ```
 
 The value is read per resolution rather than snapshotted, so a hot-reloaded document takes effect on the next session created and every running session stays on the preset it was composed from. Clearing the user field re-inherits the composition default. A default naming a preset no root supplies is stored without complaint and fails at the next `resolve()` — the roster is a live directory, so a name absent now may exist by the time a session asks for it.
@@ -150,5 +150,5 @@ Prefix-stable for the life of an agent: a composition is installed once, before 
 - **A superseded generation is never reclaimed** — sessions already joined keep the generation they run on, and the roster holds no join count that could tell when the last one left, so the whole subtree stays mounted until the process ends. The cost is per generation rather than per session, but it is not free: `dsh-skill-filesystem` watches its roots by default, so each edit-then-create cycle adds a live watcher set. Bounded by how often compositions are edited — which the settings-page authoring flow makes a per-save event rather than a per-deploy one. Reclaiming one needs a joined-agent count on the standing mount; see the `TODO` at `ensureStanding`.
 - **A copy is never mounted to validate** — it is byte-identical to its source, so a source broken on disk yields a copy exactly as broken as the source; discovery's health check marks both rows on the next roster read rather than deferring the failure to a session start.
 - **Health is a shape check, not a mount** — discovery proves the composition parses in the loader dialect and holds named rows, not that every row's module resolves or activates; a row naming an absent package still fails at the first session, which rolls the creation back.
-- **A copy is a snapshot that drifts** — upgrading the deployment does not update copies of shipped presets, and there is no patch semantics at this layer to express "standard plus one change" (that is the bundle layer's `cordis.patch.yml`); the shipped set itself accepts the same cost — `cordis` and `code` are full copies of `standard` — so the whole assembly stays readable in one file.
+- **A copy is a snapshot that drifts** — upgrading the deployment does not update copies of shipped presets, and there is no patch semantics at this layer to express "study plus one change" (that is the bundle layer's `cordis.patch.yml`); the shipped beginner modes accept the same cost — they share one tool roster and differ by persona plus `skills/` — so the whole assembly stays readable in one file.
 - **Root scans are not watched** — every read hits the filesystem instead, which keeps the roster fresh but puts one `readdir` per root on each `list()`.

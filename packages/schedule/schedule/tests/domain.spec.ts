@@ -5,6 +5,7 @@ import {
   ScheduleInputError,
   ScheduleLogError,
   allocateScheduleId,
+  applyScheduleEvent,
   canonicalizeTimeZone,
   createAfterScheduleRecord,
   createAtScheduleRecord,
@@ -112,6 +113,16 @@ describe('version-1 Schedule decoding and folding', () => {
     { ...atCreateData(), schedule: { ...atCreateData().schedule, kind: 'later' } },
   ])('rejects malformed durable data %#', (data) => {
     expect(() => decodeScheduleChange(data)).toThrow(ScheduleLogError)
+  })
+
+  it('applyScheduleEvent returns the same fold for non-Schedule events and advances creates', () => {
+    const empty = foldScheduleEvents([])
+    const other = { type: 'user/message', seq: 0, time: 1, data: {} } as SessionEvent
+    expect(applyScheduleEvent(empty, other)).toBe(empty)
+    const created = applyScheduleEvent(empty, scheduleEvent(createData()))
+    expect(created.active).toHaveLength(1)
+    expect(created.active[0]?.id).toBe('schedule-1')
+    expect(() => applyScheduleEvent(created, scheduleEvent(createData()))).toThrow(ScheduleLogError)
   })
 
   it('folds active records in create order and rejects invalid transitions', () => {

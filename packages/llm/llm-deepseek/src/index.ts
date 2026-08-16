@@ -27,6 +27,7 @@ import {
   DeepSeekAdapter,
 } from './adapter.ts'
 import type { DeepSeekCatalogModel, DeepSeekConnectionOptions } from './adapter.ts'
+import { discoverDeepSeekModels } from './discovery.ts'
 
 export {
   DEFAULT_CONTEXT_WINDOW,
@@ -251,6 +252,14 @@ export function apply(ctx: Context, config: Config): void {
   ctx.llm.registerConfigurableProviders([
     { provider: PROVIDER, displayName: 'DeepSeek', settingsNs: NS, settingsPath: [] },
   ])
+  // The key probe every configuration surface uses, and the one the first-run
+  // page runs before it stores anything. Registration is itself an effect, so
+  // it is withdrawn with this fiber.
+  ctx.llm.registerModelDiscovery(NS, request => discoverDeepSeekModels(
+    request,
+    () => options().baseURL,
+    () => resolveApiKey(options()),
+  ))
   // Route effects bind to this apply fiber via the stable `ctx` reference,
   // even when a swap runs inside the scoped settings callback below.
   const registration = ctx.llm.registerAdapter([PROVIDER], adapter)

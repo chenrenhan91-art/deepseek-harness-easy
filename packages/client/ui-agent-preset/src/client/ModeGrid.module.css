@@ -1,0 +1,102 @@
+/* The new-session mode grid, under the hero composer card. Four columns at
+   the hero's full width, two on a narrow column — the cards stay tappable
+   rather than shrinking to fit eight across. */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 var(--dsh-composer-side-clearance);
+  margin-top: 12px;
+}
+
+.heading {
+  padding-left: 4px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-caption);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (width <= 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 92px;
+  padding: 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-base);
+  text-align: left;
+  cursor: pointer;
+}
+
+.card:not(:disabled):hover {
+  border-color: var(--dsw-alias-state-business-primary);
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.card:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* The chosen card carries the business blue on both its border and its glyph:
+   one card is always chosen, so a background tint alone would read as hover. */
+.cardChosen {
+  border-color: var(--dsw-alias-state-business-primary);
+  box-shadow: inset 0 0 0 1px var(--dsw-alias-state-business-primary);
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.cardChosen .cardIcon {
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 12%, transparent);
+}
+
+.icon {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.cardChosen .icon {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+.cardName {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.cardDesc {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-caption);
+}
+
+.hint {
+  padding-left: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-caption);
+}

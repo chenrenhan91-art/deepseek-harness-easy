@@ -23,7 +23,7 @@ const SEED_ID = 'stats-paged-history-web-e2e'
 
 /** Turn count: 2 surface messages per turn, so 28 turns overflow one 50-message page. */
 const TURNS = 28
-const FULL_COUNTS = `${TURNS} turns · ${TURNS} steps`
+const FULL_COUNTS = `${TURNS} 轮 · ${TURNS} 步`
 
 /**
  * Generate the seed: TURNS closed single-step turns of one short user prompt
@@ -112,7 +112,7 @@ describe('web e2e: whole-session stats survive history paging', () => {
 
     // 加载更早: prepending the older page must not move ANY strip figure —
     // counts, wall times, or token groups.
-    await page.getByRole('button', { name: 'Load earlier' }).click()
+    await page.getByRole('button', { name: '加载更早' }).click()
     await expect.poll(() => page.getByText('m1', { exact: true }).count(), { timeout: 10_000 }).toBe(1)
     expect(await strip.textContent()).toBe(stripBeforePaging)
     // With the whole log loaded, the window mounts one turn-tail footer per

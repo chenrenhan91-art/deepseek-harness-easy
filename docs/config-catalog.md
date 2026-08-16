@@ -200,7 +200,7 @@ export interface PresetRoot {
 export type PresetTrust = 'system' | 'user'
 ```
 
-Source: [`packages/preset/agent-presets/src/preset.ts:52`](../packages/preset/agent-presets/src/preset.ts)
+Source: [`packages/preset/agent-presets/src/preset.ts:54`](../packages/preset/agent-presets/src/preset.ts)
 
 <a id="deepseek-aidsh-agent-spine-demo"></a>
 
@@ -427,6 +427,32 @@ export interface Config {
 ```
 
 Source: [`packages/client/hmr/src/index.ts:31`](../packages/client/hmr/src/index.ts)
+
+<a id="deepseek-aidsh-client-locale"></a>
+
+## `@deepseek-ai/dsh-client-locale`
+
+```ts config-catalog
+/**
+ * Plugin config: the deployment's locale, resolved below the user layer. A
+ * Chinese-first assembly declares `preference: zh` so a browser reporting any
+ * other language still opens in Chinese; leaving it out delegates to the
+ * browser's own language. Either way the Language row still wins, because a
+ * user selection is stored in the layer above this one.
+ */
+export type Config = LocaleSettings
+
+/** Durable locale section shared by the Host schema and the browser scope. */
+export interface LocaleSettings {
+  /** Explicit locale selection; absence delegates to the browser. */
+  preference?: LocaleId
+}
+
+/** Shipped locale identifier. */
+export type LocaleId = typeof LOCALE_IDS[number]
+```
+
+Source: [`packages/client/locale/src/index.ts:22`](../packages/client/locale/src/index.ts)
 
 <a id="deepseek-aidsh-code-runtime-worker-thread"></a>
 
@@ -889,7 +915,7 @@ export interface DeepSeekCatalogModel {
 
 Depends on: [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts)
 
-Source: [`packages/llm/llm-deepseek/src/index.ts:62`](../packages/llm/llm-deepseek/src/index.ts)
+Source: [`packages/llm/llm-deepseek/src/index.ts:63`](../packages/llm/llm-deepseek/src/index.ts)
 
 <a id="deepseek-aidsh-llm-pi-ai"></a>
 
@@ -3028,37 +3054,29 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-agent` ([`packages/core/agent/src/index.ts`](../packages/core/agent/src/index.ts))
 - `@deepseek-ai/dsh-api-gateway` — requires `typert` ([`packages/api/gateway/src/index.ts`](../packages/api/gateway/src/index.ts))
 - `@deepseek-ai/dsh-api-remotes` ([`packages/api/remotes/src/index.ts`](../packages/api/remotes/src/index.ts))
-- `@deepseek-ai/dsh-client-locale` ([`packages/client/locale/src/index.ts`](../packages/client/locale/src/index.ts))
 - `@deepseek-ai/dsh-client-modules` — requires `webServer` · `loader` ([`packages/client/modules/src/index.ts`](../packages/client/modules/src/index.ts))
 - `@deepseek-ai/dsh-client-runtime` ([`packages/client/runtime/src/index.ts`](../packages/client/runtime/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-agent-preset` ([`packages/client/ui-agent-preset/src/index.ts`](../packages/client/ui-agent-preset/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-commands` ([`packages/client/ui-commands/src/index.ts`](../packages/client/ui-commands/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-conversation` ([`packages/client/ui-conversation/src/index.ts`](../packages/client/ui-conversation/src/index.ts))
-- `@deepseek-ai/dsh-client-ui-cordis` ([`packages/extensions/ui-cordis/src/index.ts`](../packages/extensions/ui-cordis/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-deliverables` — requires `systemPrompt` ([`packages/client/ui-deliverables/src/index.ts`](../packages/client/ui-deliverables/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-directory-picker-browse` ([`packages/client/ui-directory-picker-browse/src/index.ts`](../packages/client/ui-directory-picker-browse/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-directory-picker-native` ([`packages/client/ui-directory-picker-native/src/index.ts`](../packages/client/ui-directory-picker-native/src/index.ts))
-- `@deepseek-ai/dsh-client-ui-goal` ([`packages/client/ui-goal/src/index.ts`](../packages/client/ui-goal/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-input-trigger` ([`packages/client/ui-input-trigger/src/index.ts`](../packages/client/ui-input-trigger/src/index.ts))
-- `@deepseek-ai/dsh-client-ui-jobs` ([`packages/client/ui-jobs/src/index.ts`](../packages/client/ui-jobs/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-layout` ([`packages/client/ui-layout/src/index.ts`](../packages/client/ui-layout/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-message-feedback` ([`packages/client/ui-message-feedback/src/index.ts`](../packages/client/ui-message-feedback/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-model-selection` ([`packages/client/ui-model-selection/src/index.ts`](../packages/client/ui-model-selection/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-permission-presets` ([`packages/client/ui-permission-presets/src/index.ts`](../packages/client/ui-permission-presets/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-plan` ([`packages/client/ui-plan/src/index.ts`](../packages/client/ui-plan/src/index.ts))
+- `@deepseek-ai/dsh-client-ui-schedule` ([`packages/client/ui-schedule/src/index.ts`](../packages/client/ui-schedule/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-settings` ([`packages/client/ui-settings/src/index.ts`](../packages/client/ui-settings/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-settings-general` ([`packages/client/ui-settings-general/src/index.ts`](../packages/client/ui-settings-general/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-settings-models` ([`packages/client/ui-settings-models/src/index.ts`](../packages/client/ui-settings-models/src/index.ts))
-- `@deepseek-ai/dsh-client-ui-settings-plugin-inventory` ([`packages/client/ui-settings-plugin-inventory/src/index.ts`](../packages/client/ui-settings-plugin-inventory/src/index.ts))
-- `@deepseek-ai/dsh-client-ui-settings-plugins` ([`packages/client/ui-settings-plugins/src/index.ts`](../packages/client/ui-settings-plugins/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-sidebar` ([`packages/client/ui-sidebar/src/index.ts`](../packages/client/ui-sidebar/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-skill` ([`packages/client/ui-skill/src/index.ts`](../packages/client/ui-skill/src/index.ts))
-- `@deepseek-ai/dsh-client-ui-subagent` ([`packages/client/ui-subagent/src/index.ts`](../packages/client/ui-subagent/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-theme` ([`packages/client/ui-theme/src/index.ts`](../packages/client/ui-theme/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-tool` ([`packages/client/ui-tool/src/index.ts`](../packages/client/ui-tool/src/index.ts))
-- `@deepseek-ai/dsh-client-ui-trajectory` ([`packages/client/ui-trajectory/src/index.ts`](../packages/client/ui-trajectory/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-user-questions` ([`packages/client/ui-user-questions/src/index.ts`](../packages/client/ui-user-questions/src/index.ts))
-- `@deepseek-ai/dsh-client-ui-workflow-run` ([`packages/client/ui-workflow-run/src/index.ts`](../packages/client/ui-workflow-run/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-workspace` ([`packages/client/ui-workspace/src/index.ts`](../packages/client/ui-workspace/src/index.ts))
 - `@deepseek-ai/dsh-command-compact` — requires `commands` · `compaction` ([`packages/compaction/command-compact/src/index.ts`](../packages/compaction/command-compact/src/index.ts))
 - `@deepseek-ai/dsh-command-feedback` — requires `commands` ([`packages/feedback/command-feedback/src/index.ts`](../packages/feedback/command-feedback/src/index.ts))

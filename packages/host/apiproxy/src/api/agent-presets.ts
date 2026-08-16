@@ -34,6 +34,12 @@ export interface AgentPresetEntry {
   /** One sentence on what the preset is for, when it published one. */
   readonly description?: string
   /**
+   * Glyph name the preset asked a picker to draw for it. The name set belongs
+   * to the surface, so an unknown one is passed through and the picker falls
+   * back to its own default rather than the roster refusing the row.
+   */
+  readonly icon?: string
+  /**
    * Why this preset cannot compose a session, absent when it can. A broken
    * preset stays listed — its directory still occupies the id, so a surface
    * must be able to show and delete it — but offering it for selection would

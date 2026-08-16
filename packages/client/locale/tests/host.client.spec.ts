@@ -2,7 +2,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
 import { SettingsProvider, settingsNamespace, type SettingsNamespace } from '@deepseek-ai/dsh-settings'
 import {
-  LOCALE_SETTINGS_NAMESPACE, apply,
+  Config, LOCALE_SETTINGS_NAMESPACE, apply,
 } from '@deepseek-ai/dsh-client-locale'
 
 class MemorySettings extends SettingsProvider {
@@ -17,7 +17,7 @@ describe('locale host', () => {
   it('registers an optional explicit locale preference with the Host settings lifecycle', async () => {
     const ctx = new Context()
     await ctx.plugin(MemorySettings).await()
-    const fiber = ctx.plugin({ apply })
+    const fiber = ctx.plugin({ apply, Config })
     await fiber.await()
     const ns = settingsNamespace(LOCALE_SETTINGS_NAMESPACE)
     expect(ctx.settings.get(ns)).toEqual({})
@@ -26,5 +26,15 @@ describe('locale host', () => {
     await expect(ctx.settings.update(ns, { preference: 'fr' })).rejects.toThrow()
     await fiber.dispose()
     expect(ctx.settings.describe().map(row => row.ns)).not.toContain(ns)
+  })
+
+  it('resolves the composition preference until a person selects another', async () => {
+    const ctx = new Context()
+    await ctx.plugin(MemorySettings).await()
+    await ctx.plugin({ apply, Config }, { preference: 'zh' }).await()
+    const ns = settingsNamespace(LOCALE_SETTINGS_NAMESPACE)
+    expect(ctx.settings.get(ns)).toEqual({ preference: 'zh' })
+    await ctx.settings.update(ns, { preference: 'en' })
+    expect(ctx.settings.get(ns)).toEqual({ preference: 'en' })
   })
 })

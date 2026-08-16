@@ -31,7 +31,6 @@ const PLUGINS: readonly (WebBootEntry & { bundlePath: string })[] = [
   { id: '@deepseek-ai/dsh-client-ui-sidebar', bundlePath: 'packages/client/ui-sidebar/lib/client.js', url: '/plugins/ui-sidebar.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-ui-layout'] },
   { id: '@deepseek-ai/dsh-client-ui-conversation', bundlePath: 'packages/client/ui-conversation/lib/client.js', url: '/plugins/ui-conversation.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-ui-layout'] },
   { id: '@deepseek-ai/dsh-client-ui-tool', bundlePath: 'packages/client/ui-tool/lib/client.js', url: '/plugins/ui-tool.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-runtime', '@deepseek-ai/dsh-client-locale', '@deepseek-ai/dsh-client-ui-conversation'] },
-  { id: '@deepseek-ai/dsh-client-ui-workflow-run', bundlePath: 'packages/client/ui-workflow-run/lib/client.js', url: '/plugins/ui-workflow-run.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-locale', '@deepseek-ai/dsh-client-runtime', '@deepseek-ai/dsh-client-ui-conversation'] },
   {
     id: '@deepseek-ai/dsh-client-ui-workspace',
     bundlePath: 'packages/client/ui-workspace/lib/client.js',
@@ -44,7 +43,6 @@ const PLUGINS: readonly (WebBootEntry & { bundlePath: string })[] = [
     ],
   },
   { id: '@deepseek-ai/dsh-session-log-export', bundlePath: 'packages/session-query/session-log-export/lib/client.js', url: '/plugins/session-log-download.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-ui-commands', '@deepseek-ai/dsh-client-ui-conversation'] },
-  { id: '@deepseek-ai/dsh-client-ui-trajectory', bundlePath: 'packages/client/ui-trajectory/lib/client.js', url: '/plugins/ui-trajectory.js', rev: 'fx', inject: ['@deepseek-ai/dsh-client-ui-conversation'] },
 ]
 
 const bundles = new Map(PLUGINS.map(plugin => [
@@ -68,10 +66,11 @@ let unmount: (() => void) | undefined
 
 /**
  * Register the per-test jsdom setup and teardown the assembled boot needs:
- * English pinned before boot so role/text locators stay deterministic across
- * localized component migrations (the newEnglishPage e2e convention), the
- * observers and frame callbacks jsdom lacks, and a full reset of the document,
- * the boot globals, and the injected plugin styles afterwards.
+ * Chinese pinned before boot so role/text locators match the Web product
+ * (`locale.preference: zh` on the real composition; this lane's fixture
+ * transport does not serve Host settings, so the navigator is the selector),
+ * the observers and frame callbacks jsdom lacks, and a full reset of the
+ * document, the boot globals, and the injected plugin styles afterwards.
  */
 export function installAssembledBootEnv(): void {
   beforeEach(() => {
@@ -79,9 +78,9 @@ export function installAssembledBootEnv(): void {
     // The locale service derives its provisional locale from the browser and
     // takes an explicit choice only from Host settings, which this lane's
     // fixture transport does not serve; pinning the navigator is what selects
-    // English here.
-    Object.defineProperty(navigator, 'languages', { value: ['en-US'], configurable: true })
-    Object.defineProperty(navigator, 'language', { value: 'en-US', configurable: true })
+    // Chinese here.
+    Object.defineProperty(navigator, 'languages', { value: ['zh-CN'], configurable: true })
+    Object.defineProperty(navigator, 'language', { value: 'zh-CN', configurable: true })
     document.title = 'DeepSeek Harness'
     vi.stubGlobal('ResizeObserver', ResizeObserverStub)
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>

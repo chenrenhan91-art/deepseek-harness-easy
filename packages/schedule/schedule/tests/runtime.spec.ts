@@ -7,6 +7,7 @@ import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
 import {
   ScheduleId,
   createAfterScheduleRecord,
+  createDailyScheduleRecord,
   createEveryScheduleRecord,
   foldScheduleEvents,
 } from '../src/domain.ts'
@@ -118,6 +119,21 @@ function appendAfter(
   prompt = 'check logs',
 ): void {
   const record = createAfterScheduleRecord(ScheduleId(id), prompt, afterSeconds, createdAt)
+  test.agent.session.append('schedule/change', { version: 1, operation: 'create', schedule: record })
+}
+
+function appendDaily(
+  test: RuntimeHarness,
+  id: string,
+  createdAt = Date.now(),
+  prompt = 'check build',
+): void {
+  const record = createDailyScheduleRecord(
+    ScheduleId(id),
+    prompt,
+    { time: '09:00', time_zone: 'UTC' },
+    createdAt,
+  )
   test.agent.session.append('schedule/change', { version: 1, operation: 'create', schedule: record })
 }
 
@@ -313,6 +329,20 @@ describe('Schedule timer and admission runtime', () => {
     if (next?.type !== 'text') throw new Error('expected fixed-rate batch text')
     expect(next.text).toContain('"occurrence_at":"2026-08-05T12:05:00.000Z"')
     expect(next.text).not.toContain('schedule-slow')
+    await runtime.dispose()
+  })
+
+  it('batches an overdue daily calendar record', async () => {
+    const test = await harness()
+    appendDaily(test, 'schedule-daily', Date.parse('2026-08-04T08:00:00.000Z'), 'check build')
+    const runtime = runtimeFor(test)
+    runtime.start()
+    await settle()
+    expect(test.followed).toHaveLength(1)
+    const text = test.followed[0]?.content[0]
+    if (text?.type !== 'text') throw new Error('expected calendar batch text')
+    expect(text.text).toContain('[SCHEDULE REMINDER BATCH]')
+    expect(text.text).toContain('"schedule_id":"schedule-daily"')
     await runtime.dispose()
   })
 

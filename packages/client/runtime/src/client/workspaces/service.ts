@@ -11,6 +11,16 @@ import type { SessionsPort, SessionsPortList } from '../contract/sessions-port.t
 import type { IWorkspaces } from '../contract/workspaces.ts'
 import { WorkspaceManager, type WorkspaceListPhase } from './manager.ts'
 
+/**
+ * Shipped ids the beginner roster deleted. A blank session that still names
+ * one cannot be switched via `agentPreset.select` (select resumes that
+ * identity first). Reusing it as the New Session landing pad reopens
+ * `preset "standard" not found`.
+ */
+const RETIRED_SHIPPED_PRESET_IDS: ReadonlySet<string> = new Set([
+  'standard', 'code', 'minimal', 'cordis',
+])
+
 /** Workspace list plus the two-baseline readiness and default-target projection. */
 export interface WorkspaceListState {
   items: readonly WorkspaceView[]
@@ -107,7 +117,9 @@ export class WorkspaceRuntime implements IWorkspaces {
       const summary = sessions.byId[id]
       if (summary !== undefined && summary.blank && summary.cwd === workspace.path
         && workspace.sessionIds.includes(summary.id)
-        && !archived.includes(summary.id)) return summary.id
+        && !archived.includes(summary.id)
+        && (summary.agentPreset === undefined
+          || !RETIRED_SHIPPED_PRESET_IDS.has(summary.agentPreset))) return summary.id
     }
     const attempt = this.sessions.create({ workspaceId })
       .finally(() => { this.connecting.delete(workspaceId) })

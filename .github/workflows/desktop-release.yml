@@ -1,0 +1,88 @@
+# Pack the beginner desktop zips (portable Node + built dsh web + launcher)
+# and attach them to a dsh-v* GitHub Release. Source-run stays `pnpm dsh web`.
+name: Desktop release
+
+on:
+  push:
+    tags:
+      - 'dsh-v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PRIMARY_NODE_VERSION: '24'
+  DSH_TELEMETRY_DISABLED: '1'
+
+jobs:
+  pack:
+    name: Pack desktop zips
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.PRIMARY_NODE_VERSION }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install zip
+        run: sudo apt-get update && sudo apt-get install -y zip unzip
+
+      - name: Configure pnpm store path
+        id: pnpm-store
+        run: |
+          store_root="$HOME/.local/share/pnpm/store"
+          echo "PNPM_CONFIG_STORE_DIR=$store_root" >> "$GITHUB_ENV"
+          store_path=$(PNPM_CONFIG_STORE_DIR="$store_root" pnpm store path --silent)
+          echo "path=$store_path" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-node-${{ env.PRIMARY_NODE_VERSION }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.PRIMARY_NODE_VERSION }}-pnpm-
+
+      - name: Install (immutable)
+        run: pnpm install --frozen-lockfile
+
+      - name: Pack desktop zips
+        run: pnpm run pack-desktop -- --out dist/desktop
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-zips
+          path: dist/desktop/*.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --title "$tag" --notes-file packaging/desktop/BEGINNER.zh.txt
+          fi
+          gh release upload "$tag" \
+            dist/desktop/DeepSeek-Harness-macOS.zip \
+            dist/desktop/DeepSeek-Harness-Windows.zip \
+            --clobber

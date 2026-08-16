@@ -9,9 +9,12 @@
     "musl-gcc",
     "python3",
     "sandbox-exec",
+    "go",
     "tar",
     "taskkill",
-    "where.exe"
+    "unzip",
+    "where.exe",
+    "zip"
   ],
   "ignoreWorkspaces": [
     "vendor/*",
@@ -160,13 +163,15 @@
         "tests/**/*.tsx"
       ]
     },
-    "packages/client/ui-goal": {
+    "packages/client/ui-schedule": {
       "entry": [
+        "tests/**/*.spec.ts",
         "tests/**/*.spec.tsx"
       ],
       "project": [
         "src/**/*.ts",
         "src/**/*.tsx",
+        "tests/**/*.ts",
         "tests/**/*.tsx"
       ]
     },
@@ -190,16 +195,6 @@
       ]
     },
     "packages/client/ui-deliverables": {
-      "entry": [
-        "tests/**/*.spec.tsx"
-      ],
-      "project": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "tests/**/*.tsx"
-      ]
-    },
-    "packages/client/ui-workflow-run": {
       "entry": [
         "tests/**/*.spec.tsx"
       ],

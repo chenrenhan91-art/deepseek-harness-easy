@@ -20,7 +20,7 @@
 import { useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import clsx from 'clsx'
 import {
-  CodeBlock, DiffBlock, DisclosureRow, IconInspectOutline12, ReadBlock, SearchBlock, StateDot, TerminalBlock, WebBlock,
+  CodeBlock, DiffBlock, DisclosureRow, ReadBlock, SearchBlock, StateDot, TerminalBlock, WebBlock,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { WebBlockProps } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
@@ -94,11 +94,6 @@ export interface ToolRowProps {
   filePath?: string | undefined
   /** Open the path with the host OS default application (already cwd-resolved). */
   onOpenFile?: ((path: string) => void) | undefined
-  /**
-   * Jump to this call in the trajectory view: a hover-revealed Inspect pill
-   * over the expanded body. Absent = no affordance.
-   */
-  inspect?: (() => void) | undefined
 }
 
 /** Leading-slot state substitution: the tool icon yields to the terminal state
@@ -144,7 +139,6 @@ export function ToolRow({
   state,
   filePath,
   onOpenFile,
-  inspect,
 }: ToolRowProps) {
   const [expanded, setExpanded] = useState(false)
   const terminalBody = terminal ?? null
@@ -231,8 +225,8 @@ export function ToolRow({
           </>
         )}
       >
-        {/* The wrapper (sibling of the header row, so clicks inside never
-            toggle it) carries the expanded body and the Inspect pill below. */}
+        {/* The wrapper is a sibling of the header row, so clicks inside the
+            expanded body never toggle it. */}
         <div className={css.bodyWrap}>
           {terminalBody !== null
             ? (
@@ -271,7 +265,7 @@ export function ToolRow({
                           <div className={css.ioCard}>
                             {cardBody !== null && (
                               <div className={css.ioSection}>
-                                <span className={css.ioLabel}>IN</span>
+                                <span className={css.ioLabel}>{t('tool.io.input')}</span>
                                 <span className={css.ioText}>{cardBody}</span>
                               </div>
                             )}
@@ -280,7 +274,7 @@ export function ToolRow({
                             )}
                             {outputText !== null && (
                               <div className={css.ioSection}>
-                                <span className={css.ioLabel}>OUT</span>
+                                <span className={css.ioLabel}>{t('tool.io.output')}</span>
                                 <span className={css.ioText} data-error={state === 'error' || undefined}>
                                   {outputText}
                                 </span>
@@ -290,16 +284,6 @@ export function ToolRow({
                         )}
                       </>
                     )}
-          {inspect !== undefined && (
-            <button
-              type="button"
-              className={css.inspectButton}
-              onClick={inspect}
-            >
-              <IconInspectOutline12 />
-              Inspect
-            </button>
-          )}
         </div>
       </DisclosureRow>
     </div>

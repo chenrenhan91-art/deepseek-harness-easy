@@ -124,9 +124,9 @@ describe('web e2e: assistant IconActions wait for the turn to end', () => {
     ).toBe(true)
     // Only the user bubble owns a footer (clock + copy; user bubbles carry no
     // branch action): the narration is not the answer yet.
-    const copyButtons = page.getByRole('button', { name: 'Copy' })
+    const copyButtons = page.getByRole('button', { name: '复制' })
     await expect.poll(() => copyButtons.count(), { timeout: 10_000 }).toBe(1)
-    expect(await page.getByRole('button', { name: 'Branch into a new conversation' }).count()).toBe(0)
+    expect(await page.getByRole('button', { name: '在新对话中分支' }).count()).toBe(0)
     await copyButtons.first().focus()
     const running = await captureStableAria(page, '[class*="centerCol"]', scaffold!.workspaceCwd)
     await compareOrRefreshGolden(RUNNING_EXPECTED, running, MODE)
@@ -134,7 +134,7 @@ describe('web e2e: assistant IconActions wait for the turn to end', () => {
     // Closing the turn from the park is the state change under test: an
     // aborted turn is durably closed, so its transcript tail (the frozen
     // partial) takes the seat while the mid-turn narration keeps none.
-    await page.getByRole('button', { name: 'Stop generating' }).click()
+    await page.getByRole('button', { name: '停止生成' }).click()
     await settled
     expect(sessionEvents.filter(e => e.type === 'turn/end').map(e => e.data.reason.kind)).toEqual(['aborted'])
     await expect.poll(() => copyButtons.count(), { timeout: 10_000 }).toBe(2)

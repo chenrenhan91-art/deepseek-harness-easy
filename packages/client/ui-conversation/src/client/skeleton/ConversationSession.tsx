@@ -147,8 +147,6 @@ export function ConversationSession({
   const blank = useSession(s => s.blank)
   const inputState = useInput(s => s)
   const storedDraft = useStore(s => s.draft)
-  // `?? null`: persisted snapshots from before the inspect field rehydrate without it.
-  const inspect = useStore(s => s.inspect ?? null)
 
   useEffect(() => {
     if (inputState.draft === '' && storedDraft !== '') inputActions.setDraft(storedDraft)
@@ -165,10 +163,7 @@ export function ConversationSession({
   if (blank && composerPhase === 'blank') return null
   return (
     <div className={css.viewArea}>
-      {active !== undefined && renderSlot('conversation.view', {
-        inspect,
-        onInspectDone: () => { actions.setInspect(null) },
-      }, { only: active.id })}
+      {active !== undefined && renderSlot('conversation.view', {}, { only: active.id })}
     </div>
   )
 }

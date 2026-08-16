@@ -40,6 +40,28 @@
     # once the web UI owns the choice per session.
     mode: !!js process.env.DSH_TOOLS_MODE
 
+# Beginner Web: new sessions start fully open. The pickers render the host
+# `name` as-is, so the two shipped presets carry Chinese labels here.
+- id: permission
+  config:
+    defaultPreset: danger-full-access
+    presets:
+      read-only:
+        sandbox: read-only
+        approval: ask
+        name: 只读
+        description: 只能看文件；改文件或运行命令前会先问你。
+      workspace-write:
+        sandbox: workspace-write
+        approval: ask
+        name: 工作区可写
+        description: 可以改这个工作区里的文件；超出范围的操作会先问你。
+      danger-full-access:
+        sandbox: danger-full-access
+        approval: never
+        name: 完全放开
+        description: 不再询问确认，可以直接改文件、运行命令，包括敏感操作。
+
 # ── web-only host rows, the transport layer, and the browser roster ─────────
 
 # `dsh.client` rows are the browser roster the modules node half scans into
@@ -83,6 +105,14 @@
     # projection key); the projection registry itself is a base-layer row.
     - id: session-stats
       name: '@deepseek-ai/dsh-session-stats'
+
+    # Session-local reminders: tools + /schedule + the schedule projection.
+    # time-context lets the model interpret unqualified dates in the browser zone.
+    - id: time-context
+      name: '@deepseek-ai/dsh-time-context'
+
+    - id: schedule
+      name: '@deepseek-ai/dsh-schedule'
 
     # Resolve bind host, SSH launch, and display once at boot, then mount the
     # matching dual-face directory picker. Mount -native or -browse directly in
@@ -174,8 +204,13 @@
     - id: ui-theme
       name: '@deepseek-ai/dsh-client-ui-theme'
 
+    # A Chinese-first surface: the deployment preference stands under the user
+    # layer, so a browser reporting any other language still opens in Chinese
+    # and the Language row still switches away from it.
     - id: locale
       name: '@deepseek-ai/dsh-client-locale'
+      config:
+        preference: zh
 
     - id: ui-layout
       name: '@deepseek-ai/dsh-client-ui-layout'
@@ -192,23 +227,12 @@
     - id: ui-settings-models
       name: '@deepseek-ai/dsh-client-ui-settings-models'
 
-    - id: ui-settings-plugin-inventory
-      name: '@deepseek-ai/dsh-client-ui-settings-plugin-inventory'
-
     - id: ui-conversation
       name: '@deepseek-ai/dsh-client-ui-conversation'
 
     # Tool call tree, generic fallback, and keyed business Tool views.
     - id: ui-tool
       name: '@deepseek-ai/dsh-client-ui-tool'
-
-    - id: ui-cordis
-      name: '@deepseek-ai/dsh-client-ui-cordis'
-
-    # Durable workflow lifecycle as an independent Chat node after the
-    # existing generic workflow tool row.
-    - id: ui-workflow-run
-      name: '@deepseek-ai/dsh-client-ui-workflow-run'
 
     # Turn tail: the produced-files row under each closing assistant message.
     # Remove this entry to turn the surface off; the tail hole renders empty.
@@ -219,8 +243,8 @@
     - id: ui-workspace
       name: '@deepseek-ai/dsh-client-ui-workspace'
 
-    # Input triggers: the '/' | '@' pipeline (ui-input-trigger), the command surface over
-    # it (ui-commands), and the two reference sources (ui-skill / ui-subagent).
+    # Input triggers: the '/' | '@' pipeline (ui-input-trigger), the command
+    # surface over it (ui-commands), and the skill reference source (ui-skill).
     - id: ui-input-trigger
       name: '@deepseek-ai/dsh-client-ui-input-trigger'
 
@@ -229,17 +253,6 @@
 
     - id: ui-skill
       name: '@deepseek-ai/dsh-client-ui-skill'
-
-    - id: ui-subagent
-      name: '@deepseek-ai/dsh-client-ui-subagent'
-
-    # Background jobs: the session-header list over the jobsBySession mirror.
-    - id: ui-jobs
-      name: '@deepseek-ai/dsh-client-ui-jobs'
-
-    # Goal surface: GoalBar in the input dock over the goal session projection.
-    - id: ui-goal
-      name: '@deepseek-ai/dsh-client-ui-goal'
 
     # Per-message feedback: Like/Dislike plus an optional note in the
     # assistant-message action strip, over the messageFeedback Remote.
@@ -253,25 +266,21 @@
     - id: ui-permission
       name: '@deepseek-ai/dsh-client-ui-permission-presets'
 
-    # The agent-preset row in General settings: the default preset for
-    # sessions created later. Absent a roster it renders nothing.
+    # The mode grid on the new-session screen: one card per agent preset.
+    # Absent a roster it renders nothing.
     - id: ui-agent-preset
       name: '@deepseek-ai/dsh-client-ui-agent-preset'
-
-    # Plugin configuration: the host-plane sections a user owns, as expandable
-    # cards. A namespace this deployment does not expose renders nothing.
-    - id: ui-settings-plugins
-      name: '@deepseek-ai/dsh-client-ui-settings-plugins'
 
     # Plan control: the composer plan seat over the plan projection + /plan channel.
     - id: ui-plan
       name: '@deepseek-ai/dsh-client-ui-plan'
 
+    # Beginner daily/weekly schedule page under New Session.
+    - id: ui-schedule
+      name: '@deepseek-ai/dsh-client-ui-schedule'
+
     - id: ui-user-questions
       name: '@deepseek-ai/dsh-client-ui-user-questions'
-
-    - id: ui-trajectory
-      name: '@deepseek-ai/dsh-client-ui-trajectory'
 
 # ── the agent plane moves behind agent presets ─────────────────────────────
 #
@@ -421,4 +430,7 @@
     - id: agent-presets
       name: '@deepseek-ai/dsh-agent-presets'
       config:
-        default: standard
+        # A session that never picked a mode still needs one composition, and
+        # `study` is the mode that answers a plain question without producing
+        # files, so it is the safest thing to be in by accident.
+        default: study

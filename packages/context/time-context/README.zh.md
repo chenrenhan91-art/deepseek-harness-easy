@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-可选的持久上下文，包含当前带时区时间、附加到当前开放请求的浏览器时区，以及在模型请求准备期间采样的经过时长。默认组合不启用它；Schedule Web overlay 会挂载它，使模型可以按用户的浏览器时区解释未明确限定时区的日期和时间。决策记录：[持久 time-context Agent Note](../../../.agents/notes/implemented/feature/2026-07-16-durable-per-step-time-context.md)。
+可选的持久上下文，包含当前带时区时间、附加到当前开放请求的浏览器时区，以及在模型请求准备期间采样的经过时长。无头默认组合不启用它；随附的 Web 组合会挂载它，使模型可以按用户的浏览器时区解释未明确限定时区的日期和时间。决策记录：[持久 time-context Agent Note](../../../.agents/notes/implemented/feature/2026-07-16-durable-per-step-time-context.md)。
 
 ## 配置
 
@@ -30,7 +30,7 @@
 
 每个读数都使用确切的快照来源 `{ kind: 'plugin', plugin: 'time-context', form: 'snapshot', sections: [{ name: 'time-context', text: <same text> }] }`。`./invariant` 配套模块会校验该形状，根据原始 `user-rpc` 消息重新派生当前轮次的浏览器策略，并检查时间戳时区与经过时长基线。
 
-正数间隔调度会扫描原始持久会话事件，查找最新一条归因于插件的消息，其中包括已被压缩（compaction）遮蔽的读数。因此，它无需进程本地缓存也能在恢复后继续生效。正数间隔可以有意让后续请求复用现有历史，而不添加新读数；Schedule Web overlay 会省略该间隔。
+正数间隔调度会扫描原始持久会话事件，查找最新一条归因于插件的消息，其中包括已被压缩（compaction）遮蔽的读数。因此，它无需进程本地缓存也能在恢复后继续生效。正数间隔可以有意让后续请求复用现有历史，而不添加新读数；随附的 Web 组合会省略该间隔。
 
 第 1 步从最新一条在其之前持久化的用户、助手或工具结果消息起测量。为该步骤拟议的提示词尚未追加。后续步骤从同一轮次中前一个 time-context 事件起测量。缺少基线时报告 `unavailable`，挂钟时间倒退时将经过时长限制为零。
 

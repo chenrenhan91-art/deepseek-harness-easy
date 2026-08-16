@@ -1,0 +1,4 @@
+name: 表格数据
+description: 整理 Excel 和 CSV，做统计、去重、出图
+order: 3
+icon: table

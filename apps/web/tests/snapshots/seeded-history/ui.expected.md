@@ -1,54 +1,51 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Use the read tool twice" [disabled]
-  - button "Session log":
-    - text: Session log
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
-- text: "Use the read tool twice in one assistant message: read a.txt and b.txt. Then reply with the single word DONE and stop. 7/25 {{clock}}"
-- button "Copy":
+- text: "Use the read tool twice in one assistant message: read a.txt and b.txt. Then reply with the single word DONE and stop. {{clock}}"
+- button "复制":
   - img
-- button "Think The user wants me to read a.txt and b.txt, then reply with \"DONE\". Let me do both reads in parallel.":
+- button "思考 The user wants me to read a.txt and b.txt, then reply with \"DONE\". Let me do both reads in parallel.":
   - img
   - img
-  - text: Think The user wants me to read a.txt and b.txt, then reply with "DONE". Let me do both reads in parallel.
-- button "Read a.txt":
+  - text: 思考 The user wants me to read a.txt and b.txt, then reply with "DONE". Let me do both reads in parallel.
+- button "读取文件 a.txt":
   - img
   - img
-  - text: Read
+  - text: 读取文件
   - button "a.txt"
-- button "Read b.txt":
+- button "读取文件 b.txt":
   - img
   - img
-  - text: Read
+  - text: 读取文件
   - button "b.txt"
-- button "Think Both files have been read. a.txt contains \"alpha\" and b.txt contains \"beta\". I'll now reply with DONE as instructed.":
+- button "思考 Both files have been read. a.txt contains \"alpha\" and b.txt contains \"beta\". I'll now reply with DONE as instructed.":
   - img
   - img
-  - text: Think Both files have been read. a.txt contains "alpha" and b.txt contains "beta". I'll now reply with DONE as instructed.
+  - text: 思考 Both files have been read. a.txt contains "alpha" and b.txt contains "beta". I'll now reply with DONE as instructed.
 - paragraph: DONE
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- button "compact Compacted 5 history items (~{{tokens}} tokens)"
-- button "Context injection AGENTS.md":
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- button "压缩上下文 已压缩 5 条历史记录（约 247 tokens）"
+- button "上下文注入 AGENTS.md":
   - img
   - img
-  - text: Context injection AGENTS.md
-- textbox "Message the agent"
-- button "Commands":
+  - text: 上下文注入 AGENTS.md
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：工作区可写": 工作区可写
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: 1 turns · 2 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 98% Input 15.8K tok · Output 135 tok
+- button "发送消息" [disabled]
+- text: 1 轮 · 2 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 98% 输入 15.8K tok · 输出 135 tok

@@ -178,8 +178,6 @@ export default defineConfig({
         // Client/web UI files whose remaining branches need a browser-grade
         // harness the jsdom lane doesn't cover yet. TODO(gui): cover and
         // remove as the client test lane matures.
-        'packages/client/ui-trajectory/src/*',
-        // Trajectory's compact Markdown projection retains deferred branch coverage.
         'packages/client/ui-primitives/src/markdown/plain-text.ts',
         'packages/client/ui-user-questions/src/client/QuestionComposer.tsx',
         'packages/client/ui-primitives/src/Menu.tsx',
@@ -223,7 +221,6 @@ export default defineConfig({
         'packages/client/ui-commands/src/index.ts',
         'packages/client/ui-skill/src/index.ts',
         'packages/client/ui-input-trigger/src/index.ts',
-        'packages/client/ui-subagent/src/index.ts',
         'packages/client/ui-commands/src/client/popup.ts',
         'packages/client/ui-commands/src/client/directory.ts',
         'packages/client/ui-commands/src/client/service.ts',
@@ -243,7 +240,7 @@ export default defineConfig({
         'packages/client/ui-workspace/src/client/index.ts',
         'packages/test-support/client-runtime/src/translate.ts',
         'packages/client/ui-primitives/src/JsonTree.tsx',
-        'packages/client/ui-settings-models/src/client/DeepSeekOnboardingDialog.tsx',
+        'packages/client/ui-settings-models/src/client/ApiKeyOnboarding.tsx',
         'packages/client/ui-settings-models/src/client/welcome-store.ts',
         'packages/extensions/*/src/**/*.ts',
         'packages/extensions/*/src/**/*.tsx',

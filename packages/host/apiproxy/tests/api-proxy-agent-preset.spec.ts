@@ -11,7 +11,7 @@ import { join } from 'node:path'
 import { Context } from '@deepseek-ai/cordis'
 import AgentRegistry, { type AgentFactory } from '@deepseek-ai/dsh-agent'
 import type { Agent } from '@deepseek-ai/dsh-agent'
-import SessionStore, { SessionId, type Session } from '@deepseek-ai/dsh-session'
+import SessionStore, { SessionId, type Session, type SessionEvent } from '@deepseek-ai/dsh-session'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
 import { RpcId, type RpcRequest } from '../src/api/rpc.ts'
 import type { HostFrame } from '../src/api/events.ts'
@@ -130,8 +130,30 @@ async function harness(
       const unregister = ctx.agents.register(agent)
       return { agent, dispose: () => { unregister(); return Promise.resolve() } }
     },
-    async resume() {
-      throw new Error('test harness has no persisted sessions')
+    async resume(_ownerCtx, options) {
+      const persistence = ctx.get('sessionPersistence') as {
+        inspect?: (id: SessionId) => Promise<{
+          meta: { cwd?: string; agentPreset?: string }
+          events: readonly SessionEvent[]
+        }>
+      } | undefined
+      const inspected = persistence?.inspect === undefined
+        ? undefined
+        : await persistence.inspect(options.resumeSessionId)
+      if (inspected === undefined) throw new Error('test harness has no persisted sessions')
+      const session = ctx.sessions.create(options.resumeSessionId, {
+        meta: {
+          ...inspected.meta.cwd === undefined ? {} : { cwd: inspected.meta.cwd },
+          ...inspected.meta.agentPreset === undefined ? {} : { agentPreset: inspected.meta.agentPreset },
+        },
+        ...inspected.events.length === 0 ? {} : { seed: [...inspected.events] },
+      })
+      const agent = stubAgent(session)
+      const agentCtx = ctx.extend({ agent })
+      ;(agent as { ctx?: Context }).ctx = agentCtx
+      await options.setup?.(agentCtx)
+      const unregister = ctx.agents.register(agent)
+      return { agent, dispose: () => { unregister(); return Promise.resolve() } }
     },
   }
   ctx.agents.setFactory(factory)
@@ -452,6 +474,53 @@ describe('agentPreset.select', () => {
     expect(response.result.ok).toBe(false)
     if (response.result.ok) throw new Error('unreachable')
     expect(response.result.error.code).toBe('agent-preset-not-found')
+  })
+
+  it('switches a cold session whose recorded preset left the roster', async () => {
+    const meta = { id: SessionId('sel-retired'), createdAt: 1, cwd: '/tmp/sel-retired', agentPreset: 'standard' }
+    const { api } = await harness(['study', 'writing'], {
+      list: () => Promise.resolve([meta]),
+      inspect: () => Promise.resolve({ meta, events: [] }),
+    })
+
+    const response = await api.agentPresets.select(
+      request({ sessionId: SessionId('sel-retired'), agentPreset: 'writing' }))
+
+    // Resume must not die on the retired id: select needs a live agent, and
+    // the blank-session switch is how the mode grid recovers that session.
+    expect(response.result.ok).toBe(true)
+    if (!response.result.ok) throw new Error('unreachable')
+    expect(response.result.value.agentPreset).toBe('writing')
+  })
+
+  it('still refuses a recorded session that names no preset when the default is absent', async () => {
+    const meta = { id: SessionId('sel-unnamed'), createdAt: 1, cwd: '/tmp/sel-unnamed' }
+    const { api } = await harness([], {
+      list: () => Promise.resolve([meta]),
+      inspect: () => Promise.resolve({ meta, events: [] }),
+    })
+
+    const response = await api.agentPresets.select(
+      request({ sessionId: SessionId('sel-unnamed'), agentPreset: 'writing' }))
+
+    expect(response.result.ok).toBe(false)
+    if (response.result.ok) throw new Error('unreachable')
+    expect(response.result.error.message).toMatch(/resume failed.*not found/)
+  })
+
+  it('still refuses a recorded reconstruct when the unnamed default is absent too', async () => {
+    const meta = { id: SessionId('sel-empty'), createdAt: 1, cwd: '/tmp/sel-empty', agentPreset: 'standard' }
+    const { api } = await harness([], {
+      list: () => Promise.resolve([meta]),
+      inspect: () => Promise.resolve({ meta, events: [] }),
+    })
+
+    const response = await api.agentPresets.select(
+      request({ sessionId: SessionId('sel-empty'), agentPreset: 'writing' }))
+
+    expect(response.result.ok).toBe(false)
+    if (response.result.ok) throw new Error('unreachable')
+    expect(response.result.error.message).toMatch(/resume failed.*not found/)
   })
 
   it('reports a deployment that composes no presets', async () => {

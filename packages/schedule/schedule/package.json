@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-schedule",
-  "description": "Agent-scoped durable after, at, and fixed-rate reminders over the session event log",
+  "description": "Agent-scoped durable after, at, fixed-rate, and local-clock reminders over the session event log",
   "version": "0.1.0-rc.5",
   "publishConfig": {
     "access": "public"
@@ -22,24 +22,46 @@
       "types": "./lib/types/invariant.d.ts",
       "default": "./lib/invariant.js"
     },
+    "./types": {
+      "types": "./lib/types/types.d.ts",
+      "default": "./lib/types/types.js"
+    },
+    "./client": {
+      "types": "./lib/types/client.d.ts",
+      "default": "./lib/types/client.js"
+    },
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/index.js",
     "lib/invariant.js",
+    "lib/types/**/*.js",
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",
   "peerDependencies": {
     "@deepseek-ai/dsh-agent": "workspace:^",
     "@deepseek-ai/dsh-brand": "workspace:^",
+    "@deepseek-ai/dsh-commands": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
     "@deepseek-ai/dsh-llm": "workspace:^",
     "@deepseek-ai/dsh-session": "workspace:^",
     "@deepseek-ai/dsh-session-persistence": "workspace:^",
+    "@deepseek-ai/dsh-session-projection": "workspace:^",
     "@deepseek-ai/dsh-tools": "workspace:^",
     "@deepseek-ai/cordis": "workspace:^"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-commands": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-session-projection": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@deepseek-ai/cordis-plugin-loader": "workspace:^",
@@ -47,7 +69,9 @@
     "@deepseek-ai/dsh-agent-loop": "workspace:^",
     "@deepseek-ai/dsh-agent-loop-testkit": "workspace:^",
     "@deepseek-ai/dsh-brand": "workspace:^",
+    "@deepseek-ai/dsh-commands": "workspace:^",
     "@deepseek-ai/dsh-invariants": "workspace:^",
+    "@deepseek-ai/dsh-session-projection": "workspace:^",
     "@deepseek-ai/dsh-llm": "workspace:^",
     "@deepseek-ai/dsh-session": "workspace:^",
     "@deepseek-ai/dsh-session-persistence": "workspace:^",

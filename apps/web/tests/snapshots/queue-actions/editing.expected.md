@@ -1,45 +1,50 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Reply with a one-sentence description" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: Reply with a one-sentence description of event sourcing, then stop. {{clock}}
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
+  - img
+  - img
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
 - paragraph: partial
 - status: Deep diving...
-- button "2 queued messages" [disabled] [expanded]
+- button "2 条排队消息" [disabled] [expanded]
 - list:
   - listitem:
     - text: Queue item to remove
-    - button "Edit queued message":
+    - button "编辑排队消息":
       - img
-    - button "Remove queued message":
+    - button "删除排队消息":
       - img
-    - button "Steer queued message":
+    - button "插话发送":
       - img
   - listitem:
-    - textbox "Edit queued message": Edited queue item
-    - button "Save queued message":
+    - textbox "编辑排队消息": Edited queue item
+    - button "保存排队消息":
       - img
-    - tooltip "Save queued message"
-    - button "Cancel editing":
+    - tooltip "保存排队消息"
+    - button "取消编辑":
       - img
-- textbox "Cmd/Ctrl+Enter steers all queued messages"
-- button "Commands":
+- textbox "Cmd/Ctrl+Enter 插话发送全部排队消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Stop generating"
+- button "停止生成"

@@ -1,50 +1,59 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Use the ask_user_question tool to" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: "Use the ask_user_question tool to ask me exactly one multi-select question with id \"color\", question \"Which color do you prefer?\", header \"Pick one\", and two options: label \"Blue\" with description \"A cool recessive hue that reads as calm and trustworthy in long reading sessions and dense dashboards.\", and label \"Green\" with description \"A restful mid-spectrum hue with the highest perceived brightness, easiest on the eye over long sessions.\" Set multi_select to true. After I answer, reply with the single word DONE and stop. {{clock}}"
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
-  - img
-  - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- button "Think The user wants me to use the ask_user_question tool with specific parameters. Let me do exactly that.":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Think The user wants me to use the ask_user_question tool with specific parameters. Let me do exactly that.
-- button "Ask question 1/1 answered":
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
   - img
   - img
-  - text: Ask question 1/1 answered
-- button "Think The user answered \"Blue\". I should now reply with the single word DONE and stop.":
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
   - img
   - img
-  - text: Think The user answered "Blue". I should now reply with the single word DONE and stop.
+  - text: 上下文注入 time-context
+- button "思考 The user wants me to use the ask_user_question tool with specific parameters. Let me do exactly that.":
+  - img
+  - img
+  - text: 思考 The user wants me to use the ask_user_question tool with specific parameters. Let me do exactly that.
+- button "提问 1/1 已回答":
+  - img
+  - img
+  - text: 提问 1/1 已回答
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
+- button "思考 The user answered \"Blue\". I should now reply with the single word DONE and stop.":
+  - img
+  - img
+  - text: 思考 The user answered "Blue". I should now reply with the single word DONE and stop.
 - paragraph: DONE
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：完全放开": 完全放开
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "3% of context used"
-- button "Send message" [disabled]
-- text: 1 turns · 2 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 95% Input 8.6K tok · Output 180 tok
+- button "上下文已用 3%"
+- button "发送消息" [disabled]
+- text: 1 轮 · 2 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 95% 输入 8.6K tok · 输出 180 tok

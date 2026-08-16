@@ -41,7 +41,6 @@ const LONG_HISTORY_TURNS = 500
 const TOOL_TURN_INTERVAL = 10
 const TOOLS_PER_TOOL_TURN = 10
 const EXPECTED_TOOL_CALLS = LONG_HISTORY_TURNS / TOOL_TURN_INTERVAL * TOOLS_PER_TOOL_TURN
-const EXPECTED_TRAJECTORY_ROWS = 2_100
 const DEFAULT_HISTORY_TURNS = 24
 const PERF_REPLAY_CONTEXT_WINDOW = 10_000_000
 const STREAM_PACE_MS = 8
@@ -620,7 +619,7 @@ async function startUserRenderProbe(
   page: Page,
   marker: string,
 ): Promise<void> {
-  const send = page.getByRole('button', { name: 'Send message', exact: true })
+  const send = page.getByRole('button', { name: '发送消息', exact: true })
   await send.waitFor({ timeout: 15_000 })
   await expect.poll(() => send.isEnabled(), { timeout: 15_000 }).toBe(true)
   await page.evaluate((expectedMarker) => {
@@ -698,7 +697,7 @@ async function startUserRenderProbe(
 }
 
 async function triggerUserRenderProbe(page: Page): Promise<void> {
-  const send = page.getByRole('button', { name: 'Send message', exact: true })
+  const send = page.getByRole('button', { name: '发送消息', exact: true })
   await send.click()
 }
 
@@ -911,17 +910,17 @@ async function openPerformancePage(
   await world.page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
   const group = world.page.getByRole('treeitem').first()
   await expect.poll(() => group.textContent(), { timeout: 30_000 })
-    .toContain(`${String(expectedSessions)} ${expectedSessions === 1 ? 'session' : 'sessions'}`)
+    .toContain(`${String(expectedSessions)} 个会话`)
   return group
 }
 
 async function openLongHistory(page: Page): Promise<number> {
-  await page.getByRole('textbox', { name: 'Search name, keywords...', exact: true })
+  await page.getByRole('textbox', { name: '搜索会话', exact: false })
     .fill('LONG_PERF_SENTINEL')
-  const results = page.getByRole('tree', { name: 'Search results' }).getByRole('treeitem')
+  const results = page.getByRole('tree', { name: '搜索结果' }).getByRole('treeitem')
   await expect.poll(() => results.count(), { timeout: 60_000 }).toBe(1)
   await results.first().click()
-  await page.getByRole('tab', { name: 'Chat', exact: true }).waitFor({ timeout: 30_000 })
+  await page.locator('[data-conversation-scroll]').waitFor({ timeout: 30_000 })
   return conversationTurns(page)
 }
 
@@ -957,7 +956,7 @@ async function continueConversation(
     const streamBefore = await chromiumMetrics(cdp)
     const streamStarted = performance.now()
     const settled = world.scaffold.whenTurnSettled(60_000)
-    await world.page.getByRole('button', { name: 'Send message', exact: true }).click()
+    await world.page.getByRole('button', { name: '发送消息', exact: true }).click()
     await world.page.getByText(spec.userMarker, { exact: false }).last().waitFor({ timeout: 15_000 })
     const clickToUserEchoMs = performance.now() - streamStarted
     await world.page.getByText(spec.firstMarker, { exact: false }).last().waitFor({ timeout: 15_000 })
@@ -1212,45 +1211,26 @@ describe('manual web performance: complex workspace and history', () => {
       await expect.poll(() => page.getByRole('treeitem').count()).toBe(1)
 
       const contentSearch = await measure(cdp, async () => {
-        await page.getByRole('textbox', { name: 'Search name, keywords...', exact: true })
+        await page.getByRole('textbox', { name: '搜索会话', exact: false })
           .fill('LONG_PERF_SENTINEL')
-        const results = page.getByRole('tree', { name: 'Search results' }).getByRole('treeitem')
+        const results = page.getByRole('tree', { name: '搜索结果' }).getByRole('treeitem')
         await expect.poll(() => results.count(), { timeout: 60_000 }).toBe(1)
         await results.first().waitFor({ timeout: 60_000 })
         return results.first()
       })
       const opened = await measure(cdp, async () => {
         await contentSearch.value.click()
-        await page.getByRole('tab', { name: 'Trajectory', exact: true }).waitFor({ timeout: 30_000 })
+        await page.locator('[data-conversation-scroll]').waitFor({ timeout: 30_000 })
         return conversationTurns(page)
       })
       expect(opened.value).toBe(DEFAULT_HISTORY_TURNS)
 
-      const trajectoryRows = page.getByRole('row')
-      const coldTrajectory = await measure(cdp, async () => {
-        await page.getByRole('tab', { name: 'Trajectory', exact: true }).click()
-        return stableCount(trajectoryRows, count => count === EXPECTED_TRAJECTORY_ROWS)
-      })
-      expect(coldTrajectory.value).toBe(EXPECTED_TRAJECTORY_ROWS)
-
-      const collapseTurns = await measure(cdp, async () => {
-        await page.getByRole('button', { name: 'Collapse turns', exact: true }).click()
-        return stableCount(trajectoryRows, count => count > 0 && count < EXPECTED_TRAJECTORY_ROWS)
-      })
-      expect(collapseTurns.value).toBeLessThan(EXPECTED_TRAJECTORY_ROWS)
-      const trajectorySearch = await measure(cdp, async () => {
-        await page.getByRole('searchbox', { name: 'Search trajectory', exact: true }).fill('turn 499')
-        return stableCount(trajectoryRows, count => count > 0 && count < 20)
-      })
-      expect(trajectorySearch.value).toBeLessThan(20)
-
-      await page.getByRole('tab', { name: 'Chat', exact: true }).click()
       const historyPages: { turns: number; measurement: Measurement }[] = []
       let turns = await conversationTurns(page)
       while (turns < LONG_HISTORY_TURNS) {
         const previousTurns = turns
         const older = await measure(cdp, async () => {
-          await page.getByRole('button', { name: 'Load earlier', exact: true }).click()
+          await page.getByRole('button', { name: '加载更早', exact: true }).click()
           await expect.poll(() => conversationTurns(page), { timeout: 30_000 })
             .toBeGreaterThan(previousTurns)
           return conversationTurns(page)
@@ -1259,25 +1239,15 @@ describe('manual web performance: complex workspace and history', () => {
         historyPages.push({ turns, measurement: older.measurement })
       }
 
-      const warmTrajectory = await measure(cdp, async () => {
-        await page.getByRole('tab', { name: 'Trajectory', exact: true }).click()
-        return stableCount(trajectoryRows, count => count === EXPECTED_TRAJECTORY_ROWS)
-      })
-      expect(warmTrajectory.value).toBe(EXPECTED_TRAJECTORY_ROWS)
-      const warmConversation = await measure(cdp, async () => {
-        await page.getByRole('tab', { name: 'Chat', exact: true }).click()
-        return conversationTurns(page)
-      })
-      expect(warmConversation.value).toBe(LONG_HISTORY_TURNS)
+      expect(turns).toBe(LONG_HISTORY_TURNS)
 
       console.info(`WEB_PERF_RESULT ${JSON.stringify({
-        scenario: 'workspace-history-trajectory',
+        scenario: 'workspace-history',
         fixture: {
           sidebarSessions: SIDEBAR_SESSION_COUNT,
           totalSessions: SIDEBAR_SESSION_COUNT + 1,
           longHistoryTurns: LONG_HISTORY_TURNS,
           toolCalls: EXPECTED_TOOL_CALLS,
-          trajectoryRows: EXPECTED_TRAJECTORY_ROWS,
         },
         setupMs: rounded(world.setupMs),
         boot: {
@@ -1289,12 +1259,7 @@ describe('manual web performance: complex workspace and history', () => {
         sidebarExpand: sidebar.measurement,
         contentSearch: contentSearch.measurement,
         openLongHistory: { initialTurns: opened.value, ...opened.measurement },
-        coldTrajectory: { rows: coldTrajectory.value, ...coldTrajectory.measurement },
-        collapseTurns: { rows: collapseTurns.value, ...collapseTurns.measurement },
-        trajectorySearch: { rows: trajectorySearch.value, ...trajectorySearch.measurement },
         historyPages,
-        warmTrajectory: { rows: warmTrajectory.value, ...warmTrajectory.measurement },
-        warmConversation: { turns: warmConversation.value, ...warmConversation.measurement },
       }, null, 2)}`)
       expect(world.tripwire.warnings).toEqual([])
       expect(world.tripwire.pageErrors).toEqual([])
@@ -1352,7 +1317,7 @@ describe('manual web performance: complex workspace and history', () => {
       while (turns < LONG_HISTORY_TURNS) {
         const previousTurns = turns
         const older = await measure(cdp, async () => {
-          await world.page.getByRole('button', { name: 'Load earlier', exact: true }).click()
+          await world.page.getByRole('button', { name: '加载更早', exact: true }).click()
           await expect.poll(() => conversationTurns(world.page), { timeout: 30_000 })
             .toBeGreaterThan(previousTurns)
           return conversationTurns(world.page)

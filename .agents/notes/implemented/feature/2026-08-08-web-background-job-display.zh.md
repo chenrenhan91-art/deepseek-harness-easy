@@ -10,7 +10,7 @@ Status: implemented
 
 于是 Web 端的人类看不到构建正在跑，分不清一个任务是已经完成还是卡死，也无法把它停掉。唯一的痕迹是 transcript 里更早某处那张打印了 job id 的 `run_in_background` 工具卡片，而那张卡片此后再也不会更新。
 
-会话 header 本来就是每会话后台活动的落点：[`dsh-client-ui-subagent`](../../../../packages/client/ui-subagent/README.md) 把 subagent 目录贡献到 `conversation.session.header.actions`。位置没有争议。缺的是任何一条把任务状态送到浏览器的通道。
+会话 header 本来就是每会话后台活动的落点。Web 不再随附 subagent 目录或 jobs 页头操作（[新手 Web 工作台](./2026-08-15-beginner-web-workbench.md)）。本笔记仍拥有把任务状态送到浏览器的 mux 通道。
 
 ## 决策
 
@@ -87,7 +87,7 @@ abstract onJobsChanged(listener: JobsChangedListener): () => void
 
 ### header 入口
 
-[`@deepseek-ai/dsh-client-ui-jobs`](../../../../packages/client/ui-jobs/README.md) 在 `conversation.session.header.actions` 注册一个条目，排在 subagent 目录之后。呈现契约归它自己的 README；值得记在这里的决策是：会话没有任务时控件根本不渲染；活跃角标为零时省略，让只剩历史的会话保留一个安静的入口；终态行保持可见，因为失败任务的 `detail` 是其失败唯一可读之处。
+`@deepseek-ai/dsh-client-ui-jobs` 曾在 `conversation.session.header.actions` 注册一个条目，排在 subagent 目录之后。Web 不再随附该包（[新手 Web 工作台](./2026-08-15-beginner-web-workbench.md)）。值得记在这里的决策仍是：会话没有任务时控件根本不渲染；活跃角标为零时省略，让只剩历史的会话保留一个安静的入口；终态行保持可见，因为失败任务的 `detail` 是其失败唯一可读之处。
 
 因此一个运行中的一次性后台 subagent 会同时出现在那里和 subagent 目录里。两者回答不同的问题——目录负责进入子会话的 transcript，而这个列表是中断能力唯一可能附着的句柄——在这里屏蔽 `kind: 'subagent'` 会让中断那一期恰好对这批任务没有入口。
 
@@ -115,9 +115,7 @@ abstract onJobsChanged(listener: JobsChangedListener): () => void
 
 ## 测试
 
-[web e2e 场景](../../../../apps/web/tests/background-job-list.e2e.ts)是端到端的证据，且无需密钥：一次真实的 `run_in_background` bash 调用注册进 `ctx.jobs`，header 的计数与行在没有任何用户操作的情况下出现，通过注册表杀掉该任务后打开着的列表翻到生产者给出的 detail。它断言的是整条投递链路，而不是其中某一层。
-
-在它之下，[`jobs-local`](../../../../packages/jobs/jobs-local/tests/jobs.spec.ts) 钉住变更订阅的全部四个提交点、对抛错观察者的包容，以及显式销毁与 fiber 拆除两条路径上的注销；[`api-proxy-jobs`](../../../../packages/host/apiproxy/tests/api-proxy-jobs.spec.ts) 钉住「非空才发 baseline」、三次变更推送、被丢弃的内部字段、无主扇出、不 resume 的保证，以及没有注册表的组合；客户端各套件钉住 last-wins 折叠、缺失键表示、两处清理，以及组件的排序、时长与关闭行为。
+宿主与包测试钉住变更流。Web 不再随附 jobs 页头 e2e（[新手 Web 工作台](./2026-08-15-beginner-web-workbench.md)）。[`jobs-local`](../../../../packages/jobs/jobs-local/tests/jobs.spec.ts)钉住四个提交点上的变更流、对抛错观察者的包容，以及显式释放和 fiber 拆除时的移除；[`api-proxy-jobs`](../../../../packages/host/apiproxy/tests/api-proxy-jobs.spec.ts)钉住仅在非空时下发基线、三次变更推送、丢弃内部字段、无主扇出、不可恢复保证，以及注册表缺席组合。
 
 ## 影响
 

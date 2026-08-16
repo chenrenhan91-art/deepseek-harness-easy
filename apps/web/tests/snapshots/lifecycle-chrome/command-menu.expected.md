@@ -1,9 +1,15 @@
-- listbox "Trigger suggestions":
-  - text: Commands
-  - option "compact Compact older conversation history" [selected]
-  - option "export Download this Session log as a ZIP archive"
-  - option "feedback record feedback about this session"
-  - option "goal set or view the goal for a long-running task"
-  - option "permission Switch the permission preset (sandbox mode + approval policy)"
-  - option "plan Enter or leave plan mode"
+- listbox "触发候选建议":
+  - text: 命令
+  - option "compact 压缩较早的对话历史" [selected]
+  - option "export 将本会话日志下载为 ZIP 压缩包"
+  - option "feedback 记录关于本会话的反馈"
+  - option "goal 设置或查看长期任务的目标"
+  - option "permission 切换权限预设（沙箱模式与审批策略）"
+  - option "plan 进入或退出 plan mode"
+  - option "schedule 在本对话中设置提醒"
   - option "model Select the model for this conversation"
+  - text: 技能
+  - option "check-understanding 真懂了吗：讲完出一道小应用题，答错就换角度，不重复原话"
+  - option "explain-clearly 讲明白：把复杂概念拆成零基础也能跟上的解释，并检验是否真懂"
+  - option "vision 视觉技能：观察、对比并说明会话中的图片"
+  - option "work-an-example 带做一道：从他的题或一个具体例子走完，不跳步骤"

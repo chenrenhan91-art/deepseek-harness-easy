@@ -6,6 +6,7 @@ import AgentLoop from '@deepseek-ai/dsh-agent-loop'
 import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
 import { CallId } from '@deepseek-ai/dsh-llm'
 import { SessionId } from '@deepseek-ai/dsh-session'
+import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
 import * as toolSchedule from '../src/index.ts'
 
 class PersistenceProbe extends Service {
@@ -79,6 +80,15 @@ describe('Schedule plugin composition', () => {
     await child.dispose()
     await root.dispose()
     await existing.dispose()
+    await ctx.fiber.dispose()
+  })
+
+  it('registers the schedule projection when sessionProjections is composed', async () => {
+    const ctx = await harness()
+    await ctx.plugin(SessionProjectionRegistry)
+    await ctx.plugin(toolSchedule)
+    const session = ctx.sessions.create()
+    expect(ctx.sessionProjections.snapshot(session).values.schedule).toEqual({ items: [] })
     await ctx.fiber.dispose()
   })
 

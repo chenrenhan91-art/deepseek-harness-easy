@@ -1,357 +1,354 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "{{workspace}}" [disabled]
-  - button "Session log":
-    - text: Session log
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
-- text: m1 7/25 {{clock}}
-- button "Copy":
+- text: m1 {{clock}}
+- button "复制":
   - img
 - paragraph: r1
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m2 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m2 {{clock}}
+- button "复制":
   - img
 - paragraph: r2
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m3 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m3 {{clock}}
+- button "复制":
   - img
 - paragraph: r3
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m4 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m4 {{clock}}
+- button "复制":
   - img
 - paragraph: r4
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m5 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m5 {{clock}}
+- button "复制":
   - img
 - paragraph: r5
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m6 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m6 {{clock}}
+- button "复制":
   - img
 - paragraph: r6
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m7 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m7 {{clock}}
+- button "复制":
   - img
 - paragraph: r7
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m8 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m8 {{clock}}
+- button "复制":
   - img
 - paragraph: r8
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m9 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m9 {{clock}}
+- button "复制":
   - img
 - paragraph: r9
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m10 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m10 {{clock}}
+- button "复制":
   - img
 - paragraph: r10
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m11 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m11 {{clock}}
+- button "复制":
   - img
 - paragraph: r11
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m12 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m12 {{clock}}
+- button "复制":
   - img
 - paragraph: r12
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m13 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m13 {{clock}}
+- button "复制":
   - img
 - paragraph: r13
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m14 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m14 {{clock}}
+- button "复制":
   - img
 - paragraph: r14
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m15 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m15 {{clock}}
+- button "复制":
   - img
 - paragraph: r15
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m16 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m16 {{clock}}
+- button "复制":
   - img
 - paragraph: r16
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m17 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m17 {{clock}}
+- button "复制":
   - img
 - paragraph: r17
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m18 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m18 {{clock}}
+- button "复制":
   - img
 - paragraph: r18
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m19 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m19 {{clock}}
+- button "复制":
   - img
 - paragraph: r19
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m20 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m20 {{clock}}
+- button "复制":
   - img
 - paragraph: r20
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m21 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m21 {{clock}}
+- button "复制":
   - img
 - paragraph: r21
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m22 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m22 {{clock}}
+- button "复制":
   - img
 - paragraph: r22
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m23 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m23 {{clock}}
+- button "复制":
   - img
 - paragraph: r23
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m24 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m24 {{clock}}
+- button "复制":
   - img
 - paragraph: r24
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m25 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m25 {{clock}}
+- button "复制":
   - img
 - paragraph: r25
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m26 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m26 {{clock}}
+- button "复制":
   - img
 - paragraph: r26
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m27 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m27 {{clock}}
+- button "复制":
   - img
 - paragraph: r27
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}} m28 7/25 {{clock}}
-- button "Copy":
+- text: {{clock}} 用时 {{duration}} m28 {{clock}}
+- button "复制":
   - img
 - paragraph: r28
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: 7/25 {{clock}} Ran for {{duration}}
-- button "Back to bottom":
+- text: {{clock}} 用时 {{duration}}
+- button "回到底部":
   - img
-- textbox "Message the agent"
-- button "Commands":
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：工作区可写": 工作区可写
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: 28 turns · 28 steps LLM {{duration}}
+- button "发送消息" [disabled]
+- text: 28 轮 · 28 步 LLM {{duration}}

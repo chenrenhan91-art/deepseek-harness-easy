@@ -30,28 +30,28 @@ function selected(agentPreset: string, seq: number): SessionEvent {
 
 describe('resolving which preset a session ran', () => {
   it('reads the creation-time value when nothing was switched', () => {
-    expect(resolveSessionPreset({ header: header('standard'), events: [] })).toBe('standard')
+    expect(resolveSessionPreset({ header: header('study'), events: [] })).toBe('study')
   })
 
   it('prefers a logged switch over the header', () => {
     // The switch's effect outlives the blank window it was made in: the turns
     // that follow run under the newer composition.
-    expect(resolveSessionPreset({ header: header('standard'), events: [selected('minimal', 0)] }))
-      .toBe('minimal')
+    expect(resolveSessionPreset({ header: header('study'), events: [selected('writing', 0)] }))
+      .toBe('writing')
   })
 
   it('takes the last switch when a session was moved twice', () => {
     expect(resolveSessionPreset({
-      header: header('standard'),
-      events: [selected('minimal', 0), selected('cordis', 1)],
-    })).toBe('cordis')
+      header: header('study'),
+      events: [selected('writing', 0), selected('slides', 1)],
+    })).toBe('slides')
   })
 
   it('finds a switch behind later events', () => {
     const later = { type: 'turn/end', seq: 2, time: 2, data: { turn: 1 } } as SessionEvent
 
-    expect(resolveSessionPreset({ header: header(), events: [selected('minimal', 0), later] }))
-      .toBe('minimal')
+    expect(resolveSessionPreset({ header: header(), events: [selected('writing', 0), later] }))
+      .toBe('writing')
   })
 
   it('reports none when the deployment composes no presets', () => {

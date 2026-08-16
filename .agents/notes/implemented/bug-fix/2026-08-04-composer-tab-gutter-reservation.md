@@ -41,7 +41,7 @@ The reservation is worth what it costs only because the bar takes layout space h
 
 ## Testing
 
-`apps/web/tests/composer-tab-geometry.e2e.ts` measures the input card's rectangle in both tabs, at a viewport where the card sits at its width cap and one where it shrinks with the column, and asserts the two rectangles are the same rectangle. Only a real engine reports this: jsdom gives every element a zero-sized box and no scrollbar, so a unit spec could assert the declarations exist but not that the two states land in the same place. For the same reason no CSS-text spec accompanies it — it would restate the declarations without adding a fact the browser lane does not already establish.
+Web no longer ships a second conversation view, so the two-tab geometry scenario is retired with the Trajectory package ([beginner Web workbench](../feature/2026-08-15-beginner-web-workbench.md)). Chat still declares `scrollbar-gutter: stable` on the column scroller; overlay compensation remains in CSS for any view that opts into a composer overlay. A unit spec can assert those declarations exist; it cannot prove two tabs land on the same rectangle because only Chat is composed.
 
 The scenario launches chromium without Playwright's default `--hide-scrollbars`, which is load-bearing: under that argument a bar consumes no layout width, so the tabs agree with and without the compensation and every comparison in the file holds vacuously. Measured, both bands sit at 0 under the argument and at 8 and 0 with it dropped.
 

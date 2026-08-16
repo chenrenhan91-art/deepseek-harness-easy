@@ -38,17 +38,9 @@ Status: implemented
 
 ## 测试
 
-`apps/cli/tests/shipped-composition.e2e.ts` 曾在伪终端中通过真实 Loader 启动交付树，并从会话日志持久化的 `request/header` 中读出工具名，因此断言的是模型实际收到的目录。它传入的 `--config` overlay `composition-keyless-tail.cordis.yml` 只用于测试隔离：一个无网络适配器，以及落在工作区内的会话产物。
-
-该尾部还曾插入 `composition-settled.ts`，用于在终端字节流上宣告 Loader 激活已 settle。TUI 在自己的 fiber 一启动就渲染，因此在 banner 处敲下的提示词可能在工具行与持久化仍在激活时就抵达循环，从而组装出不完整的目录；把冒烟的首个提示词 gate 在该标记上，正是断言得以确定的原因。
-
-同一份冒烟还根据同一份产物固定 TUI 的执行姿态。那些沙箱 schema 与初始权限断言归[workspace-write 默认值决策](2026-07-31-workspace-write-surface-default.md)所有，独立于本工具清单决策。
-
-[`apps/web/tests/shipped-composition.e2e.ts`](../../../../apps/web/tests/shipped-composition.e2e.ts) 在构建产物 lane 中覆盖 Web surface,断言它的工具目录、它的访问默认值未被触碰,以及 `workspace-write` 的可写根包含临时目录——一个会让沙箱测试说谎的陷阱,当工作区落在 `/tmp` 下时([`roots.ts`](../../../../packages/sandbox/sandbox/src/roots.ts))。
+曾经从持久化 `request/header` 读出工具名的 TUI 组合冒烟已不在树中。Web 覆盖位于 [`apps/web/tests/shipped-composition.e2e.ts`](../../../../apps/web/tests/shipped-composition.e2e.ts)：它断言新手工具目录（外加随附的 `glob`/`grep`）、`permissionPresets.defaultPreset` 为 `danger-full-access`，以及 `workspace-write` 的可写根包含临时目录——一个会让沙箱测试说谎的陷阱，当工作区落在 `/tmp` 下时（[`roots.ts`](../../../../packages/sandbox/sandbox/src/roots.ts)）。进程 `sandboxPolicy.defaultMode` 在会话钉住 Web 默认值之前仍是 `workspace-write`（[新手 Web 工作台](./2026-08-15-beginner-web-workbench.md)）。
 
 `glob` 与 `grep` 被作为固定成员断言，而不是一对宿主依赖：`dsh-tool-fs-search` spawn 打包的 ripgrep 二进制并无条件注册两个工具，因此这一对始终在场。
-
-除入库测试外,两个 surface 都以 plain Node 从构建产物 `apps/cli/lib/bin.js` 出发、用真实密钥驱动过。每一个已挂载的工具都执行成功,包括 `ralph` 与 `web_search`;模型从未触达 `cordis_*` 或 `mcp_*`,被要求做 LSP 跳转时退化到 `grep`,被要求开持久终端时用了后台 `bash` 任务。
 
 ## 曾考虑的替代方案
 
@@ -62,8 +54,6 @@ Status: implemented
 
 ## 后果
 
-同一个模型在两个 surface 上拿到同样的工具,那处没有记录理由的差异消失了。测试会精确断言二十个无条件提供的名称，并把 `glob` 与 `grep` 作为固定成员钉在两侧，因此日后只改一个 surface 都会让检查失败而不是悄悄发出去；[session-search-not-shipped-default 决策](2026-08-02-session-search-not-shipped-default.md)正是这样一次后来的改动，两个测试也随之移动。
+Web 工具目录是新手子集外加随附的 `glob`/`grep`；宿主专业向工具在 Web 补丁上保持禁用（[新手 Web 工作台](./2026-08-15-beginner-web-workbench.md)）。日后只改一个 surface 仍会让 Web 组合检查失败，而不是悄悄发出去。
 
-`apps/cli` 增加了五个 workspace 依赖:四个是交付树当时挂载的,外加 `dsh-mcp-client`——它并不被挂载,存在的意义是让已安装的 `dsh` 能挂。四个保留了下来——[session-search-not-shipped-default 决策](2026-08-02-session-search-not-shipped-default.md)把 `@deepseek-ai/dsh-tool-session-query` 连同它的行一起移除了。
-
-执行策略独立于工具清单。[共享 workspace-write 决策](2026-07-31-workspace-write-surface-default.md)拥有两个 surface 的沙箱执行器与默认权限；更改该策略不会增加或移除工具。
+执行策略独立于工具清单。[共享 workspace-write 决策](2026-07-31-workspace-write-surface-default.md)拥有沙箱执行器；新手工作台拥有 Web 的 `danger-full-access` 会话默认值。更改该策略不会增加或移除工具。

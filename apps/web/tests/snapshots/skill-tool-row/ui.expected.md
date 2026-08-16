@@ -1,52 +1,48 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Load the snapshot-skill skill with" [disabled]
-  - button "Session log":
-    - text: Session log
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
-- text: Load the snapshot-skill skill with the skill tool, then reply DONE. {{date}} {{clock}}
-- button "Copy":
+- text: Load the snapshot-skill skill with the skill tool, then reply DONE. {{clock}}
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- button "Context injection skill-catalog":
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
   - img
   - img
-  - text: Context injection skill-catalog
-- button "Think Load the requested skill.":
+  - text: 上下文注入 skill-catalog
+- button "思考 Load the requested skill.":
   - img
   - img
-  - text: Think Load the requested skill.
-- button "Skill snapshot-skill" [expanded]:
+  - text: 思考 Load the requested skill.
+- button "技能 snapshot-skill" [expanded]:
   - img
-  - text: Skill snapshot-skill
-- region "Instructions": "Instructions <skill_content name=\"snapshot-skill\"> <skill_resources> Base directory for this skill: {{cwd}}/.dsh/skills/snapshot-skill Resolve relative paths mentioned by this skill against the base directory before using them. Load referenced resources only as needed. </skill_resources> <skill_instructions> Follow these snapshot-only instructions. Resolve referenced resources relative to this skill directory. </skill_instructions> </skill_content>"
-- button "Inspect"
-- button "Think The skill is loaded.":
+  - text: 技能 snapshot-skill
+- region "说明": "说明 <skill_content name=\"snapshot-skill\"> <skill_resources> Base directory for this skill: {{cwd}}/.dsh/skills/snapshot-skill Resolve relative paths mentioned by this skill against the base directory before using them. Load referenced resources only as needed. </skill_resources> <skill_instructions> Follow these snapshot-only instructions. Resolve referenced resources relative to this skill directory. </skill_instructions> </skill_content>"
+- button "思考 The skill is loaded.":
   - img
   - img
-  - text: Think The skill is loaded.
+  - text: 思考 The skill is loaded.
 - paragraph: DONE
-- button "Copy":
+- button "复制":
   - img
-- button "Good response":
+- button "好的回答":
   - img
-- button "Bad response":
+- button "有问题的回答":
   - img
-- button "Branch into a new conversation":
+- button "在新对话中分支":
   - img
-- text: {{date}} {{clock}} Ran for {{duration}} TTFT {{duration}} {{throughput}} tok/s
-- textbox "Message the agent"
-- button "Commands":
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- textbox "给智能体发消息"
+- button "命令":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash":
+- button "访问模式，当前：工作区可写": 工作区可写
+- button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: 1 turns · 2 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 0% Input 280 tok · Output 30 tok
+- button "发送消息" [disabled]
+- text: 1 轮 · 2 步 LLM {{duration}} · 工具调用 {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 0% 输入 280 tok · 输出 30 tok

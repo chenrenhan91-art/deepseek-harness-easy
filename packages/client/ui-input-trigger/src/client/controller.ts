@@ -118,11 +118,12 @@ export class InputTriggerController {
   }
 
   /**
-   * Toggle a menu containing exactly one registered source. The supplied hit
-   * is a synthetic selection span rather than a typed trigger token, but
-   * picks deliberately reuse the ordinary source callback and scoped input
-   * mutation pipeline.
-   * @param source - registered source name under `hit.trigger`.
+   * Toggle a menu for every source registered on `hit.trigger`. The chrome
+   * launcher still identifies itself by `source` (expanded state, toggle-closed);
+   * candidates reuse the ordinary menu, keyboard arbitration, pick callback,
+   * and scoped input mutations. The supplied hit is a synthetic selection
+   * span rather than a typed trigger token.
+   * @param source - registered source name under `hit.trigger` (the launcher id).
    * @param hit - synthetic hit carrying position and pick-time draft CAS.
    */
   toggleSource(source: string, hit: TriggerHit): void {
@@ -131,17 +132,17 @@ export class InputTriggerController {
       this.dismiss()
       return
     }
-    const match = this.deps.roster.sources(hit.trigger).find(item => item.name === source)
-    if (match === undefined) {
+    const roster = this.deps.roster.sources(hit.trigger)
+    if (!roster.some(item => item.name === source)) {
       this.dismiss()
       return
     }
     this.stopFetch()
     this.hit = hit
     this.launcher.set(source)
-    this.menu.set(seedGroups(this.menu.getSnapshot(), [source]))
+    this.menu.set(seedGroups(this.menu.getSnapshot(), roster.map(item => item.name)))
     this.reduce({ type: 'hit', hit })
-    this.fetchCandidates(hit, [match])
+    this.fetchCandidates(hit, roster)
   }
 
   /**

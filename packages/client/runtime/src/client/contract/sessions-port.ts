@@ -16,6 +16,12 @@ export interface SessionsPortSummary {
   /** Empty-log bit (blank sessions are reused by New Session instead of minting another). */
   blank: boolean
   cwd?: string
+  /**
+   * Composition the session records. New Session skips reuse when this is a
+   * shipped id the current roster deleted — that blank cannot be resumed
+   * just to land on it again.
+   */
+  agentPreset?: string
   updatedAt: number
 }
 
@@ -36,7 +42,7 @@ export interface SessionsPort {
    * @param opts - target workspace.
    * @returns the new session id.
    */
-  create(opts: { workspaceId: WorkspaceId }): Promise<SessionId>
+  create(opts: { workspaceId: WorkspaceId; agentPreset?: string }): Promise<SessionId>
   /**
    * Select a session as current.
    * @param id - session id (must exist in the list store).

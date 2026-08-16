@@ -140,7 +140,7 @@ describe('web e2e: live-turn interactions (cancel / error / retry)', () => {
     ).toBe(true)
     const loadingSnapshot = await captureStableAria(page, '[class*="centerCol"]', scaffold!.workspaceCwd)
     await compareOrRefreshGolden(LOADING_EXPECTED, loadingSnapshot, MODE)
-    await page.getByRole('button', { name: 'Stop generating' }).click()
+    await page.getByRole('button', { name: '停止生成' }).click()
     await settled
     expect(turnEndReasons(sessionEvents).at(-1)).toBe('aborted')
     // Composer recovered; no streaming node lingers. The host settled first
@@ -168,45 +168,13 @@ describe('web e2e: live-turn interactions (cancel / error / retry)', () => {
     expect(sessionEvents.filter(e => e.type === 'llm/retry').length).toBe(0)
     await expect.poll(() => page.locator('textarea').first().isEnabled(), { timeout: 10_000 }).toBe(true)
     expect(await page.locator('[data-streaming="true"]').count()).toBe(0)
-    const errorStatus = page.getByRole('status').filter({ hasText: 'This turn failed' })
+    const errorStatus = page.getByRole('status').filter({ hasText: '本轮运行失败' })
     await errorStatus.waitFor({ timeout: 10_000 })
     expect(await errorStatus.textContent()).toContain('API key is invalid')
     expect(await errorStatus.textContent()).toContain('AUTH')
     expect(await page.locator('body').textContent()).not.toContain('sk-preview-secret')
     const snapshot = await captureStableAria(page, '[class*="centerCol"]', scaffold!.workspaceCwd)
     await compareOrRefreshGolden(ERROR_EXPECTED, snapshot, MODE)
-    await page.getByRole('tab', { name: 'Trajectory' }).click()
-    const requestMarker = page.locator('tr[data-request-only="true"]').last()
-      .getByRole('button', { name: /Request #/ })
-    await requestMarker.click()
-    await page.getByText('API key is invalid', { exact: true }).waitFor({ timeout: 10_000 })
-    expect(await page.locator('body').textContent()).not.toContain('sk-preview-secret')
-    expect(tripwire.pageErrors).toEqual([])
-    expect(tripwire.warnings).toEqual([])
-  }, 120_000)
-
-  it.skipIf(MODE === 'record')('keeps a terminal request marker inside the trajectory table', async () => {
-    await launch(() => ({
-      patches: [{ at: 0, entry: { kind: 'throw', chunks: [], message: AUTH_PROVIDER_MESSAGE, code: 'AUTH' } }],
-    }))
-    const { settled } = await sendPrompt()
-    await settled
-    await page.getByRole('tab', { name: 'Trajectory' }).click()
-    // The boundary marker row itself is a 0-height hairline except at the
-    // table tail; the marker button is absolutely positioned and stays
-    // visible, so wait on it directly.
-    const tailRequest = page.locator('tr[data-request-only="true"]').last()
-    const requestMarker = tailRequest.getByRole('button', { name: /Request #/ })
-    await requestMarker.waitFor({ timeout: 10_000 })
-
-    const markerWithinTable = await requestMarker.evaluate((element) => {
-      const marker = element.getBoundingClientRect()
-      const table = element.closest('table')?.getBoundingClientRect()
-      if (table === undefined) throw new Error('request marker has no table')
-      return marker.bottom <= table.bottom
-    })
-
-    expect(markerWithinTable).toBe(true)
     expect(tripwire.pageErrors).toEqual([])
     expect(tripwire.warnings).toEqual([])
   }, 120_000)

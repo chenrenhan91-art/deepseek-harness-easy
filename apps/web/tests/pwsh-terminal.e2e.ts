@@ -70,14 +70,14 @@ describe.skipIf(MODE === 'record' || !HAS_PWSH)('web e2e: pwsh calls use the bas
     // sessions by workspace and its row order is world-dependent, while the
     // search index covers the seeded log deterministically. Search is a
     // collapsed header action; expand it so the input is actionable.
-    const searchButton = page.getByRole('button', { name: 'Search sessions' })
+    const searchButton = page.getByRole('button', { name: '搜索会话' })
     if (await searchButton.getAttribute('aria-expanded') !== 'true') await searchButton.click()
-    const search = page.getByPlaceholder('Search sessions', { exact: false })
+    const search = page.getByPlaceholder('搜索会话', { exact: false })
     await search.fill('Run a PowerShell command')
-    const result = page.getByRole('tree', { name: 'Search results' }).getByRole('treeitem')
+    const result = page.getByRole('tree', { name: '搜索结果' }).getByRole('treeitem')
     await expect.poll(() => result.count(), { timeout: 15_000 }).toBe(1)
     await result.click()
-    await page.getByRole('tab', { name: 'Chat', exact: true }).waitFor({ timeout: 15_000 })
+    await page.locator('[data-conversation-scroll]').waitFor({ timeout: 15_000 })
     // The tool row is expand-gated: the settled row uses the bash layout and carries the
     // shell-family variant, and the terminal card lives in the expanded body.
     const row = page.locator('[data-tool="pwsh"]').first()

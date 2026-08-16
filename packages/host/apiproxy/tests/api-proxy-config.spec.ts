@@ -13,7 +13,7 @@ import SessionStore from '@deepseek-ai/dsh-session'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
-import LlmRuntime, { LlmAdapter } from '@deepseek-ai/dsh-llm'
+import LlmRuntime, { INVALID_CREDENTIAL_CODE, LlmAdapter, LlmError } from '@deepseek-ai/dsh-llm'
 import type { GenerateOptions, LlmModelInfo, LlmProviderInfo, StreamChunk } from '@deepseek-ai/dsh-llm'
 import { SettingsProvider, settingsNamespace } from '@deepseek-ai/dsh-settings'
 import type { SettingsNamespace } from '@deepseek-ai/dsh-settings'
@@ -230,7 +230,7 @@ function forwardedSettings(ns: string): HostFrame {
     type: 'host/remote-event',
     event: 'settings/document-updated',
     // The revision is the Host's own counter, so the matcher is the assertion.
-    args: [ns, expect.any(Number)], // oxlint-disable-line typescript/no-unsafe-assignment
+    args: [ns, expect.any(Number)],
   }
 }
 
@@ -760,8 +760,40 @@ describe('llm.discoverModels', () => {
 
     expect(error.code).toBe('model-discovery-failed')
     expect(error.message).toContain('answered 401; check the API key')
-    expect(error.details).toEqual({ settingsNs: 'llm-pi-ai', baseURL: 'https://gateway.acme.example/v1' })
+    expect(error.details).toEqual({
+      settingsNs: 'llm-pi-ai',
+      baseURL: 'https://gateway.acme.example/v1',
+      // A plain Error carries no credential taxonomy, so the endpoint is what
+      // the caller is told to look at.
+      reason: 'endpoint-unusable',
+    })
     expect(JSON.stringify(error)).not.toContain('wrong')
+  })
+
+  it('separates a key the probe could not use from an endpoint that failed', async () => {
+    const ctx = await harness()
+    const refusals = [
+      new LlmError('https://gateway.acme.example/v1/models refused this API key (401)', INVALID_CREDENTIAL_CODE),
+      new LlmError('no API key for provider route "deepseek"', 'MISSING_CREDENTIAL'),
+    ]
+    ctx.llm.registerModelDiscovery('llm-pi-ai', async () => {
+      const next = refusals.shift()
+      if (next === undefined) throw new Error('missing refusal fixture')
+      throw next
+    })
+    const api = createApiProxy(ctx, DEFAULTS)
+
+    for (const _refusal of [0, 1]) {
+      const error = expectErr(await api.llm.discoverModels(request({
+        settingsNs: 'llm-pi-ai',
+        baseURL: 'https://gateway.acme.example/v1',
+        apiKey: 'wrong',
+      })))
+
+      // The first-run page branches on this to name the field to correct
+      // rather than parsing the adapter's own sentence.
+      expect(error.details).toMatchObject({ reason: 'invalid-credential' })
+    }
   })
 
   it('reports a namespace no adapter family serves', async () => {

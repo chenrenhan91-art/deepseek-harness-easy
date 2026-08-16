@@ -144,7 +144,7 @@ async function detailsTrack(page: Page): Promise<number> {
 const UI_PLUGIN_DIRS = [
   'connection', 'runtime', 'ui-theme', 'locale', 'ui-layout', 'ui-sidebar',
   'ui-settings', 'ui-settings-general', 'ui-settings-models', 'ui-conversation',
-  'ui-model-selection', 'ui-user-questions', 'ui-trajectory', '../session-query/session-log-export',
+  'ui-model-selection', 'ui-user-questions', '../session-query/session-log-export',
 ]
 const ROUND_DONE_MARKER = 'WEB_ROUND_DONE'
 const notReady = UI_PLUGIN_DIRS.filter((dir) => {
@@ -281,6 +281,7 @@ describe('dsh web keyless CLI smoke', () => {
         .filter(name => name === 'web_search' || name === 'web_fetch'))
         .toMatchInlineSnapshot(`
           [
+            "web_fetch",
             "web_search",
           ]
         `)
@@ -525,7 +526,7 @@ describe.skipIf(!process.env.DEEPSEEK_API_KEY || notReady.length > 0)('web smoke
   it('cold start: loading page settles into the three-column frame', async () => {
     onTestFailed(() => saveFailureShot(page, 'w5-cold-start'))
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
-    expect(await page.locator('text=Failed to load plugins').count()).toBe(0)
+    expect(await page.locator('text=加载插件失败').count()).toBe(0)
     const template = await page.locator('[class*="frame"]').evaluate(el => getComputedStyle(el).gridTemplateColumns)
     expect(template.split(' ').length).toBe(3)
     await screen(page, '01-cold-start')
@@ -565,7 +566,7 @@ describe.skipIf(!process.env.DEEPSEEK_API_KEY || notReady.length > 0)('web smoke
       durableTitle,
       { timeout: 15_000 },
     )
-    const sessionTree = page.getByRole('tree', { name: 'Sessions' })
+    const sessionTree = page.getByRole('tree', { name: '会话' })
     const projectRow = sessionTree.getByRole('treeitem').first()
     if (await projectRow.getAttribute('aria-expanded') === 'false') await projectRow.click()
     await Promise.all([
@@ -577,13 +578,10 @@ describe.skipIf(!process.env.DEEPSEEK_API_KEY || notReady.length > 0)('web smoke
     await screen(page, '04-round-complete')
   }, 150_000)
 
-  it('view tabs: Chat and Trajectory switch', async () => {
+  it('hides view tabs when Chat is the only composed view', async () => {
     onTestFailed(() => saveFailureShot(page, 'w5-tabs'))
-    await page.locator('button', { hasText: /Trajectory/i }).first().click()
-    await screen(page, '05-trajectory-tab')
-    await page.getByLabel('Trajectory timeline').waitFor()
-    await expect.poll(() => page.getByRole('tab', { name: 'Waterfall' }).count()).toBe(0)
-    await page.locator('button', { hasText: /^Chat$/i }).first().click()
+    await expect.poll(() => page.getByRole('tablist').count(), { timeout: 10_000 }).toBe(0)
+    await page.locator('[data-conversation-scroll]').waitFor({ timeout: 10_000 })
     await screen(page, '07-back-to-chat')
   })
 

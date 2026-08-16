@@ -5,7 +5,7 @@
  * conversation starts, and a header is only worth reading after that. Offering
  * a control here would promise a switch the host refuses; naming what the
  * session runs is the honest affordance, and the choice itself lives on the
- * new-session screen ({@link AgentPresetSeat}).
+ * new-session screen's mode grid.
  */
 
 import { useEffect } from 'react'
@@ -15,7 +15,6 @@ import { IconAgentPresetOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
 // Type-only: pulls the ui-conversation SlotMap merge (the header actions).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { AgentPresetSettingsState } from './settings-store.ts'
-import { presetDisplayText } from './locales.ts'
 import css from './AgentPresetLabel.module.css'
 
 /** Registration-side business face for the header label. */
@@ -54,11 +53,10 @@ export function AgentPresetLabel({
   if (preset === undefined) return null
 
   const option = options.find(entry => entry.id === preset)
-  const text = option === undefined ? undefined : presetDisplayText(option, t)
   return (
-    <span className={css.label} title={text?.description ?? t('headerHint')}>
+    <span className={css.label} title={option?.description ?? t('headerHint')}>
       <IconAgentPresetOutline16 size={14} className={css.icon} />
-      {text?.name ?? preset}
+      {option?.name ?? preset}
     </span>
   )
 }

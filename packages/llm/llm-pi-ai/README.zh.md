@@ -128,7 +128,7 @@ profile 的 `models` 列表是*替换*该路由已安装 catalog，而不是扩�
 
 询问只读 `openai-completions` 与 `openai-responses`，它们「`GET /models` + bearer 认证」的形状是网关、自建服务与官方端点三方一致认可的那一种。Azure 尽管出身 OpenAI 也被排除——它用 `api-key` 标头认证并要求 `api-version` 查询参数——Codex 则走 OAuth；其余协议一律以 `DISCOVERY_UNSUPPORTED` 回答，让界面回退到手工填写，而不是把认证失败报成一个没有模型的提供方。`baseURL` 按前缀而非待解析 URL 处理，因此 `https://gateway.example/openai/v1` 这类部署路径会保留其路径段。
 
-多数列表只公布 id；`context_window`/`context_length` 与 `max_output_tokens`/`max_tokens` 在网关提供时会被读取，没有可用 id 的条目会被跳过而不是让整份列表失败，其余仍由采纳方补齐。回复在四兆字节上限下读取，且上限落在实际收到的字节上——端点是用户自己填的 URL，因此会先看声明长度，但绝不把它当作边界。端点不可达、凭据被拒、响应非 JSON、以及响应没有 `data` 数组，都会以 `DISCOVERY_FAILED` 失败，消息点名端点；仅当 401 或 403 时才点名凭据。读取响应体期间被取消会呈现为 `ABORTED`，与请求发出之前被取消一致。
+回复由 [`@deepseek-ai/dsh-llm`](../llm/README.md#reading-a-model-listing-model-listingts) 的 `readModelListing` 读取，与每个读取同一份 OpenAI 兼容清单的适配器共用：id 加上网关愿意公布的容量，没有可用 id 的条目被跳过，上限为四兆字节且落在实际收到的字节上。端点不可达、凭据被拒、响应非 JSON、以及响应没有 `data` 数组，都会以 `DISCOVERY_FAILED` 失败，消息点名端点；仅当 401 或 403 时才点名凭据。读取响应体期间被取消会呈现为 `ABORTED`，与请求发出之前被取消一致。
 
 ## 提供方／模型路由与回放
 

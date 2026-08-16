@@ -1,10 +1,10 @@
-- dialog "Select Workspace Directory":
-  - heading "Select Workspace Directory" [level=2]
+- dialog "选择工作区目录":
+  - heading "选择工作区目录" [level=2]
   - navigation:
-    - button "Home"
+    - button "主目录"
     - img
     - button "browse-golden"
-  - button "Edit path":
+  - button "编辑路径":
     - img
   - list:
     - listitem:
@@ -48,9 +48,9 @@
         - img
         - text: beta
         - img
-  - button "New folder":
+  - button "新建文件夹":
     - img
-    - text: New folder
-  - button "Show hidden files"
-  - button "Cancel"
-  - button "Open"
+    - text: 新建文件夹
+  - button "显示隐藏文件"
+  - button "取消"
+  - button "打开"

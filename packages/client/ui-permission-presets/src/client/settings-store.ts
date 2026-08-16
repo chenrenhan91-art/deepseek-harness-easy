@@ -22,7 +22,7 @@ export const PERMISSION_SETTINGS_NS = 'permission'
 export interface PermissionDefaultOption {
   /** Preset key written to Settings. */
   id: string
-  /** Host-supplied label or a title-cased preset key. */
+  /** Host-supplied preset name from the dynamic enum description. */
   label: string
 }
 

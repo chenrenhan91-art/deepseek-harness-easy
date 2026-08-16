@@ -1,0 +1,142 @@
+/* The first-run page: one scrollable column on the onboarding stage, sized so
+   the two steps and the permission notice fit one screen on a laptop. */
+
+.page {
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.content {
+  width: min(560px, 100%);
+  box-sizing: border-box;
+  padding: 72px 24px 48px;
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.lead {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.step {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-base);
+}
+
+.stepTitle {
+  margin: 0;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.stepBody {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.consoleLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.consoleLink {
+  display: inline-block;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--dsw-alias-state-business-primary);
+}
+
+.form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+}
+
+.submit {
+  flex: none;
+  min-width: 112px;
+}
+
+.error {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--dsw-alias-state-error-primary);
+}
+
+/* The reported cause stays available but subordinate: the sentence above it
+   is what a first-run user acts on. */
+.detail {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-caption);
+  overflow-wrap: anywhere;
+}
+
+.notice {
+  margin-top: 28px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.noticeTitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.later {
+  display: block;
+  margin: 20px auto 0;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-caption);
+  cursor: pointer;
+}
+
+.later:hover {
+  color: var(--dsw-alias-label-secondary);
+}
+
+@media (width <= 560px) {
+  .content {
+    padding: 48px 16px 32px;
+  }
+
+  .form {
+    flex-direction: column;
+  }
+}

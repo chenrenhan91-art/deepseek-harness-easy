@@ -15,6 +15,7 @@ import { messageImageLabels } from '../image-labels.ts'
 import { CompactionItem } from './CompactionItem.tsx'
 import { ContextInjectionRow } from './ContextInjectionRow.tsx'
 import { MessageIconActions } from './MessageIconActions.tsx'
+import { DEEPSEEK_TOP_UP_URL, isQuotaFailure } from '../quota-failure.ts'
 import css from './MessageItem.module.css'
 
 type UserImage = Extract<UserMessageNode['content'][number], { type: 'image' }>
@@ -123,7 +124,16 @@ function TurnErrorItem({ node, t }: {
       <StateDot state="error" className={css.turnErrorDot} />
       <div className={css.turnErrorCopy}>
         <span className={css.turnErrorTitle}>{t('message.turnError')}</span>
-        <span className={css.turnErrorMessage}>{node.message}</span>
+        <span className={css.turnErrorMessage}>
+          {isQuotaFailure(node.code, node.message) ? t('message.quota') : node.message}
+        </span>
+        {isQuotaFailure(node.code, node.message)
+          ? (
+            <a className={css.turnErrorTopUp} href={DEEPSEEK_TOP_UP_URL} target="_blank" rel="noreferrer">
+              {t('message.quotaTopUp')}
+            </a>
+          )
+          : null}
       </div>
       {node.code !== undefined && <code className={css.turnErrorCode}>{node.code}</code>}
     </div>

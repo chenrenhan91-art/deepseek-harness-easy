@@ -23,6 +23,7 @@ const WELCOME_EXPECTED = join(SNAPSHOT_DIR, 'welcome.expected.md')
 const MISSING_EXPECTED = join(SNAPSHOT_DIR, 'missing.expected.md')
 const MODELS_EXPECTED = join(SNAPSHOT_DIR, 'models.expected.md')
 const MODE = webSnapshotMode()
+const ONBOARDING_TITLE = '先连上模型，再开始'
 
 describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup', () => {
   let scaffold: WebScaffold
@@ -71,17 +72,41 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     await welcome.getByRole('button', { name: WELCOME_NOTICE_COPY.zh.continueLabel }).click()
     await welcome.waitFor({ state: 'detached', timeout: 15_000 })
 
-    const credentialStep = page.getByRole('dialog', { name: '添加一个 API Key 开始使用' })
-    await credentialStep.waitFor({ timeout: 15_000 })
+    const credentialStep = page.locator('[class*="onboardingOverlay"]')
+    await page.getByRole('heading', { name: ONBOARDING_TITLE }).waitFor({ timeout: 15_000 })
     const keyInput = credentialStep.getByLabel('API 密钥', { exact: true })
     await keyInput.waitFor({ timeout: 10_000 })
-    const initial = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
+    const initial = await captureStableAria(page, '[class*="onboardingOverlay"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(MISSING_EXPECTED, initial, MODE)
 
     const secret = `dsh_onboarding_${randomBytes(12).toString('hex')}`
     await keyInput.fill(secret)
-    await credentialStep.getByRole('button', { name: '保存并继续' }).click()
+    // Keyless: the page probes with `llm.discoverModels` before storing. A
+    // random secret must not hit DeepSeek; this stub answers the listing so
+    // the write path is what this scenario still proves.
+    await page.route('**/api/llm.discoverModels', async (route) => {
+      const envelope = route.request().postDataJSON() as {
+        rpcId: string
+        payload: { settingsNs: string; provider?: string; apiKey?: string }
+      }
+      expect(envelope.payload).toEqual({
+        settingsNs: 'llm-deepseek',
+        provider: 'deepseek-official',
+        apiKey: secret,
+      })
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          type: 'server-response',
+          rpcId: envelope.rpcId,
+          result: { ok: true, value: { models: [{ id: 'deepseek-chat' }] } },
+        }),
+      })
+    })
+    await credentialStep.getByRole('button', { name: '验证并开始' }).click()
     await credentialStep.waitFor({ state: 'detached', timeout: 15_000 })
+    await page.unroute('**/api/llm.discoverModels')
     expect(await page.locator('#root').evaluate(root => (root as HTMLElement).inert)).toBe(false)
 
     const stored = await readFile(join(scaffold.harnessHome, '.credentials.yaml'), 'utf8')
@@ -114,7 +139,7 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     acknowledgeReloadConnectionLoss(tripwire, secondReloadWarnings)
     await page.waitForSelector('[class*="frame"]', { timeout: 15_000 })
     expect(await page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.zh.title }).count()).toBe(0)
-    expect(await page.getByRole('dialog', { name: '添加一个 API Key 开始使用' }).count()).toBe(0)
+    expect(await page.getByRole('heading', { name: ONBOARDING_TITLE }).count()).toBe(0)
 
     // An old acknowledgement means materially revised copy: welcome returns,
     // while the already-configured provider step remains complete.
@@ -127,7 +152,7 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     await welcome.waitFor({ timeout: 15_000 })
     await welcome.getByRole('button', { name: WELCOME_NOTICE_COPY.zh.continueLabel }).click()
     await welcome.waitFor({ state: 'detached', timeout: 15_000 })
-    expect(await page.getByRole('dialog', { name: '添加一个 API Key 开始使用' }).count()).toBe(0)
+    expect(await page.getByRole('heading', { name: ONBOARDING_TITLE }).count()).toBe(0)
 
     expect((await page.content()).includes(secret)).toBe(false)
     expect((await page.locator('body').ariaSnapshot()).includes(secret)).toBe(false)
@@ -155,7 +180,7 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
       setInterval(() => {
         if (document.querySelector(
           '[role="dialog"][aria-label="内测声明"], '
-          + '[role="dialog"][aria-label="添加一个 API Key 开始使用"]',
+          + '[class*="onboardingOverlay"]',
         ) !== null) {
           sightings.push('chrome')
         }
@@ -187,7 +212,7 @@ describe.skipIf(MODE === 'record')('web e2e: first-run DeepSeek credential setup
     expect(await page.evaluate(() =>
       (window as unknown as { __takeoverSightings: string[] }).__takeoverSightings)).toEqual([])
     expect(await page.getByRole('dialog', { name: WELCOME_NOTICE_COPY.zh.title }).count()).toBe(0)
-    expect(await page.getByRole('dialog', { name: '添加一个 API Key 开始使用' }).count()).toBe(0)
+    expect(await page.getByRole('heading', { name: ONBOARDING_TITLE }).count()).toBe(0)
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 

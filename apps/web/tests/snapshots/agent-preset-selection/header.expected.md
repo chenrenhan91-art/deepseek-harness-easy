@@ -1,10 +1,7 @@
-- navigation "Session hierarchy":
+- navigation "会话层级":
   - button "Seeded turn" [disabled]
 - img
-- text: Minimal mode
-- button "1 subagent":
-  - text: 1 subagent
-  - img
-- button "Session log":
-  - text: Session log
+- text: 写作
+- button "会话日志":
+  - text: 会话日志
   - img

@@ -7,7 +7,7 @@ import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { TestRemote, usePinnedBrowserLanguages } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply, inject, refreshIfLoaded } from '@deepseek-ai/dsh-client-ui-settings-models/client'
 import { ModelsSection } from '../src/client/ModelsSection.tsx'
-import { DeepSeekOnboardingDialog } from '../src/client/DeepSeekOnboardingDialog.tsx'
+import { ApiKeyOnboarding } from '../src/client/ApiKeyOnboarding.tsx'
 import { WelcomeNotice } from '../src/client/WelcomeNotice.tsx'
 
 // The service reads its initial locale from the browser; these specs assert
@@ -68,10 +68,10 @@ describe('ui-settings-models apply', () => {
       options: { id: 'welcome-notice', order: -100 },
     })
     const deepSeek = onboarding.find(entry => entry.options.id === 'deepseek-official')!
-    expect(deepSeek.component).toBe(DeepSeekOnboardingDialog)
+    expect(deepSeek.component).toBe(ApiKeyOnboarding)
     expect(deepSeek.options).toMatchObject({ id: 'deepseek-official', order: 0 })
     const deepSeekInjected = (
-      deepSeek.inject as unknown as () => import('../src/client/DeepSeekOnboardingDialog.tsx').DeepSeekOnboardingInjected
+      deepSeek.inject as unknown as () => import('../src/client/ApiKeyOnboarding.tsx').ApiKeyOnboardingInjected
     )()
     expect(deepSeekInjected.hooks.models).toBe(injected.controller.store)
     expect(deepSeekInjected.api).toBeDefined()
@@ -196,7 +196,7 @@ describe('pushed invalidations', () => {
       .find(candidate => candidate.options.id === 'deepseek-official')!
     const injected = (
       entry.inject as unknown as
-      () => import('../src/client/DeepSeekOnboardingDialog.tsx').DeepSeekOnboardingInjected
+      () => import('../src/client/ApiKeyOnboarding.tsx').ApiKeyOnboardingInjected
     )()
     injected.controller.store.update((state) => { state.status = 'ready' })
     const load = vi.spyOn(injected.controller, 'load').mockResolvedValue()

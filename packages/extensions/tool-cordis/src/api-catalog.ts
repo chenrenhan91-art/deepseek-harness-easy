@@ -2635,7 +2635,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'AgentPreset',
-    declaration: 'export interface AgentPreset {\n    readonly id: string;\n    readonly trust: PresetTrust;\n    readonly path: string;\n    readonly name?: string;\n    readonly description?: string;\n    readonly order?: number;\n    readonly broken?: string;\n}',
+    declaration: 'export interface AgentPreset {\n    readonly id: string;\n    readonly trust: PresetTrust;\n    readonly path: string;\n    readonly name?: string;\n    readonly description?: string;\n    readonly order?: number;\n    readonly icon?: string;\n    readonly broken?: string;\n}',
   },
   {
     name: 'AgentSetup',

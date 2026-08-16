@@ -14,7 +14,7 @@ agent preset 已经能按会话组装一个 agent 的工具，却管不了这些
 
 把注册表和它的投影拆开。注册表留在宿主平面；**呈现方式**变成它内部按 scope 的状态，与已经住在那里的作用域限制和守卫并列。
 
-`ToolRuntime.presentAs(mode)` 只接受 scoped 上下文，形状照抄 `restrict()`：它通过 `ScopedLayers.effect` 在调用方 scope 的 `ToolLayer` 上写一个单元，因此会随声明它的那个 scope 一起卸载。在随附的 Web 界面里那个 scope 是某个 agent preset 的常驻挂载——`code` preset 携带 `tool-presentation` 行——因此一份声明覆盖加入该 preset 的每个 agent，而 `modeFor(scope)` 取作用域链上最近的那份声明。它与 config 的 `mode` 一并解析，后者于是成为「未作声明的 scope」的默认值，而不再是进程级事实。原先决定呈现方式的三处读取——wire schema、可见性视图里的 `run_code` 条目、以及生成的 SDK 段——改为读取该 scope 的模式，而非服务的。
+`ToolRuntime.presentAs(mode)` 只接受 scoped 上下文，形状照抄 `restrict()`：它通过 `ScopedLayers.effect` 在调用方 scope 的 `ToolLayer` 上写一个单元，因此会随声明它的那个 scope 一起卸载。在随附的 Web 界面里那个 scope 是某个 agent preset 的常驻挂载。八个新手模式都不携带 `tool-presentation` 行；Code Mode 仍是宿主 `tools.mode` / `DSH_TOOLS_MODE` 选择。用户自有 preset 仍可挂载 `@deepseek-ai/dsh-agent-tool-presentation`。`modeFor(scope)` 取作用域链上最近的那份声明。它与 config 的 `mode` 一并解析，后者于是成为「未作声明的 scope」的默认值，而不再是进程级事实。原先决定呈现方式的三处读取——wire schema、可见性视图里的 `run_code` 条目、以及生成的 SDK 段——改为读取该 scope 的模式，而非服务的。
 
 有两个随之而来的结果，且都是承重的：
 

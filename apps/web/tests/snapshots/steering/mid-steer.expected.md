@@ -1,48 +1,53 @@
 - banner:
-  - navigation "Session hierarchy":
+  - navigation "会话层级":
     - button "Use the ask_user_question tool to" [disabled]
   - img
-  - text: Standard mode
-  - button "Session log":
-    - text: Session log
+  - text: 学习答疑
+  - button "会话日志":
+    - text: 会话日志
     - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: Use the ask_user_question tool to ask me exactly one question with id "checkpoint", question "Ready to continue?", header "Checkpoint", and options labeled "Yes" and "No". After I answer, reply with one short sentence acknowledging my answer and stop. {{clock}}
-- button "Copy":
+- button "复制":
   - img
-- button "Context injection @deepseek-ai/dsh-system-prompt":
-  - img
-  - img
-  - text: Context injection @deepseek-ai/dsh-system-prompt
-- button "Think The user wants me to use the ask_user_question tool to ask them a specific question with the given parameters. Let me do exactly that.":
+- button "上下文注入 @deepseek-ai/dsh-system-prompt":
   - img
   - img
-  - text: Think The user wants me to use the ask_user_question tool to ask them a specific question with the given parameters. Let me do exactly that.
-- text: Running
-- button "Ask question waiting":
+  - text: 上下文注入 @deepseek-ai/dsh-system-prompt
+- button "上下文注入 skill-catalog":
   - img
   - img
-  - text: Ask question waiting
+  - text: 上下文注入 skill-catalog
+- button "上下文注入 time-context":
+  - img
+  - img
+  - text: 上下文注入 time-context
+- button "思考 The user wants me to use the ask_user_question tool to ask them a specific question with the given parameters. Let me do exactly that.":
+  - img
+  - img
+  - text: 思考 The user wants me to use the ask_user_question tool to ask them a specific question with the given parameters. Let me do exactly that.
+- text: 运行中
+- button "提问 等待回答":
+  - img
+  - img
+  - text: 提问 等待回答
 - status: Deep diving...
 - text: "Interjection: include the word BANANA in your final reply."
-- button "Copy":
+- button "复制":
   - img
 - region "Ready to continue?":
   - text: Checkpoint
   - heading "Ready to continue?" [level=2]
-  - button "Dismiss all questions":
+  - button "放弃整组问题":
     - img
   - radiogroup:
     - radio "Yes": 1 Yes
     - radio "No": 2 No
-    - textbox "Type your answer"
-  - button "Previous question" [disabled]:
+    - textbox "输入你的答案"
+  - button "上一题" [disabled]:
     - img
   - text: 1 / 1
-  - button "Next question" [disabled]:
+  - button "下一题" [disabled]:
     - img
   - status
-  - button "Skip this question"
-  - button "Submit" [disabled]
+  - button "跳过本题"
+  - button "提交" [disabled]

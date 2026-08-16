@@ -77,6 +77,7 @@ export class InputHub implements SessionInputResolver {
       queue: queueReadFaceOf(session),
       defaultSink: (text, imageIds, mode) => { this.sink(session, text, imageIds, mode) },
       steerQueue: () => { void this.steerQueue(session, shell) },
+      commandFailedText: () => this.t('command.failed'),
     })
     this.shells.set(id, shell)
     // The one teardown axis: listeners, shell, and map entries all ride the

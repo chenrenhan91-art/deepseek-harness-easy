@@ -28,27 +28,17 @@ const BASE_PATCH = join(REPO_ROOT, 'packages/bundle/base/cordis.patch.yml')
 const WEB_PATCH = join(REPO_ROOT, 'packages/bundle/web-app/cordis.patch.yml')
 /** The installation anchor whose dependency surface the preset module fallback mirrors. */
 const INSTALL_ANCHOR = join(REPO_ROOT, 'apps/cli/package.json')
-const EXAMPLES_INSTALL_ANCHOR = join(REPO_ROOT, 'examples/package.json')
-const MINIMAL_PROMPT = 'You are a helpful software engineer assistant.'
-const MINIMAL_BASH_DESCRIPTION = `Run commands in a bash shell
-* When invoking this tool, the contents of the "command" parameter does NOT need to be XML-escaped.
-* You don't have access to the internet via this tool.
-* You do have access to a mirror of common linux and python packages via apt and pip.
-* State is persistent across command calls and discussions with the user.
-* To inspect a particular line range of a file, e.g. lines 10-25, try 'sed -n 10,25p /path/to/the/file'.
-* Please avoid commands that may produce a very large amount of output.
-* Please run long lived commands in the background, e.g. 'sleep 10 &' or start a server in the background.`
+/** Every shipped beginner mode, in the order the roster presents them. */
+const MODES = [
+  'web-page', 'writing', 'sheet', 'files', 'study', 'slides', 'autopilot', 'learn-code',
+] as const
 
 /**
  * Boot the shipped Web composition, minus the rows that would bind a port,
  * touch the network, or write outside the test. Everything that decides an
- * agent's capabilities is the real thing, including both shipped presets.
+ * agent's capabilities is the real thing, including every shipped mode.
  */
-async function bootWeb(
-  settingsFile: string,
-  extra: PatchOptions[] = [],
-  extraInstallAnchor?: string,
-): Promise<Context> {
+async function bootWeb(settingsFile: string, extra: PatchOptions[] = []): Promise<Context> {
   const storageRoot = join(dirname(settingsFile), 'storages')
   const patches: PatchOptions[] = [
     ...loadOverlayPatches('dsh-test', BASE_PATCH),
@@ -102,7 +92,7 @@ async function bootWeb(
     {
       id: 'agent-presets',
       config: {
-        default: 'standard',
+        default: 'study',
         roots: [{ path: join(CONFIG_DIR, 'agent-presets'), trust: 'system' }],
         includeUserRoot: false,
       },
@@ -115,7 +105,6 @@ async function bootWeb(
   // them resolvable — the same mechanism, not a test-only shim.
   const home = dirname(settingsFile)
   healProfilesModuleFallback(INSTALL_ANCHOR, home)
-  if (extraInstallAnchor !== undefined) healProfilesModuleFallback(extraInstallAnchor, home)
   const profileDir = join(home, 'profiles', 'spec')
   await mkdir(profileDir, { recursive: true })
   const rootConfig = join(profileDir, 'cordis.yml')
@@ -128,16 +117,18 @@ async function bootWeb(
 const toolNames = (ctx: Context, agent?: Agent): string[] =>
   ctx.tools.schemas(agent).map(schema => schema.name).sort()
 
-function enablePresetTool(composition: string, id: string): string {
-  const row = `    - id: ${id}\n`
-  const start = composition.indexOf(row)
-  if (start < 0) throw new Error(`missing preset row ${id}`)
-  const end = composition.indexOf('\n    - id:', start + row.length)
-  const disabled = composition.indexOf('      disabled: true\n', start)
-  if (disabled < 0 || (end >= 0 && disabled > end)) {
-    throw new Error(`preset row ${id} is not disabled`)
-  }
-  return composition.slice(0, disabled) + composition.slice(disabled + '      disabled: true\n'.length)
+/**
+ * What a mode composed, without the reminder tools the host installs on root
+ * agents alone — a delegated child is not a root agent, so comparing a child
+ * to its parent tool for tool would measure that rule rather than the mode.
+ */
+const composedToolNames = (ctx: Context, agent: Agent): string[] =>
+  toolNames(ctx, agent).filter(name => !name.startsWith('schedule_'))
+
+/** The persona text an agent composed from `preset` was given. */
+async function persona(ctx: Context, agent: Agent): Promise<string> {
+  const assembly = await ctx.systemPrompt.assemble({ scope: agent })
+  return assembly.sections.find(section => section.name === 'deployment:persona')?.text ?? ''
 }
 
 let ctx: Context
@@ -149,9 +140,9 @@ beforeAll(async () => {
 
 describe('the shipped Web composition', () => {
   it('leaves the global tool layer empty', () => {
-    // Every model-facing tool belongs to a preset, `ask_user_question`
+    // Every model-facing tool belongs to a mode, `ask_user_question`
     // included: a tool in the global layer reaches EVERY agent regardless of
-    // which preset composed it, so a two-tool benchmark surface would really
+    // which mode composed it, so a two-tool benchmark surface would really
     // present three. A regression here means an agent-plane row came back to
     // the host composition.
     expect(toolNames(ctx)).toEqual([])
@@ -163,16 +154,14 @@ describe('the shipped Web composition', () => {
     // meter sits behind an `isolate` realm and is invisible to `ctx.get`.
     //
     // The projection registry is process-wide rather than scope-layered, so a
-    // preset-side meter would also make the browser's context meter appear for
-    // a `minimal` session the moment some OTHER session mounted a preset that
-    // carries one, and vanish entirely in a process that only ever ran
-    // `minimal`. Host ownership is what makes the meter a per-session fact.
+    // preset-side meter would make the browser's context meter a function of
+    // which modes happen to be mounted rather than a per-session fact.
     expect(ctx.get('tokenMeter')).toBeDefined()
     const projections = ctx.get('sessionProjections')
     if (projections === undefined) throw new Error('the Web composition must compose a projection registry')
     const handle = await ctx.agents.create({
-      sessionId: SessionId('preset-minimal-meter'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'minimal').then(() => undefined),
+      sessionId: SessionId('preset-meter'),
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'study').then(() => undefined),
     })
     try {
       // A subset assertion: `tasks`, `goal`, and the rest register into the
@@ -184,18 +173,24 @@ describe('the shipped Web composition', () => {
     }
   })
 
-  it('supplies both shipped presets, and only those, from the system root', async () => {
+  it('supplies the eight shipped modes, and only those, from the system root', async () => {
     const listed = await ctx.agentPresets.list()
 
-    expect(listed.map(preset => preset.id).sort()).toEqual(['code', 'cordis', 'minimal', 'standard'])
+    // Roster order is the order the mode grid presents; every shipped mode
+    // declares `order` in its `preset.yml` so the grid never sorts by id.
+    expect(listed.map(preset => preset.id)).toEqual([...MODES])
     expect(listed.every(preset => preset.trust === 'system')).toBe(true)
-    expect(ctx.agentPresets.defaultId).toBe('standard')
+    // A card with no Chinese name or one-line description is unreadable on
+    // the first screen, which is the only place a beginner picks a mode.
+    expect(listed.every(preset => preset.name !== undefined && preset.description !== undefined)).toBe(true)
+    expect(listed.every(preset => preset.broken === undefined)).toBe(true)
+    expect(ctx.agentPresets.defaultId).toBe('study')
   })
 
-  it('composes the full agent from `standard`', async () => {
+  it('composes the same beginner toolset from every mode', async () => {
     const handle = await ctx.agents.create({
-      sessionId: SessionId('preset-standard'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'standard').then(() => undefined),
+      sessionId: SessionId('preset-tools'),
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'study').then(() => undefined),
     })
     try {
       // The EXACT catalog, not a spot-check: an omission is this design's
@@ -203,143 +198,80 @@ describe('the shipped Web composition', () => {
       // layer mounts cleanly and simply contributes nothing. `glob`/`grep` are
       // excluded for the reason the TUI composition e2e excludes them — they
       // depend on ripgrep being present on the machine.
+      // `schedule_*` is host-plane and installs itself on every root agent, so
+      // reminders work in every mode rather than only in `autopilot`.
       expect(toolNames(ctx, handle.agent).filter(name => name !== 'glob' && name !== 'grep')).toEqual([
-        'ask_user_question', 'bash', 'create_goal', 'edit', 'exit_plan_mode',
-        'get_goal', 'interrupt_agent', 'job_kill', 'job_list', 'job_output', 'list_agents', 'ralph', 'read', 'read_image', 'send_message', 'skill',
-        'subagent', 'subagent_fork', 'todo_write', 'update_goal', 'web_search',
-        'workflow', 'write',
+        'ask_user_question', 'bash', 'edit', 'exit_plan_mode', 'read', 'read_image',
+        'schedule_create', 'schedule_delete', 'schedule_list',
+        'skill', 'todo_write', 'web_fetch', 'web_search', 'write',
       ])
     } finally {
       await handle.dispose()
     }
   })
 
-  it('composes the exact RL prompt and two tools from `minimal`', async () => {
-    const handle = await ctx.agents.create({
-      sessionId: SessionId('preset-minimal'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'minimal').then(() => undefined),
+  it('differs between modes by persona and skills rather than by tools', async () => {
+    const study = await ctx.agents.create({
+      sessionId: SessionId('preset-study'),
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'study').then(() => undefined),
+    })
+    const page = await ctx.agents.create({
+      sessionId: SessionId('preset-web-page'),
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'web-page').then(() => undefined),
     })
     try {
-      const assembly = await ctx.systemPrompt.assemble({ scope: handle.agent })
-      expect(assembly.sections).toEqual([
-        { name: 'deployment:persona', text: MINIMAL_PROMPT },
-      ])
-      expect(assembly.tools.map(tool => tool.name)).toEqual(['bash', 'str_replace_editor'])
-      expect(assembly.tools.find(tool => tool.name === 'bash')?.description).toBe(MINIMAL_BASH_DESCRIPTION)
-      expect(JSON.stringify(assembly.tools.find(tool => tool.name === 'str_replace_editor')?.parameters))
-        .toContain('Absolute path')
-      expect(ctx.agentPresets.serviceFor(handle.agent, 'compaction')).toBeUndefined()
-      expect(handle.agent.ctx.get('compaction')).toBeUndefined()
+      // Same capabilities, different expertise: a beginner who picked "做网页"
+      // must not discover that the mode also took a tool away.
+      expect(toolNames(ctx, page.agent)).toEqual(toolNames(ctx, study.agent))
+      expect(await persona(ctx, page.agent)).not.toBe(await persona(ctx, study.agent))
+
+      const pageSkills = (await ctx.skills.list({ scope: page.agent })).map(skill => skill.name)
+      const studySkills = (await ctx.skills.list({ scope: study.agent })).map(skill => skill.name)
+      expect(pageSkills).toEqual(expect.arrayContaining([
+        'build-a-page', 'look-distinct', 'check-on-phone', 'vision',
+      ]))
+      expect(studySkills).toEqual(expect.arrayContaining([
+        'explain-clearly', 'check-understanding', 'work-an-example', 'vision',
+      ]))
+      expect(studySkills).not.toContain('build-a-page')
+      expect(pageSkills).not.toContain('explain-clearly')
     } finally {
-      await handle.dispose()
+      await page.dispose()
+      await study.dispose()
     }
   })
 
   it('keeps two differently composed sessions independent', async () => {
-    const full = await ctx.agents.create({
-      sessionId: SessionId('preset-both-full'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'standard').then(() => undefined),
+    const study = await ctx.agents.create({
+      sessionId: SessionId('preset-both-study'),
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'study').then(() => undefined),
     })
-    const minimal = await ctx.agents.create({
-      sessionId: SessionId('preset-both-minimal'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'minimal').then(() => undefined),
+    const writing = await ctx.agents.create({
+      sessionId: SessionId('preset-both-writing'),
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'writing').then(() => undefined),
     })
     try {
-      expect(toolNames(ctx, minimal.agent)).toEqual(['bash', 'str_replace_editor'])
-      expect(toolNames(ctx, full.agent).length).toBeGreaterThan(10)
+      expect(toolNames(ctx, writing.agent).length).toBeGreaterThan(5)
 
-      await minimal.dispose()
+      await writing.dispose()
 
-      // Tearing the minimal session down leaves the full one whole.
-      expect(toolNames(ctx, full.agent).length).toBeGreaterThan(10)
+      // Tearing one session down leaves the other whole.
+      expect(toolNames(ctx, study.agent).length).toBeGreaterThan(5)
       expect(toolNames(ctx)).toEqual([])
     } finally {
-      await full.dispose()
+      await study.dispose()
     }
   })
 
-  it('composes the cordis agent with its own toolset', async () => {
-    const handle = await ctx.agents.create({
-      sessionId: SessionId('preset-cordis'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'cordis').then(() => undefined),
-    })
-    try {
-      const tools = toolNames(ctx, handle.agent)
-      // The self-referential toolset is what distinguishes this preset.
-      expect(tools).toEqual(expect.arrayContaining([
-        'cordis_inspect_list', 'cordis_inspect_query', 'cordis_inspect_self',
-        'cordis_define', 'cordis_run', 'cordis_stop', 'cordis_undefine',
-      ]))
-      // And it keeps the standard agent's own tools rather than replacing them.
-      expect(tools).toEqual(expect.arrayContaining(['bash', 'read', 'edit', 'skill']))
-      expect(tools).not.toContain('str_replace_editor')
+  it('ships each mode\'s expertise inside its own directory', async () => {
+    // A mode's skill root is derived from its own `baseUrl`, so the expertise
+    // travels with the directory wherever the mode is installed.
+    const skill = join(CONFIG_DIR, 'agent-presets', 'web-page', 'skills', 'build-a-page', 'SKILL.md')
 
-      // The preset's own authoring skill registers into ITS layer of the host
-      // registry: the cordis agent's view carries it, the global view does not.
-      const scoped = (await ctx.skills.list({ scope: handle.agent })).map(skill => skill.name)
-      expect(scoped).toContain('editing-cordis-compositions')
-      expect((await ctx.skills.list()).map(skill => skill.name)).not.toContain('editing-cordis-compositions')
-    } finally {
-      await handle.dispose()
-    }
+    expect((await readFile(skill, 'utf8')).startsWith('---\nname: build-a-page')).toBe(true)
   })
 
-  it('presents `code` as Code Mode without disturbing a native session beside it', async () => {
-    const coded = await ctx.agents.create({
-      sessionId: SessionId('preset-code'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'code').then(() => undefined),
-    })
-    const native = await ctx.agents.create({
-      sessionId: SessionId('preset-code-native'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'standard').then(() => undefined),
-    })
-    try {
-      // One tool reaches the MODEL: the transport. The registry's catalog for
-      // this agent is unchanged — a code mode collapses the presentation, not
-      // the capabilities — so the assembly is what carries the claim.
-      const assembly = await ctx.systemPrompt.assemble({ scope: coded.agent })
-      expect(assembly.tools.map(tool => tool.name)).toEqual(['run_code'])
-      expect(toolNames(ctx, coded.agent)).not.toContain('str_replace_editor')
-      const sdk = assembly.sections.find(section => section.name === 'tools:sdk')?.text ?? ''
-      expect(sdk).not.toContain('str_replace_editor')
-      expect(sdk).toContain('web_search')
-
-      // The presentation is this agent's alone: the deployment default is
-      // native, and the session composed from `standard` still sees it.
-      const nativeAssembly = await ctx.systemPrompt.assemble({ scope: native.agent })
-      expect(nativeAssembly.tools.map(tool => tool.name)).toContain('bash')
-      expect(nativeAssembly.tools.map(tool => tool.name)).not.toContain('run_code')
-      expect(nativeAssembly.sections.some(section => section.name === 'tools:sdk')).toBe(false)
-    } finally {
-      await native.dispose()
-      await coded.dispose()
-    }
-  })
-
-  it('keeps the self-referential toolset out of every other preset', async () => {
-    const handle = await ctx.agents.create({
-      sessionId: SessionId('preset-no-cordis'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'standard').then(() => undefined),
-    })
-    try {
-      // Editing the live runtime is opt-in per session, not ambient.
-      expect(toolNames(ctx, handle.agent)).not.toContain('cordis_define')
-    } finally {
-      await handle.dispose()
-    }
-  })
-
-  it('ships the composition-authoring skill inside the preset directory', async () => {
-    // The preset's skill root is derived from its own `baseUrl`, so the skill
-    // travels with the directory wherever the preset is installed.
-    const skill = join(
-      CONFIG_DIR, 'agent-presets', 'cordis', 'skills', 'editing-cordis-compositions', 'SKILL.md',
-    )
-
-    expect((await readFile(skill, 'utf8')).startsWith('---\nname: editing-cordis-compositions')).toBe(true)
-  })
-
-  it('merges the global skill layer into a preset agent\'s catalog, keeping local discovery preset-side', async () => {
+  it('merges the global skill layer into a mode agent\'s catalog, keeping local discovery preset-side', async () => {
     const proj = await mkdtemp(join(tmpdir(), 'dsh-preset-skill-proj-'))
     await mkdir(join(proj, '.dsh', 'skills', 'project-proof'), { recursive: true })
     await writeFile(join(proj, '.dsh', 'skills', 'project-proof', 'SKILL.md'), [
@@ -355,21 +287,21 @@ describe('the shipped Web composition', () => {
     const handle = await ctx.agents.create({
       // Unique per run: the composition persists into the ambient DSH home,
       // and a fixed id would collide with a log an earlier run left there.
-      sessionId: SessionId(`preset-skills-standard-${randomUUID()}`),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'standard').then(() => undefined),
+      sessionId: SessionId(`preset-skills-${randomUUID()}`),
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'study').then(() => undefined),
     })
     try {
       // The host (global) view carries the deployment-level provider alone:
       // local discovery moved behind the presets with `skill-filesystem`.
       expect((await ctx.skills.list({ cwd: proj })).map(skill => skill.name)).toEqual(['dsh-badge'])
 
-      // The standard agent's view merges the global layer with its preset's
-      // own local discovery over the session cwd.
+      // A mode agent's view merges the global layer with its own local
+      // discovery over the session cwd.
       const scoped = (await ctx.skills.list({ cwd: proj, scope: handle.agent })).map(skill => skill.name)
       expect(scoped).toContain('dsh-badge')
       expect(scoped).toContain('project-proof')
 
-      // The preset's own loader tool resolves the global-layer skill.
+      // The mode's own loader tool resolves the global-layer skill.
       const loaded = await ctx.tools.execute({
         callId: CallId('preset-skills-load'),
         name: 'skill',
@@ -384,33 +316,17 @@ describe('the shipped Web composition', () => {
     }
   })
 
-  it('shows a minimal agent the global layer but no loader tool', async () => {
-    const handle = await ctx.agents.create({
-      sessionId: SessionId(`preset-skills-minimal-${randomUUID()}`),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'minimal').then(() => undefined),
-    })
-    try {
-      // Layer visibility is the registry's; whether an agent can USE skills
-      // stays the preset's choice — minimal mounts no `tool-skill`, so its
-      // tool table has no loader even though the global layer is readable.
-      expect((await ctx.skills.list({ scope: handle.agent })).map(skill => skill.name)).toContain('dsh-badge')
-      expect(toolNames(ctx, handle.agent)).toEqual(['bash', 'str_replace_editor'])
-    } finally {
-      await handle.dispose()
-    }
-  })
-
   it('never rewrites the preset file it composed from', async () => {
     // The Loader persists a tree whose plugin self-disposed, and tearing an
     // agent down disposes its whole subtree. Inherited, that rewrote the
     // shipped composition — truncating it to `[]` the first time a session
     // ended — so `PresetTree` refuses to write at all.
-    const path = join(CONFIG_DIR, 'agent-presets', 'standard', 'agent.cordis.yml')
+    const path = join(CONFIG_DIR, 'agent-presets', 'study', 'agent.cordis.yml')
     const before = await readFile(path, 'utf8')
 
     const handle = await ctx.agents.create({
       sessionId: SessionId('preset-readonly'),
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'standard').then(() => undefined),
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'study').then(() => undefined),
     })
     await handle.dispose()
     // Slack, not a race the number has to win. The write is driven by the
@@ -424,139 +340,40 @@ describe('the shipped Web composition', () => {
   })
 })
 
-describe('product subagent rows in user presets', () => {
-  let productCtx: Context
-  const ids = ['products-none', 'products-codex', 'products-claude', 'products-both'] as const
-
-  beforeAll(async () => {
-    const root = await mkdtemp(join(tmpdir(), 'dsh-product-presets-'))
-    const userRoot = join(root, 'presets')
-    const settingsFile = join(root, 'settings.yaml')
-    const standard = await readFile(join(CONFIG_DIR, 'agent-presets', 'standard', 'agent.cordis.yml'), 'utf8')
-    await writeFile(settingsFile, '{}\n')
-    for (const id of ids) {
-      let composition = standard
-      if (id === 'products-codex' || id === 'products-both') {
-        composition = enablePresetTool(composition, 'tool-subagent-codex')
-      }
-      if (id === 'products-claude' || id === 'products-both') {
-        composition = enablePresetTool(composition, 'tool-subagent-claude-code')
-      }
-      const directory = join(userRoot, id)
-      await mkdir(directory, { recursive: true })
-      await writeFile(join(directory, 'agent.cordis.yml'), composition)
-    }
-    productCtx = await bootWeb(settingsFile, [
-      { insert: [
-        { id: 'subagent-codex', name: '@deepseek-ai/dsh-subagent-codex' },
-        { id: 'subagent-claude-code', name: '@deepseek-ai/dsh-subagent-claude-code' },
-      ] },
-      {
-        id: 'agent-presets',
-        config: {
-          default: 'standard',
-          roots: [
-            { path: join(CONFIG_DIR, 'agent-presets'), trust: 'system' },
-            { path: userRoot, trust: 'user' },
-          ],
-          includeUserRoot: false,
-        },
-      },
-    ], EXAMPLES_INSTALL_ANCHOR)
-  }, 120_000)
-
-  afterAll(async () => {
-    await productCtx.fiber.dispose()
-  })
-
-  it('composes none, either product, or both without changing the shared host registry', async () => {
-    const expected = new Map<string, string[]>([
-      ['products-none', []],
-      ['products-codex', ['subagent_codex']],
-      ['products-claude', ['subagent_claude_code']],
-      ['products-both', ['subagent_claude_code', 'subagent_codex']],
-    ])
-    expect(productCtx.subagents.list()).toEqual(expect.arrayContaining([
-      'spawn', 'fork', 'codex', 'claude-code',
-    ]))
-
-    for (const [id, productTools] of expected) {
-      const handle = await productCtx.agents.create({
-        sessionId: SessionId(`preset-${id}`),
-        setup: agentCtx => productCtx.agentPresets.mount(agentCtx, id).then(() => undefined),
-      })
-      try {
-        const tools = toolNames(productCtx, handle.agent)
-        expect(tools.filter(name => name === 'subagent_codex' || name === 'subagent_claude_code'))
-          .toEqual(productTools)
-      } finally {
-        await handle.dispose()
-      }
-    }
-  })
-
-  it('applies a product-row edit only to later sessions on the preset', async () => {
-    const preset = await productCtx.agentPresets.resolve('products-none')
-    const original = await readFile(preset.path, 'utf8')
-    const existing = await productCtx.agents.create({
-      sessionId: SessionId('preset-product-generation-existing'),
-      setup: agentCtx => productCtx.agentPresets.mount(agentCtx, 'products-none').then(() => undefined),
-    })
-    try {
-      expect(toolNames(productCtx, existing.agent)).not.toContain('subagent_codex')
-      await writeFile(preset.path, enablePresetTool(original, 'tool-subagent-codex'))
-
-      const later = await productCtx.agents.create({
-        sessionId: SessionId('preset-product-generation-later'),
-        setup: agentCtx => productCtx.agentPresets.mount(agentCtx, 'products-none').then(() => undefined),
-      })
-      try {
-        expect(toolNames(productCtx, existing.agent)).not.toContain('subagent_codex')
-        expect(toolNames(productCtx, later.agent)).toContain('subagent_codex')
-      } finally {
-        await later.dispose()
-      }
-    } finally {
-      await existing.dispose()
-      await writeFile(preset.path, original)
-    }
-  })
-})
-
 describe('a switch survives the session', () => {
   it('records the choice so the log states what the agent runs', async () => {
     const handle = await ctx.agents.create({
       sessionId: SessionId('preset-switch-logged'),
-      meta: { agentPreset: 'standard' },
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'standard').then(() => undefined),
+      meta: { agentPreset: 'study' },
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'study').then(() => undefined),
     })
     try {
       // The api-proxy's select does exactly this pair while the session is blank.
-      await ctx.agentPresets.recompose(handle.agent.ctx, 'minimal')
-      handle.agent.session.append('agent-preset/selected', { agentPreset: 'minimal' })
+      await ctx.agentPresets.recompose(handle.agent.ctx, 'writing')
+      handle.agent.session.append('agent-preset/selected', { agentPreset: 'writing' })
 
       // The header keeps the creation fact; the log carries what it runs.
-      expect(handle.agent.session.header.agentPreset).toBe('standard')
-      expect(resolveSessionPreset(handle.agent.session)).toBe('minimal')
+      expect(handle.agent.session.header.agentPreset).toBe('study')
+      expect(resolveSessionPreset(handle.agent.session)).toBe('writing')
     } finally {
       await handle.dispose()
     }
   })
 
   it('rebuilds a switched session from the log, not the creation header', () => {
-    // The exact shape a resume reads back from disk: the header says standard,
+    // The exact shape a resume reads back from disk: the header says study,
     // the log records the switch the user made while the session was blank.
     const rebuilt = resolveSessionPreset({
-      header: { version: 0, id: SessionId('x'), createdAt: 0, agentPreset: 'standard' },
+      header: { version: 0, id: SessionId('x'), createdAt: 0, agentPreset: 'study' },
       events: [
-        { type: 'agent-preset/selected', seq: 1, time: 0, data: { agentPreset: 'minimal' } },
+        { type: 'agent-preset/selected', seq: 1, time: 0, data: { agentPreset: 'writing' } },
         { type: 'turn/start', seq: 2, time: 0, data: { turn: 0, trigger: { kind: 'message', source: { kind: 'user' } } } },
       ] as never,
     })
 
-    // Reading the header alone would compose the creation-time preset over a
+    // Reading the header alone would compose the creation-time mode over a
     // history another one produced — the replay the blank-only lock prevents.
-    expect(rebuilt).toBe('minimal')
+    expect(rebuilt).toBe('writing')
   })
 })
 
@@ -564,8 +381,8 @@ describe('a forked session', () => {
   it('inherits the composition its seeded history was produced under', async () => {
     const parent = await ctx.agents.create({
       sessionId: SessionId('preset-fork-parent'),
-      meta: { agentPreset: 'minimal' },
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'minimal').then(() => undefined),
+      meta: { agentPreset: 'writing' },
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'writing').then(() => undefined),
     })
     const inherited = resolveSessionPreset(parent.agent.session)
     const child = await ctx.agents.create({
@@ -594,8 +411,8 @@ describe('a delegated child', () => {
   it('runs on the composition its parent runs on', async () => {
     const parent = await ctx.agents.create({
       sessionId: SessionId('preset-child-parent'),
-      meta: { agentPreset: 'standard' },
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'standard').then(() => undefined),
+      meta: { agentPreset: 'study' },
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'study').then(() => undefined),
     })
     // Exactly what an in-process subagent driver's creation window does.
     const child = await parent.agent.ctx.agents.create({
@@ -606,11 +423,11 @@ describe('a delegated child', () => {
       },
     })
     try {
-      expect(toolNames(ctx, child.agent)).toEqual(toolNames(ctx, parent.agent))
-      // The shipped `standard` preset is the whole coding agent; an empty
-      // child here is the defect, and equality alone would not catch it.
+      expect(composedToolNames(ctx, child.agent)).toEqual(composedToolNames(ctx, parent.agent))
+      // Every shipped mode is a whole agent; an empty child here is the
+      // defect, and equality alone would not catch it.
       expect(toolNames(ctx, child.agent)).toContain('bash')
-      expect(child.agent.session.header.agentPreset).toBe('standard')
+      expect(child.agent.session.header.agentPreset).toBe('study')
     } finally {
       await child.dispose()
       await parent.dispose()
@@ -620,10 +437,10 @@ describe('a delegated child', () => {
   it('follows a parent that switched preset while blank', async () => {
     const parent = await ctx.agents.create({
       sessionId: SessionId('preset-child-switch-parent'),
-      meta: { agentPreset: 'standard' },
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'standard').then(() => undefined),
+      meta: { agentPreset: 'study' },
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'study').then(() => undefined),
     })
-    await ctx.agentPresets.recompose(parent.agent.ctx, 'minimal')
+    await ctx.agentPresets.recompose(parent.agent.ctx, 'writing')
     const child = await parent.agent.ctx.agents.create({
       sessionId: SessionId('preset-child-switch'),
       meta: childSessionMeta(parent.agent, 1, 0),
@@ -633,9 +450,9 @@ describe('a delegated child', () => {
     })
     try {
       // The live scope chain is the authority, not the parent's creation
-      // header — which still names `standard`.
-      expect(toolNames(ctx, child.agent)).toEqual(toolNames(ctx, parent.agent))
-      expect(child.agent.session.header.agentPreset).toBe('minimal')
+      // header — which still names `study`.
+      expect(composedToolNames(ctx, child.agent)).toEqual(composedToolNames(ctx, parent.agent))
+      expect(child.agent.session.header.agentPreset).toBe('writing')
     } finally {
       await child.dispose()
       await parent.dispose()
@@ -669,7 +486,7 @@ describe('a launcher that configures no writable root', () => {
     derivedCtx = await bootWeb(settingsFile, [{
       id: 'agent-presets',
       config: {
-        default: 'standard',
+        default: 'study',
         roots: [{ path: join(CONFIG_DIR, 'agent-presets'), trust: 'system' }],
         includeUserRoot: true,
       },
@@ -703,7 +520,7 @@ describe('a launcher that configures no writable root', () => {
   })
 })
 
-describe('authoring a preset on the shipped composition', () => {
+describe('authoring a preset on a shipped mode', () => {
   let authorCtx: Context
   let userRoot: string
 
@@ -714,7 +531,7 @@ describe('authoring a preset on the shipped composition', () => {
     authorCtx = await bootWeb(settingsFile, [{
       id: 'agent-presets',
       config: {
-        default: 'standard',
+        default: 'study',
         roots: [
           { path: join(CONFIG_DIR, 'agent-presets'), trust: 'system' },
           // The root does not exist yet: a deployment whose user has authored
@@ -726,28 +543,28 @@ describe('authoring a preset on the shipped composition', () => {
     }])
   })
 
-  it('refuses to copy over or delete a shipped preset', async () => {
-    await expect(authorCtx.agentPresets.copy('minimal', 'standard')).rejects.toThrow(/already exists/)
-    await expect(authorCtx.agentPresets.remove('standard')).rejects.toThrow(/ships with the deployment/)
+  it('refuses to copy over or delete a shipped mode', async () => {
+    await expect(authorCtx.agentPresets.copy('study', 'web-page')).rejects.toThrow(/already exists/)
+    await expect(authorCtx.agentPresets.remove('study')).rejects.toThrow(/ships with the deployment/)
   })
 
   it.each(['../escape', 'a/b', '/abs', 'Upper'])('refuses the uncontainable id %j', async (id) => {
     // The id becomes a directory name under the user root, so containment is
     // checked on the id rather than on the joined path afterwards.
-    await expect(authorCtx.agentPresets.copy('minimal', id)).rejects.toThrow()
+    await expect(authorCtx.agentPresets.copy('study', id)).rejects.toThrow()
   })
 
-  it('copies a shipped preset a session then really composes from', async () => {
-    await authorCtx.agentPresets.copy('minimal', 'my-agent', '我的模式')
+  it('copies a shipped mode a session then really composes from', async () => {
+    await authorCtx.agentPresets.copy('study', 'my-agent', '我的模式')
 
     // Round-trips through the roster as a `user` row carrying the given name
     // and the source's description, over the source's own composition text.
     const preset = await authorCtx.agentPresets.resolve('my-agent')
-    const source = await authorCtx.agentPresets.resolve('minimal')
+    const source = await authorCtx.agentPresets.resolve('study')
     expect(preset.trust).toBe('user')
     expect(preset.name).toBe('我的模式')
     expect(preset.description).toBe(source.description)
-    expect(await authorCtx.agentPresets.read('my-agent')).toBe(await authorCtx.agentPresets.read('minimal'))
+    expect(await authorCtx.agentPresets.read('my-agent')).toBe(await authorCtx.agentPresets.read('study'))
     // Owner-only, in an owner-only directory: a composition is executable
     // configuration on a machine that may have other users.
     expect((await stat(preset.path)).mode & 0o777).toBe(0o600)
@@ -756,16 +573,16 @@ describe('authoring a preset on the shipped composition', () => {
       setup: agentCtx => authorCtx.agentPresets.mount(agentCtx, 'my-agent').then(() => undefined),
     })
     try {
-      // The same tools the shipped `minimal` composes, from a directory copied
-      // through the service into a root outside the installed harness.
-      expect(toolNames(authorCtx, handle.agent)).toEqual(['bash', 'str_replace_editor'])
+      // The copy composes an agent, from a directory copied through the
+      // service into a root outside the installed harness.
+      expect(toolNames(authorCtx, handle.agent)).toContain('bash')
     } finally {
       await handle.dispose()
     }
   })
 
   it('deletes what it copied', async () => {
-    await authorCtx.agentPresets.copy('minimal', 'doomed')
+    await authorCtx.agentPresets.copy('study', 'doomed')
 
     await authorCtx.agentPresets.remove('doomed')
 
@@ -774,7 +591,7 @@ describe('authoring a preset on the shipped composition', () => {
 })
 
 /**
- * Which preset an unnamed session gets is a user setting layered over the
+ * Which mode an unnamed session gets is a user setting layered over the
  * composition's own default. The package suite proves the layering against a
  * hand-built context; this proves it through the shipped `cordis.yml` — that
  * the roster and the settings provider are actually wired to each other, and
@@ -782,20 +599,20 @@ describe('authoring a preset on the shipped composition', () => {
  */
 describe('the default preset as a user setting', () => {
   it('composes an unnamed session from the stored default, not the composed one', async () => {
-    expect(ctx.agentPresets.defaultId).toBe('standard')
+    expect(ctx.agentPresets.defaultId).toBe('study')
 
-    await ctx.settings.update(settingsNamespace(SETTINGS_NAMESPACE), { default: 'minimal' })
+    await ctx.settings.update(settingsNamespace(SETTINGS_NAMESPACE), { default: 'writing' })
     try {
-      expect(ctx.agentPresets.defaultId).toBe('minimal')
+      expect(ctx.agentPresets.defaultId).toBe('writing')
 
       const handle = await ctx.agents.create({
         sessionId: SessionId('preset-user-default'),
         setup: agentCtx => ctx.agentPresets.mount(agentCtx).then(() => undefined),
       })
       try {
-        // `mount()` with no id resolves the effective default. Two tools, not
-        // `standard`'s catalog: the setting decided the composition.
-        expect(toolNames(ctx, handle.agent)).toEqual(['bash', 'str_replace_editor'])
+        // `mount()` with no id resolves the effective default; the persona is
+        // what distinguishes one mode's composition from another's.
+        expect(await persona(ctx, handle.agent)).toContain('写作')
       } finally {
         await handle.dispose()
       }
@@ -806,7 +623,7 @@ describe('the default preset as a user setting', () => {
       await ctx.settings.replace(settingsNamespace(SETTINGS_NAMESPACE), {})
     }
 
-    expect(ctx.agentPresets.defaultId).toBe('standard')
+    expect(ctx.agentPresets.defaultId).toBe('study')
   })
 })
 
@@ -814,14 +631,14 @@ describe('a session keeps the preset it was created with', () => {
   it('refuses to adopt a live session under a different preset', async () => {
     const handle = await ctx.agents.create({
       sessionId: SessionId('preset-locked'),
-      meta: { agentPreset: 'minimal' },
-      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'minimal').then(() => undefined),
+      meta: { agentPreset: 'writing' },
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'writing').then(() => undefined),
     })
     try {
       // The api-proxy guard reads exactly this: the header records what the
       // session runs, so naming anything else is a caller error rather than a
-      // switch. Its history was produced under `minimal`'s two tools.
-      expect(handle.agent.session.header.agentPreset).toBe('minimal')
+      // switch. Its history was produced under `writing`'s composition.
+      expect(handle.agent.session.header.agentPreset).toBe('writing')
     } finally {
       await handle.dispose()
     }

@@ -14,7 +14,7 @@ installAssembledBootEnv()
 
 /** Open the fixture history session (the alpha log carrying the turn-72 image pair) and wait for its gallery. */
 async function openFixtureSession(): Promise<void> {
-  const tree = await screen.findByRole('tree', { name: 'Sessions' }, { timeout: 10_000 })
+  const tree = await screen.findByRole('tree', { name: '会话' }, { timeout: 10_000 })
   const group = (await within(tree).findAllByText('fixture'))
     .map(el => el.closest<HTMLElement>('[role="treeitem"]'))
     .find(el => el?.getAttribute('aria-expanded') !== null)
@@ -72,7 +72,7 @@ it('renders the history image pair through the authorized attachment route and o
   fireEvent.click(frame)
   const lightbox = await screen.findByRole('dialog')
   expect(within(lightbox).getByRole('img').getAttribute('src')?.split(':')[0]).toBe('blob')
-  fireEvent.click(within(lightbox).getByRole('button', { name: /Close/ }))
+  fireEvent.click(within(lightbox).getByRole('button', { name: '关闭原图预览' }))
   await waitFor(() => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
@@ -81,14 +81,14 @@ it('renders the history image pair through the authorized attachment route and o
 it('accepts pasted images into the composer rail in order and removes them', async () => {
   mountAssembledApp()
 
-  const tree = await screen.findByRole('tree', { name: 'Sessions' }, { timeout: 10_000 })
-  const start = tree.querySelector<HTMLButtonElement>('button[aria-label="New session in fixture"]')
+  const tree = await screen.findByRole('tree', { name: '会话' }, { timeout: 10_000 })
+  const start = tree.querySelector<HTMLButtonElement>('button[aria-label="在“fixture”中新建会话"]')
   if (start === null) throw new Error('fixture Workspace new-session action missing')
   fireEvent.click(start)
 
   // Image-only send arming is pinned at package level (input-bar.spec.tsx);
   // this assembled lane pins the intake chain over the built graph.
-  const textarea = await screen.findByPlaceholderText('Describe what you want to build', {}, { timeout: 10_000 })
+  const textarea = await screen.findByPlaceholderText('描述你想要构建的内容', {}, { timeout: 10_000 })
   const image = new File([new Uint8Array([137, 80, 78, 71])], 'pasted.png', { type: 'image/png' })
   fireEvent.paste(textarea, {
     clipboardData: {
@@ -100,7 +100,7 @@ it('accepts pasted images into the composer rail in order and removes them', asy
   // The rail is an accessible group holding the draft thumbnail (queried via
   // DOM: jsdom's a11y-visibility computation hides the composer subtree).
   const rail = await waitFor(() => {
-    const el = document.querySelector('[role="group"][aria-label="Pending images"]')
+    const el = document.querySelector('[role="group"][aria-label="待发送图片"]')
     if (el === null) throw new Error('attachment rail missing')
     return el
   }, { timeout: 5_000 })
@@ -127,11 +127,11 @@ it('accepts pasted images into the composer rail in order and removes them', asy
       .toEqual(['pasted.png', 'second.png'])
   })
 
-  const remove = [...rail.querySelectorAll('button[aria-label^="Remove image"]')]
+  const remove = [...rail.querySelectorAll('button[aria-label^="移除图片"]')]
   if (remove.length !== 2) throw new Error('remove buttons missing')
   for (const button of remove) fireEvent.click(button)
   await waitFor(() => {
-    expect(document.querySelector('[role="group"][aria-label="Pending images"]')).toBeNull()
+    expect(document.querySelector('[role="group"][aria-label="待发送图片"]')).toBeNull()
   })
 
   // An unsupported file announces a transient toast (the inline strip is
@@ -143,7 +143,7 @@ it('accepts pasted images into the composer rail in order and removes them', asy
     },
   })
   const toast = await screen.findByRole('alert')
-  expect(toast.textContent).toContain('Only PNG, JPG, WebP, and GIF images are supported')
+  expect(toast.textContent).toContain('仅支持 PNG、JPG、WebP、GIF 格式的图片')
   await waitFor(() => {
     expect(screen.queryByRole('alert')).toBeNull()
   }, { timeout: 6_000 })
@@ -152,11 +152,11 @@ it('accepts pasted images into the composer rail in order and removes them', asy
 it('accepts a whole-page drop under the limits-labeled overlay and refuses an over-limit batch at intake', async () => {
   mountAssembledApp()
 
-  const tree = await screen.findByRole('tree', { name: 'Sessions' }, { timeout: 10_000 })
-  const start = tree.querySelector<HTMLButtonElement>('button[aria-label="New session in fixture"]')
+  const tree = await screen.findByRole('tree', { name: '会话' }, { timeout: 10_000 })
+  const start = tree.querySelector<HTMLButtonElement>('button[aria-label="在“fixture”中新建会话"]')
   if (start === null) throw new Error('fixture Workspace new-session action missing')
   fireEvent.click(start)
-  const textarea = await screen.findByPlaceholderText('Describe what you want to build', {}, { timeout: 10_000 })
+  const textarea = await screen.findByPlaceholderText('描述你想要构建的内容', {}, { timeout: 10_000 })
 
   // A file drag anywhere over the page raises the full-viewport overlay whose
   // desc line carries the projected limits — copy that can only render after
@@ -165,15 +165,15 @@ it('accepts a whole-page drop under the limits-labeled overlay and refuses an ov
   const dataTransfer = { types: ['Files'], files: [image], dropEffect: 'none' }
   fireEvent.dragEnter(document.body, { dataTransfer })
   const overlay = await screen.findByRole('status')
-  expect(overlay.textContent).toContain('Drag images here to add them')
+  expect(overlay.textContent).toContain('图片拖动到此处即可添加')
   await waitFor(() => {
-    expect(overlay.textContent).toContain('Up to 20 images, 5MB each')
+    expect(overlay.textContent).toContain('最多 20 张，每张 5MB')
   })
 
   // Dropping on the transcript area (not the composer card) lands in the rail.
   fireEvent.drop(document.body, { dataTransfer })
   await waitFor(() => {
-    const rail = document.querySelector('[role="group"][aria-label="Pending images"]')
+    const rail = document.querySelector('[role="group"][aria-label="待发送图片"]')
     if (rail === null) throw new Error('attachment rail missing after page drop')
     expect([...rail.querySelectorAll('img')].map(img => img.getAttribute('alt'))).toEqual(['dropped.png'])
   }, { timeout: 5_000 })
@@ -191,7 +191,7 @@ it('accepts a whole-page drop under the limits-labeled overlay and refuses an ov
     },
   })
   const banner = await screen.findByRole('alert')
-  expect(banner.textContent).toContain('A message can include up to 20 images')
-  const rail = document.querySelector('[role="group"][aria-label="Pending images"]')
+  expect(banner.textContent).toContain('一条消息最多添加 20 张图片')
+  const rail = document.querySelector('[role="group"][aria-label="待发送图片"]')
   expect([...(rail?.querySelectorAll('img') ?? [])]).toHaveLength(1)
 })

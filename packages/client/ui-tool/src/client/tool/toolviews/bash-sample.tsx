@@ -17,7 +17,7 @@ import { useState, type KeyboardEvent } from 'react'
 import type { Context } from '@deepseek-ai/cordis'
 import clsx from 'clsx'
 import {
-  IconApiOutline14, IconChevronDownOutline14, IconInspectOutline12, StateDot, TerminalBlock,
+  IconApiOutline14, IconChevronDownOutline14, StateDot, TerminalBlock,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallViewProps } from '../../contract/slots.ts'
@@ -53,7 +53,7 @@ function stateStatus(state: ToolRowState, t: BashRowProps['t']): string | null {
  * whole row toggling the command's terminal or generic error card (ToolRow's unified
  * expand interaction, replicated locally per the registrant posture).
  */
-export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }: BashRowProps) {
+export function BashRow({ toolName, block, sessionId, useSessions, t }: BashRowProps) {
   const model = toolRowModel(toolName, block)
   // Session workspace root: the terminal view's cwd resolves against it (an
   // omitted workdir IS the workspace), which the pure presenter cannot do.
@@ -109,7 +109,7 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
       >
         <span className={css.leading}>{leading}</span>
         {status !== null && <span className={css.visuallyHidden}>{status}</span>}
-        <span className={css.title}>{model.title}</span>
+        <span className={css.title}>{t(model.titleKey)}</span>
         <span className={css.sep} aria-hidden />
         {/* The terminal presenter's description is the contractual
             above-card summary; a failure's first line outranks both. */}
@@ -118,8 +118,6 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
         </span>
       </div>
       {open && (
-        /* Same hover-Inspect posture as ToolRow's expanded body, replicated
-           locally per the registrant posture. */
         <div className={css.bodyWrap}>
           {terminal !== null
             ? (
@@ -134,7 +132,7 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
               <div className={css.ioCard}>
                 {model.body !== null && (
                   <div className={css.ioSection}>
-                    <span className={css.ioLabel}>IN</span>
+                    <span className={css.ioLabel}>{t('tool.io.input')}</span>
                     <span className={css.ioText}>{model.body}</span>
                   </div>
                 )}
@@ -143,7 +141,7 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
                 )}
                 {model.output !== null && (
                   <div className={css.ioSection}>
-                    <span className={css.ioLabel}>OUT</span>
+                    <span className={css.ioLabel}>{t('tool.io.output')}</span>
                     <span className={css.ioText} data-error>
                       {model.output}
                     </span>
@@ -151,12 +149,6 @@ export function BashRow({ toolName, block, sessionId, useSessions, inspect, t }:
                 )}
               </div>
             )}
-          {inspect !== undefined && (
-            <button type="button" className={css.inspectButton} onClick={inspect}>
-              <IconInspectOutline12 />
-              Inspect
-            </button>
-          )}
         </div>
       )}
     </div>
