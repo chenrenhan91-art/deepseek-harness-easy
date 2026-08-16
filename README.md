@@ -6,14 +6,19 @@ DeepSeek Harness (`dsh`) is an open-source agent harness developed by [DeepSeek 
 
 It uses an architecture where **everything is a plugin**, and is powered by [Cordis](https://github.com/cordiverse/cordis), whose design is described in [_A Programming Paradigm for Spatiotemporal Composability_](https://github.com/cordiverse/paper).
 
-## Open from a Release (macOS / Windows)
+## Let an AI install it (recommended on macOS)
 
-1. Open the repository [Releases](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases). Download `DeepSeek-Harness-macOS.zip` or `DeepSeek-Harness-Windows.zip` for your computer. Do not download the source ZIP.
-2. Unzip onto the **Desktop**. You will see `启动 DeepSeek Harness.command` (macOS) or `DeepSeek Harness.exe` (Windows). Do not drag the zip into Applications.
-3. Double-click that file. A local server starts and the browser opens the workbench at `http://127.0.0.1:3080`.
-4. If you have no API key, the full-page guide asks you to bind one first. Two buttons — **Create an API key** and **Top up (official)** — open the official DeepSeek console. Paste the key; it is checked immediately.
+macOS Gatekeeper blocks the unsigned Release `.command` / `.app`. Send this repository to an agent that can run a terminal (Cursor, Claude, and similar) and paste:
 
-The first open may need a Gatekeeper or SmartScreen confirmation because the pack is unsigned. macOS ships a zip folder and a `.command` file, not an installable `.app`. The zip is large because it includes portable Node. Unzip onto the Desktop. Developers who already have Node can keep using `npx` or a source checkout below.
+```
+请按 https://github.com/chenrenhan91-art/deepseek-harness-easy 仓库里的 INSTALL.md（中文看 INSTALL.zh.md）在这台电脑安装 DeepSeek Harness。
+克隆仓库、安装依赖、构建，然后执行 pnpm dsh web。
+不要让我双击 .command、.app，也不要下 GitHub 的 Source code zip。
+```
+
+The agent follows [INSTALL.md](INSTALL.md) ([中文](INSTALL.zh.md)): `git clone`, `pnpm install`, `pnpm run build`, `pnpm dsh web`, then `http://127.0.0.1:3080`. Paste a DeepSeek API key on the first-run page ([create a key](https://platform.deepseek.com/api_keys), [top up](https://platform.deepseek.com/top_up)).
+
+Windows can still unzip `DeepSeek-Harness-Windows.zip` from [Releases](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases) and double-click `DeepSeek Harness.exe` (SmartScreen: Run anyway). Do not download the GitHub Source code zip.
 
 ## Developer preview
 

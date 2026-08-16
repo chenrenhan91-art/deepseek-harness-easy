@@ -1,0 +1,29 @@
+# Agent Note: AI-assisted source install
+
+Status: implemented
+
+English | [中文](2026-08-16-ai-assisted-source-install.zh.md)
+
+## Problem
+
+An unsigned file downloaded from GitHub Releases carries macOS quarantine. Gatekeeper then shows “Apple cannot verify…” with Done and Move to Trash and often no Open button. A `.app` and a `.command` both fail that check. Beginners cannot complete “unzip and double-click” on a current Mac without an Apple Developer signature.
+
+## Decision
+
+**macOS beginners install by giving this repository URL to a coding agent.** The agent follows root [INSTALL.md](../../../../INSTALL.md) (Chinese [INSTALL.zh.md](../../../../INSTALL.zh.md)): shallow `git clone`, `corepack` pnpm 11.7.0, `pnpm install`, `pnpm run build`, `pnpm dsh web`, then the system browser at `http://127.0.0.1:3080`. Git-created files are not quarantined the way a browser-downloaded zip is. The API key stays on the first-run page and the official console links.
+
+Machine-readable entry points are `llms.txt`, `.github/copilot-instructions.md`, and the `dsh-user-install` skill. The root README paste block is the user-facing prompt. This does not add a managed installer ([source run without a managed installer](../simplification/2026-08-10-source-run-without-managed-installer.md)). The Windows exe zip remains optional ([desktop release pack](2026-08-16-desktop-release-pack.md)).
+
+## Alternatives considered
+
+**Keep teaching Control-click Open or `xattr -cr`.** Rejected as the primary path: the current dialog often has no Open control, and `xattr` is a security bypass beginners should not be taught first.
+
+**Sign and notarize a `.app`.** Rejected for this pass: it needs an Apple Developer Program membership and a notarization pipeline this fork does not own.
+
+**`npx @deepseek-ai/dsh web` only.** Rejected as the written beginner procedure: it still needs Node, and this fork’s workbench lives in the git tree (`pnpm dsh web` after build). `npx` stays in the README developer section.
+
+## Consequences
+
+- A user without an agent that can run a terminal must install Node and run INSTALL.md themselves, or use Windows.
+- Full `pnpm run build` on first clone takes several minutes and needs network.
+- Unsigned macOS Release zips may remain in GitHub Releases; they are not the documented Mac install path.

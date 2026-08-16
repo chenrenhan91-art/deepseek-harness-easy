@@ -1,11 +1,10 @@
 DeepSeek Harness 使用说明
 
-1. 打开 https://github.com/chenrenhan91-art/deepseek-harness-easy/releases ，按电脑下载 DeepSeek-Harness-macOS.zip 或 DeepSeek-Harness-Windows.zip。不要下载源码 ZIP。
-2. 解压到桌面。不要把压缩包拖进「应用程序」。
-3. macOS：双击「启动 DeepSeek Harness.command」。Windows：双击 DeepSeek Harness.exe。
-4. 后台启动本机服务，浏览器打开 http://127.0.0.1:3080
-5. 没有 API Key：按整页说明先绑定。两个按钮分别是「去创建 API Key」和「去充值（官方）」。粘贴 Key 后当场验证。
-6. macOS 若提示无法打开，在访达中选中该 .command 文件，按住 Control 再点一下，选「打开」。这不是安装包，无需装到系统。
-7. Windows 若出现 SmartScreen，选「仍要运行」。
-8. 本包体积较大，因为内含便携 Node，无需先安装开发环境。
-9. 数据与 Key 存在本机用户目录（~/.dsh），不会写进本压缩包，也不要提交到 git。
+macOS：不要双击 .command 或 .app（系统会拦截）。把仓库地址发给能跑终端的 AI，按 INSTALL.md / INSTALL.zh.md 安装：
+https://github.com/chenrenhan91-art/deepseek-harness-easy
+
+请按仓库里的 INSTALL.md（中文看 INSTALL.zh.md）在这台电脑安装 DeepSeek Harness。克隆、安装依赖、构建，然后执行 pnpm dsh web。不要让我双击 .command、.app，也不要下 Source code zip。
+
+Windows：解压 DeepSeek-Harness-Windows.zip，双击 DeepSeek Harness.exe。若出现 SmartScreen，选「仍要运行」。
+
+浏览器打开 http://127.0.0.1:3080 后，按页去创建 API Key 和官方充值。数据与 Key 在 ~/.dsh，不要提交到 git。

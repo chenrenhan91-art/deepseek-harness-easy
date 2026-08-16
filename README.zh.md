@@ -6,14 +6,19 @@ DeepSeek Harness（`dsh`）是由 [DeepSeek AI](https://deepseek.com) 开发的�
 
 它采用**一切皆插件**的架构，并由 [Cordis](https://github.com/cordiverse/cordis) 驱动，其设计参见论文 [_A Programming Paradigm for Spatiotemporal Composability_](https://github.com/cordiverse/paper)。
 
-## 从 Release 下载即开（macOS / Windows）
+## 让 AI 帮你安装（macOS 推荐）
 
-1. 打开仓库的 [Releases](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases)，按电脑下载 `DeepSeek-Harness-macOS.zip` 或 `DeepSeek-Harness-Windows.zip`。不要下载源码 ZIP。
-2. 解压到**桌面**。macOS 看到「启动 DeepSeek Harness.command」，Windows 看到 `DeepSeek Harness.exe`。不要把压缩包拖进「应用程序」。
-3. 双击该文件：后台起本地服务，浏览器打开工作台 `http://127.0.0.1:3080`。
-4. 没有 Key：整页说明「先绑定 API」；两个按钮——**去创建 API Key**、**去充值（官方）**。粘贴 Key 后当场验证，通过即可用。
+macOS 的 Gatekeeper 会拦截未签名的 Release `.command` / `.app`。把本仓库发给能跑终端的助手（Cursor、Claude 等），并粘贴：
 
-第一次打开可能要过 Gatekeeper 或 SmartScreen（未签名）。macOS 是解压文件夹加 `.command`，不是可安装的 `.app`。压缩包较大，因为内含便携 Node。请解压到桌面。已经安装 Node 的开发者可以继续用下面的 `npx` 或源码路径。
+```
+请按 https://github.com/chenrenhan91-art/deepseek-harness-easy 仓库里的 INSTALL.md（中文看 INSTALL.zh.md）在这台电脑安装 DeepSeek Harness。
+克隆仓库、安装依赖、构建，然后执行 pnpm dsh web。
+不要让我双击 .command、.app，也不要下 GitHub 的 Source code zip。
+```
+
+助手按 [INSTALL.md](INSTALL.md)（[中文](INSTALL.zh.md)）执行：`git clone`、`pnpm install`、`pnpm run build`、`pnpm dsh web`，然后打开 `http://127.0.0.1:3080`。首次页粘贴 DeepSeek API Key（[创建 Key](https://platform.deepseek.com/api_keys)，[充值](https://platform.deepseek.com/top_up)）。
+
+Windows 仍可从 [Releases](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases) 解压 `DeepSeek-Harness-Windows.zip`，双击 `DeepSeek Harness.exe`（SmartScreen 选「仍要运行」）。不要下载 GitHub 的 Source code zip。
 
 ## 开发者预览
 
