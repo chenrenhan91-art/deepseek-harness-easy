@@ -7,6 +7,7 @@ import {
   parsePackDesktopArgs,
   selectNode24,
   smokeCommands,
+  WINDOWS_LAUNCHER_GOENV,
   zipName,
 } from './pack-desktop.ts'
 
@@ -37,8 +38,17 @@ describe('desktop pack names and Node dist URLs', () => {
     expect(options.outDir.endsWith('tmp/desktop')).toBe(true)
   })
 
+  it('strips the extra -- that pnpm run forwards', () => {
+    const options = parsePackDesktopArgs(['--', '--out', 'dist/desktop'])
+    expect(options.outDir.endsWith('dist/desktop')).toBe(true)
+  })
+
   it('refuses an unknown platform', () => {
     expect(() => parsePackDesktopArgs(['--platform', 'linux'])).toThrow(/unknown --platform/)
+  })
+
+  it('cross-compiles the Windows launcher from macOS or Linux', () => {
+    expect(WINDOWS_LAUNCHER_GOENV).toEqual({ GOOS: 'windows', GOARCH: 'amd64', CGO_ENABLED: '0' })
   })
 
   it('smokes the built CLI entry, not tsx source', () => {

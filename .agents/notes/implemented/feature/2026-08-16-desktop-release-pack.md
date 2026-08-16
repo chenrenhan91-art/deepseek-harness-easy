@@ -32,7 +32,7 @@ This release does not sign or notarize, does not auto-update, does not ship Linu
 
 ## Verification
 
-`packages/client/ui-settings-models/tests/onboarding-page.client.spec.tsx` pins both official links. `apps/web/tests/snapshots/onboarding-deepseek-config/missing.expected.md` records the Chinese first-run page. `packages/client/ui-conversation` tests pin a `QUOTA` turn-error link and toast. `scripts/pack-desktop.spec.ts` pins zip names, official Node dist URLs, built-bin smoke argv, and launcher templates that contain no `/Users/` checkout path.
+`packages/client/ui-settings-models/tests/onboarding-page.client.spec.tsx` pins both official links. `apps/web/tests/snapshots/onboarding-deepseek-config/missing.expected.md` records the Chinese first-run page. `packages/client/ui-conversation` tests pin a `QUOTA` turn-error link and toast. `scripts/pack-desktop.spec.ts` pins zip names, official Node dist URLs, built-bin smoke argv, Windows cross-compile env, the extra `--` that `pnpm run` forwards, and launcher templates that contain no `/Users/` checkout path. The packer restores vendored `@deepseek-ai/*` packages that legacy `pnpm deploy` omits, and builds the Windows launcher with `GOOS=windows`.
 
 ## Consequences
 

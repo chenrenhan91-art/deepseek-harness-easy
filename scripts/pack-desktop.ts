@@ -5,8 +5,8 @@
  */
 import { spawnSync } from 'node:child_process'
 import { createWriteStream, existsSync, unlinkSync } from 'node:fs'
-import { chmod, cp, mkdir, rm } from 'node:fs/promises'
-import { dirname, join, resolve } from 'node:path'
+import { chmod, cp, mkdir, readFile, readdir, rm } from 'node:fs/promises'
+import { dirname, join, resolve, sep } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { parseArgs } from 'node:util'
 import { isEntry } from './release/process.ts'
@@ -65,7 +65,7 @@ export function nodeDistUrl(version: string, family: 'darwin-arm64' | 'darwin-x6
  */
 export function parsePackDesktopArgs(argv: readonly string[]): PackDesktopOptions {
   const { values } = parseArgs({
-    args: [...argv],
+    args: argv.filter(arg => arg !== '--'),
     options: {
       out: { type: 'string', default: 'dist/desktop' },
       'skip-build': { type: 'boolean', default: false },
@@ -107,9 +107,26 @@ function pnpmBin(): string {
   return 'pnpm'
 }
 
-function run(label: string, command: string, args: readonly string[], cwd = root): void {
+/** Cross-compile env for the Windows `.exe` launcher from macOS or Linux. */
+export const WINDOWS_LAUNCHER_GOENV = {
+  GOOS: 'windows',
+  GOARCH: 'amd64',
+  CGO_ENABLED: '0',
+} as const
+
+function run(
+  label: string,
+  command: string,
+  args: readonly string[],
+  cwd = root,
+  extraEnv?: NodeJS.ProcessEnv,
+): void {
   console.log(`pack-desktop: ${label}: ${command} ${args.join(' ')}`)
-  const result = spawnSync(command, [...args], { cwd, stdio: 'inherit' })
+  const result = spawnSync(command, [...args], {
+    cwd,
+    stdio: 'inherit',
+    env: { ...process.env, CI: 'true', ...extraEnv },
+  })
   if (result.error !== undefined) throw result.error
   if (result.status !== 0) throw new Error(`pack-desktop: ${label} exited ${String(result.status)}`)
 }
@@ -167,12 +184,63 @@ async function deployApp(staging: string): Promise<void> {
     '--legacy',
     '--prod',
     '--config.node-linker=hoisted',
-    '--config.auto-install-peers=false',
     '--config.link-workspace-packages=true',
     staging,
   ])
+  await restoreMissingDeepseekPackages(staging)
   const bin = join(staging, 'lib', 'bin.js')
   if (!existsSync(bin)) throw new Error(`pack-desktop: deployed CLI missing ${bin}`)
+}
+
+/**
+ * Legacy `pnpm deploy` often leaves workspace packages (especially vendored
+ * Cordis peers) beside the source tree instead of in the slice. Copy any
+ * missing `@deepseek-ai/*` declared by the staged manifests from the repo
+ * `node_modules`.
+ * @param staging - deployed CLI root.
+ */
+async function restoreMissingDeepseekPackages(staging: string): Promise<void> {
+  const srcScope = join(root, 'node_modules', '@deepseek-ai')
+  const destScope = join(staging, 'node_modules', '@deepseek-ai')
+  await mkdir(destScope, { recursive: true })
+  const present = new Set(await readdir(destScope))
+  for (let pass = 0; pass < 8; pass += 1) {
+    const declared = new Set<string>()
+    const addFromManifest = async (manifestPath: string): Promise<void> => {
+      if (!existsSync(manifestPath)) return
+      const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as {
+        dependencies?: Record<string, string>
+        peerDependencies?: Record<string, string>
+      }
+      for (const name of [
+        ...Object.keys(manifest.dependencies ?? {}),
+        ...Object.keys(manifest.peerDependencies ?? {}),
+      ]) {
+        if (name.startsWith('@deepseek-ai/')) declared.add(name.slice('@deepseek-ai/'.length))
+      }
+    }
+    await addFromManifest(join(staging, 'package.json'))
+    for (const name of present) {
+      await addFromManifest(join(destScope, name, 'package.json'))
+    }
+    let copied = 0
+    for (const short of [...declared].sort()) {
+      if (present.has(short)) continue
+      const source = join(srcScope, short)
+      if (!existsSync(source)) continue
+      const destination = join(destScope, short)
+      const nested = join(source, 'node_modules')
+      await cp(source, destination, {
+        recursive: true,
+        dereference: true,
+        filter: path => path !== nested && !path.startsWith(nested + sep),
+      })
+      present.add(short)
+      copied += 1
+      console.log(`pack-desktop: restored @deepseek-ai/${short}`)
+    }
+    if (copied === 0) return
+  }
 }
 
 async function copyRuntimeApp(appSource: string, runtimeRoot: string): Promise<void> {
@@ -234,12 +302,13 @@ async function assembleWindows(params: {
     await cp(join(extractTo, `node-${params.nodeVersion}-${family}`), join(runtime, 'node'), { recursive: true })
   }
   const exe = join(folder, 'DeepSeek Harness.exe')
-  run('go-windows-launcher', 'go', [
-    'build',
-    '-ldflags', '-H windowsgui',
-    '-o', exe,
-    join(PACKAGING, 'windows', 'launcher.go'),
-  ], join(PACKAGING, 'windows'))
+  run(
+    'go-windows-launcher',
+    'go',
+    ['build', '-ldflags', '-H windowsgui', '-o', exe, join(PACKAGING, 'windows', 'launcher.go')],
+    join(PACKAGING, 'windows'),
+    { ...WINDOWS_LAUNCHER_GOENV },
+  )
   await cp(join(PACKAGING, 'BEGINNER.zh.txt'), join(folder, '使用说明.txt'))
   return folder
 }

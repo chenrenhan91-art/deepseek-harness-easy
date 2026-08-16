@@ -32,7 +32,7 @@ GitHub 源码 ZIP 不会产生可点的桌面图标。它没有 `node_modules`�
 
 ## 验证
 
-`packages/client/ui-settings-models/tests/onboarding-page.client.spec.tsx` 钉住两条官方链。`apps/web/tests/snapshots/onboarding-deepseek-config/missing.expected.md` 记录中文首次页。`packages/client/ui-conversation` 测试钉住 `QUOTA` 的本轮失败链接和 toast。`scripts/pack-desktop.spec.ts` 钉住 zip 名、官方 Node 下载地址、构建产物冒烟 argv，以及不含 `/Users/` 检出路径的启动器模板。
+`packages/client/ui-settings-models/tests/onboarding-page.client.spec.tsx` 钉住两条官方链。`apps/web/tests/snapshots/onboarding-deepseek-config/missing.expected.md` 记录中文首次页。`packages/client/ui-conversation` 测试钉住 `QUOTA` 的本轮失败链接和 toast。`scripts/pack-desktop.spec.ts` 钉住 zip 名、官方 Node 下载地址、构建产物冒烟 argv、Windows 交叉编译环境、`pnpm run` 多出来的 `--`，以及不含 `/Users/` 检出路径的启动器模板。打包脚本会补回 legacy `pnpm deploy` 漏掉的 vendored `@deepseek-ai/*`，并用 `GOOS=windows` 编 Windows 启动器。
 
 ## 后果
 
