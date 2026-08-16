@@ -7,6 +7,7 @@ import {
   parsePackDesktopArgs,
   selectNode24,
   smokeCommands,
+  MACOS_LAUNCHER_NAME,
   WINDOWS_LAUNCHER_GOENV,
   zipName,
 } from './pack-desktop.ts'
@@ -72,8 +73,11 @@ describe('desktop launcher templates', () => {
     expect(launch).toContain("'app', 'lib', 'bin.js'")
     expect(launch).not.toContain('tsx/esm')
     expect(shell).not.toContain('/Users/')
+    expect(shell).not.toContain('.app')
+    expect(shell).not.toContain('Contents/')
     expect(shell).toContain('DSH_DESKTOP_RUNTIME')
     expect(shell).toContain('launch.mjs')
+    expect(MACOS_LAUNCHER_NAME).toBe('启动 DeepSeek Harness.command')
     expect(golang).not.toContain('/Users/')
     expect(golang).toContain('DSH_DESKTOP_RUNTIME')
     expect(golang).toContain('launch.mjs')

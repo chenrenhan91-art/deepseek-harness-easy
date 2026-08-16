@@ -1,8 +1,8 @@
 #!/bin/sh
-# Resolve the pack root from this .app, never from a developer checkout path.
+# Resolve the pack root from this .command file, never from a developer checkout.
 set -eu
-contents="$(cd "$(dirname "$0")/.." && pwd)"
-runtime="$contents/Resources/runtime"
+root="$(cd "$(dirname "$0")" && pwd)"
+runtime="$root/runtime"
 arch="$(uname -m)"
 if [ "$arch" = "arm64" ]; then
   node="$runtime/node-darwin-arm64/bin/node"

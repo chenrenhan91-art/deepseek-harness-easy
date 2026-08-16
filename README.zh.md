@@ -9,11 +9,11 @@ DeepSeek Harness（`dsh`）是由 [DeepSeek AI](https://deepseek.com) 开发的�
 ## 从 Release 下载即开（macOS / Windows）
 
 1. 打开仓库的 [Releases](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases)，按电脑下载 `DeepSeek-Harness-macOS.zip` 或 `DeepSeek-Harness-Windows.zip`。不要下载源码 ZIP。
-2. 解压到**桌面**，会看到 DeepSeek Harness 图标。
-3. 点图标：后台起本地服务，浏览器打开工作台 `http://127.0.0.1:3080`。
+2. 解压到**桌面**。macOS 看到「启动 DeepSeek Harness.command」，Windows 看到 `DeepSeek Harness.exe`。不要把压缩包拖进「应用程序」。
+3. 双击该文件：后台起本地服务，浏览器打开工作台 `http://127.0.0.1:3080`。
 4. 没有 Key：整页说明「先绑定 API」；两个按钮——**去创建 API Key**、**去充值（官方）**。粘贴 Key 后当场验证，通过即可用。
 
-第一次打开可能要过 Gatekeeper 或 SmartScreen（未签名）。压缩包较大，因为内含便携 Node。请解压到桌面；本包不会安装到 `/Applications`。已经安装 Node 的开发者可以继续用下面的 `npx` 或源码路径。
+第一次打开可能要过 Gatekeeper 或 SmartScreen（未签名）。macOS 是解压文件夹加 `.command`，不是可安装的 `.app`。压缩包较大，因为内含便携 Node。请解压到桌面。已经安装 Node 的开发者可以继续用下面的 `npx` 或源码路径。
 
 ## 开发者预览
 

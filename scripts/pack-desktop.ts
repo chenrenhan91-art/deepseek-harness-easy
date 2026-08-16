@@ -114,6 +114,9 @@ export const WINDOWS_LAUNCHER_GOENV = {
   CGO_ENABLED: '0',
 } as const
 
+/** Finder double-click entry inside the macOS zip folder (not a `.app`). */
+export const MACOS_LAUNCHER_NAME = '启动 DeepSeek Harness.command'
+
 function run(
   label: string,
   command: string,
@@ -255,17 +258,12 @@ async function assembleMacos(params: {
   cache: string
   skipNodeDownload: boolean
 }): Promise<string> {
-  const app = join(params.work, 'DeepSeek Harness.app')
-  const contents = join(app, 'Contents')
-  const runtime = join(contents, 'Resources', 'runtime')
-  await mkdir(join(contents, 'MacOS'), { recursive: true })
-  await mkdir(join(contents, 'Resources'), { recursive: true })
-  await cp(join(PACKAGING, 'macos', 'Info.plist'), join(contents, 'Info.plist'))
-  const launcher = join(contents, 'MacOS', 'DeepSeek Harness')
+  const folder = join(params.work, 'macos')
+  const runtime = join(folder, 'runtime')
+  await mkdir(folder, { recursive: true })
+  const launcher = join(folder, MACOS_LAUNCHER_NAME)
   await cp(join(PACKAGING, 'macos', 'launcher.sh'), launcher)
   await chmod(launcher, 0o755)
-  const icns = join(PACKAGING, 'macos', 'AppIcon.icns')
-  if (existsSync(icns)) await cp(icns, join(contents, 'Resources', 'AppIcon.icns'))
   await copyRuntimeApp(params.appSource, runtime)
   if (!params.skipNodeDownload) {
     for (const family of ['darwin-arm64', 'darwin-x64'] as const) {
@@ -277,8 +275,8 @@ async function assembleMacos(params: {
       await cp(join(extractTo, `node-${params.nodeVersion}-${family}`), join(runtime, `node-${family}`), { recursive: true })
     }
   }
-  await cp(join(PACKAGING, 'BEGINNER.zh.txt'), join(params.work, '使用说明.txt'))
-  return app
+  await cp(join(PACKAGING, 'BEGINNER.zh.txt'), join(folder, '使用说明.txt'))
+  return folder
 }
 
 async function assembleWindows(params: {
@@ -346,14 +344,14 @@ export async function packDesktop(options: PackDesktopOptions): Promise<void> {
   if (options.platforms.includes('macos')) {
     const work = join(staging, 'macos')
     await rm(work, { recursive: true, force: true })
-    await assembleMacos({
+    const folder = await assembleMacos({
       work,
       appSource: join(staging, 'app'),
       nodeVersion,
       cache,
       skipNodeDownload: options.skipNodeDownload,
     })
-    zipTree(work, join(options.outDir, zipName('macos')), ['DeepSeek Harness.app', '使用说明.txt'])
+    zipTree(folder, join(options.outDir, zipName('macos')), [MACOS_LAUNCHER_NAME, 'runtime', '使用说明.txt'])
   }
   if (options.platforms.includes('windows')) {
     const work = join(staging, 'windows-work')

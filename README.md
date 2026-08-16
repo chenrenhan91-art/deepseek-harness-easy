@@ -9,11 +9,11 @@ It uses an architecture where **everything is a plugin**, and is powered by [Cor
 ## Open from a Release (macOS / Windows)
 
 1. Open the repository [Releases](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases). Download `DeepSeek-Harness-macOS.zip` or `DeepSeek-Harness-Windows.zip` for your computer. Do not download the source ZIP.
-2. Unzip onto the **Desktop**. You will see the DeepSeek Harness icon.
-3. Click the icon. A local server starts and the browser opens the workbench at `http://127.0.0.1:3080`.
+2. Unzip onto the **Desktop**. You will see `启动 DeepSeek Harness.command` (macOS) or `DeepSeek Harness.exe` (Windows). Do not drag the zip into Applications.
+3. Double-click that file. A local server starts and the browser opens the workbench at `http://127.0.0.1:3080`.
 4. If you have no API key, the full-page guide asks you to bind one first. Two buttons — **Create an API key** and **Top up (official)** — open the official DeepSeek console. Paste the key; it is checked immediately.
 
-The first open may need a Gatekeeper or SmartScreen confirmation because the app is unsigned. The zip is large because it includes portable Node. Unzip onto the Desktop; this pack does not install into `/Applications`. Developers who already have Node can keep using `npx` or a source checkout below.
+The first open may need a Gatekeeper or SmartScreen confirmation because the pack is unsigned. macOS ships a zip folder and a `.command` file, not an installable `.app`. The zip is large because it includes portable Node. Unzip onto the Desktop. Developers who already have Node can keep using `npx` or a source checkout below.
 
 ## Developer preview
 
