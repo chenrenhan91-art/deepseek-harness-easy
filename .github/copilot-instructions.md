@@ -1,3 +1,3 @@
 # Copilot / coding-agent install
 
-If the user asked to install or open DeepSeek Harness, follow [INSTALL.md](../INSTALL.md) (Chinese: [INSTALL.zh.md](../INSTALL.zh.md)). Start Web with `pnpm dsh web` from a git clone. Do not tell them to double-click `启动 DeepSeek Harness.command` or a `.app`.
+If the user asked to install or open DeepSeek Harness, follow [INSTALL.md](../INSTALL.md) (Chinese: [INSTALL.zh.md](../INSTALL.zh.md)). On macOS finish with `pnpm run desktop:install` from a git clone so the Desktop icon and Electron window appear. Do not tell them to double-click a GitHub Release `启动 DeepSeek Harness.command` or a downloaded `.app`.

@@ -12,11 +12,11 @@ macOS Gatekeeper blocks the unsigned Release `.command` / `.app`. Send this repo
 
 ```
 请按 https://github.com/chenrenhan91-art/deepseek-harness-easy 仓库里的 INSTALL.md（中文看 INSTALL.zh.md）在这台电脑安装 DeepSeek Harness。
-克隆仓库、安装依赖、构建，然后执行 pnpm dsh web。
-不要让我双击 .command、.app，也不要下 GitHub 的 Source code zip。
+克隆仓库、安装依赖、构建，然后执行 pnpm run desktop:install。
+不要下 GitHub 的 Source code zip，也不要把 GitHub Release 里未签名的 .command 或 .app 当成安装方式。
 ```
 
-The agent follows [INSTALL.md](INSTALL.md) ([中文](INSTALL.zh.md)): `git clone`, `pnpm install`, `pnpm run build`, `pnpm dsh web`, then `http://127.0.0.1:3080`. Paste a DeepSeek API key on the first-run page ([create a key](https://platform.deepseek.com/api_keys), [top up](https://platform.deepseek.com/top_up)).
+The agent follows [INSTALL.md](INSTALL.md) ([中文](INSTALL.zh.md)): `git clone`, `pnpm install`, `pnpm run build`, `pnpm run desktop:install`. That writes `~/Desktop/DeepSeek Harness.app` and opens the workbench window. Paste a DeepSeek API key on the first-run page ([create a key](https://platform.deepseek.com/api_keys), [top up](https://platform.deepseek.com/top_up)).
 
 Windows can still unzip `DeepSeek-Harness-Windows.zip` from [Releases](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases) and double-click `DeepSeek Harness.exe` (SmartScreen: Run anyway). Do not download the GitHub Source code zip.
 

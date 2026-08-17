@@ -1,12 +1,12 @@
 # DeepSeek Harness Easy
 
-> Beginner fork of DeepSeek Harness. Install by cloning this git tree and running `pnpm dsh web`. Do not use the unsigned macOS `.command` or `.app` as the install path.
+> Beginner fork of DeepSeek Harness. Install by cloning this git tree and running `pnpm run desktop:install` on macOS. Do not use an unsigned GitHub Release `.command` or `.app` as the install path.
 
 The user-facing install procedure for coding agents is INSTALL.md (Chinese: INSTALL.zh.md).
 
 ## Files
 
-- [INSTALL.md](INSTALL.md): clone, pnpm install, build, `pnpm dsh web`, first-run API key.
+- [INSTALL.md](INSTALL.md): clone, pnpm install, build, `pnpm run desktop:install`, first-run API key.
 - [INSTALL.zh.md](INSTALL.zh.md): same procedure in Simplified Chinese.
 - [README.md](README.md): project overview and the paste-this-to-an-agent prompt.
 - [docs/user/guide/index.md](docs/user/guide/index.md): Web UI after the server is running.
@@ -21,7 +21,7 @@ corepack enable
 corepack prepare pnpm@11.7.0 --activate
 pnpm install
 pnpm run build
-pnpm dsh web
+pnpm run desktop:install
 ```
 
-Open http://127.0.0.1:3080 and paste a DeepSeek API key from https://platform.deepseek.com/api_keys
+Open the Electron window (default http://127.0.0.1:3080) and paste a DeepSeek API key from https://platform.deepseek.com/api_keys

@@ -10,11 +10,11 @@ GitHub 源码 ZIP 不会产生可点的桌面图标。它没有 `node_modules`�
 
 ## 决策
 
-**否决把源码 ZIP 当作新手下载。** macOS 上支持的新手路径是助手按 [INSTALL.md](../../../../INSTALL.md) 克隆本 fork 并执行 `pnpm dsh web`（[AI 协助安装](2026-08-16-ai-assisted-source-install.md)）。Windows 仍可解压 `DeepSeek-Harness-Windows.zip` 并双击 `DeepSeek Harness.exe`。这个分法写在仓库根 README 最上方。
+**否决把源码 ZIP 当作新手下载。** macOS 上支持的新手路径是助手按 [INSTALL.md](../../../../INSTALL.md) 克隆本 fork 并执行 `pnpm run desktop:install`（[macOS Electron 桌面壳](2026-08-17-macos-electron-desktop-shell.md)）。Windows 仍可解压 `DeepSeek-Harness-Windows.zip` 并双击 `DeepSeek Harness.exe`。这个分法写在仓库根 README 最上方。
 
 **源码启动和产品包分家。** 源码检出仍用 `pnpm dsh web` 启动 Web（[无需托管安装器的源码运行](../simplification/2026-08-10-source-run-without-managed-installer.md)）。产品包是已构建的 Web 切片 + 官方便携 Node + `packaging/desktop/` 下的启动器。`scripts/pack-desktop.ts` 打 zip；`.github/workflows/desktop-release.yml` 在 `dsh-v*` tag 上传。包不把 `.app` 二进制、便携 Node 或 `node_modules` 提交进 git，也不改日常源码启动。
 
-**启动器只打开系统浏览器。** `dsh web` 只打印 URL。启动器在 `127.0.0.1:3080` 未在听时拉起捆绑的 `node …/lib/bin.js web`，然后 `open` / `start` 打开该地址。Gatekeeper 仍会隔离未签名、从网上下来的 `.command`；那不是 macOS 新手路径。不做 Electron/Tauri 窗口，也不把 LaunchAgent 或 `/Users/…` 路径产品化。
+**启动器只打开系统浏览器。** `dsh web` 只打印 URL。启动器在 `127.0.0.1:3080` 未在听时拉起捆绑的 `node …/lib/bin.js web`，然后 `open` / `start` 打开该地址。Gatekeeper 仍会隔离未签名、从网上下来的 `.command`；那不是 macOS 新手路径。产品包不内嵌 Electron/Tauri，也不把 LaunchAgent 或 `/Users/…` 路径产品化。克隆后写在桌面上的 `.app` 归 [macOS Electron 桌面壳](2026-08-17-macos-electron-desktop-shell.md)。
 
 **Key 和充值只链官方站。** `ApiKeyOnboarding` 链到 `https://platform.deepseek.com/api_keys` 与 `https://platform.deepseek.com/top_up`。之后工作台出现 `QUOTA` / 402 会再给一次充值链接。凭据留在 `$DSH_HOME`；不进 git，不进压缩包。
 
@@ -24,11 +24,11 @@ GitHub 源码 ZIP 不会产生可点的桌面图标。它没有 `node_modules`�
 
 **让 GitHub 源码 ZIP 解压即可用。** 否决：源码 ZIP 就是 git 树。要填满它就得提交 `node_modules` 和便携 Node，或再做一条源码运行决策已经拒绝的安装器。
 
-**用 Electron 或 Tauri 再包一层窗口。** 否决：产品是「用系统浏览器打开本机 Web」。第二层壳只增加签名应用工具链，不改变监听地址和引导页。
+**用 Electron 或 Tauri 再包一层窗口。** 否决用于 Release 产品包：压缩包产品仍是「用系统浏览器打开本机 Web」。在下载 zip 里再加一层壳只增加签名应用工具链，不改变监听地址和引导页。
 
 **把开发者 LaunchAgent / Hermes `tsx` 命令产品化。** 否决：那些路径绑定本机和源码。产品包必须从解压根目录跑打好的 `lib/bin.js`。
 
-**把未签名的访达启动当成 macOS 新手路径。** 否决：Gatekeeper 会隔离下载来的 `.command`，对话框常常没有「打开」。面向该受众的克隆并执行 `pnpm dsh web` 写在 [AI 协助安装](2026-08-16-ai-assisted-source-install.md)。
+**把未签名的访达启动当成 macOS 新手路径。** 否决：Gatekeeper 会隔离下载来的 `.command`，对话框常常没有「打开」。面向该受众的克隆并执行 `pnpm run desktop:install` 写在 [AI 协助安装](2026-08-16-ai-assisted-source-install.md)。
 
 ## 验证
 

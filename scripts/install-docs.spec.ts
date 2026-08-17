@@ -4,14 +4,28 @@ import { describe, expect, it } from 'vitest'
 
 const root = join(import.meta.dirname, '..')
 
+function firstFence(markdown: string): string {
+  const match = markdown.match(/```\n([\s\S]*?)```/)
+  if (match?.[1] === undefined) throw new Error('missing unlabeled paste fence')
+  return match[1]
+}
+
 describe('AI install docs', () => {
-  it('tells agents to clone this fork and start pnpm dsh web', async () => {
+  it('tells agents to clone this fork and run desktop:install', async () => {
     const install = await readFile(join(root, 'INSTALL.md'), 'utf8')
+    const installZh = await readFile(join(root, 'INSTALL.zh.md'), 'utf8')
+    const readme = await readFile(join(root, 'README.md'), 'utf8')
+    const readmeZh = await readFile(join(root, 'README.zh.md'), 'utf8')
     const llms = await readFile(join(root, 'llms.txt'), 'utf8')
-    expect(install).toContain('https://github.com/chenrenhan91-art/deepseek-harness-easy.git')
-    expect(install).toContain('pnpm dsh web')
-    expect(install).toContain('不要让我双击 .command')
+    const paste = firstFence(install)
+    expect(paste).toContain('https://github.com/chenrenhan91-art/deepseek-harness-easy')
+    expect(paste).toContain('pnpm run desktop:install')
+    expect(paste).toContain('不要下 GitHub 的 Source code zip')
+    expect(firstFence(installZh)).toBe(paste)
+    expect(firstFence(readme)).toBe(paste)
+    expect(firstFence(readmeZh)).toBe(paste)
+    expect(install).toContain('~/Desktop/DeepSeek Harness.app')
     expect(llms).toContain('INSTALL.md')
-    expect(llms).toContain('pnpm dsh web')
+    expect(llms).toContain('pnpm run desktop:install')
   })
 })

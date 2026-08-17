@@ -10,8 +10,8 @@ Tell the user to send this repository URL plus the following request to Cursor, 
 
 ```
 请按 https://github.com/chenrenhan91-art/deepseek-harness-easy 仓库里的 INSTALL.md（中文看 INSTALL.zh.md）在这台电脑安装 DeepSeek Harness。
-克隆仓库、安装依赖、构建，然后执行 pnpm dsh web。
-不要让我双击 .command、.app，也不要下 GitHub 的 Source code zip。
+克隆仓库、安装依赖、构建，然后执行 pnpm run desktop:install。
+不要下 GitHub 的 Source code zip，也不要把 GitHub Release 里未签名的 .command 或 .app 当成安装方式。
 ```
 
 ## Agent procedure
@@ -33,22 +33,24 @@ pnpm install
 pnpm run build
 ```
 
-4. Start Web from source (not the Release zip):
+4. On macOS, write the Desktop icon and open the workbench window:
 
 ```sh
-pnpm dsh web
+pnpm run desktop:install
 ```
 
-5. Open `http://127.0.0.1:3080` in the system browser. If the command prints a different URL, open that. If port 3080 is busy, pass `--port 0` or another free port.
-6. On the first-run page, the user pastes a DeepSeek API key. Official links: [create a key](https://platform.deepseek.com/api_keys) and [top up](https://platform.deepseek.com/top_up). Do not commit `.env` or the key.
+That command creates `~/Desktop/DeepSeek Harness.app` (Finder still uses that path when the sidebar says 桌面) and opens an Electron window on `http://127.0.0.1:3080`. Leave that window in front of the user. If the command prints that it only supports macOS, run `pnpm dsh web` and open the printed URL in the system browser instead.
+5. On the first-run page, the user pastes a DeepSeek API key. Official links: [create a key](https://platform.deepseek.com/api_keys) and [top up](https://platform.deepseek.com/top_up). Do not commit `.env` or the key.
 
 ## Do not do
 
 - Do not download `Source code (zip)` from GitHub and expect a clickable icon.
-- Do not tell the user to double-click `启动 DeepSeek Harness.command` or a `.app` as the install method.
+- Do not treat a GitHub Release unsigned `.command` or `.app` as the install method.
 - Do not run `xattr` or disable Gatekeeper unless the user explicitly asks for that unsigned-zip workaround.
 - Do not push to `deepseek-ai/deepseek-harness`. This checkout is the beginner fork.
 
+The Desktop icon created by `pnpm run desktop:install` is local to this clone. The user may click it later; that is not the same as opening a downloaded Release zip.
+
 ## After it is running
 
-The Web UI guide starts once the server is up: [docs/user/guide/index.md](docs/user/guide/index.md). Daily source commands stay `pnpm dsh web` from this checkout ([source run](.agents/notes/implemented/simplification/2026-08-10-source-run-without-managed-installer.md)).
+The Web UI guide starts once the window is up: [docs/user/guide/index.md](docs/user/guide/index.md). Daily click `DeepSeek Harness` on the Desktop. `pnpm dsh web` still starts the server without Electron ([source run](.agents/notes/implemented/simplification/2026-08-10-source-run-without-managed-installer.md)).

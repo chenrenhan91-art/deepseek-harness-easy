@@ -1,0 +1,33 @@
+{
+  "name": "@deepseek-ai/dsh-desktop",
+  "description": "macOS Electron shell: spawn `dsh web` and load it in a native window; install a Desktop .app that points at this checkout",
+  "version": "0.1.0-rc.5",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "directory": "apps/desktop"
+  },
+  "type": "module",
+  "main": "lib/main.js",
+  "bin": {
+    "dsh-desktop-install": "lib/bin.js"
+  },
+  "files": [
+    "lib/*.js",
+    "resources"
+  ],
+  "scripts": {
+    "start": "electron .",
+    "install-macos": "node lib/bin.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^37.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}
