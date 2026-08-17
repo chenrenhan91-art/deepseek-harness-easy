@@ -2,7 +2,7 @@
 
 English | [中文](index.zh.md)
 
-If the server is not running yet, an agent should follow [INSTALL.md](../../../INSTALL.md). Start the Web UI through the [root README](../../../README.md#run) or `pnpm dsh web`; the command prints its URL. This guide begins after that server is running. The `dsh` process uses its invoking directory as the default filesystem location, but a fresh Web UI has no selected workspace until you add one.
+If the server is not running yet, an agent should follow [INSTALL.md](../../../INSTALL.md). Start the Web UI with `pnpm dsh web` or the Desktop icon; the command prints its URL. This guide begins after that server is running. The `dsh` process uses its invoking directory as the default filesystem location, but a fresh Web UI has no selected workspace until you add one.
 
 ## Configure a model
 

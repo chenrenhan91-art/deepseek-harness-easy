@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-16-ai-assisted-source-install.md
-2026-08-16-ai-assisted-source-install.md: fdf0c4328931e5c01f463b09e92a48133ed637d8
-2026-08-16-ai-assisted-source-install.zh.md: b083d67709c0566eadc62e9aab883bd36adbae18
+2026-08-16-ai-assisted-source-install.md: 70beb680c438dc02c1d044726b4a6ae7992c93f1
+2026-08-16-ai-assisted-source-install.zh.md: df765944185192ec7a395c2da09d126e646de9d4

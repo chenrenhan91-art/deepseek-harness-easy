@@ -25,3 +25,5 @@ pnpm run desktop:install
 ```
 
 Open the Electron window (default http://127.0.0.1:3080) and paste a DeepSeek API key from https://platform.deepseek.com/api_keys
+
+Do not commit or push files produced on the user's machine after install (.env, API keys, HTML pages, lib/, dist/). Keys live in ~/.dsh.

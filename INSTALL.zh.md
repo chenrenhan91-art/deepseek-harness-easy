@@ -2,7 +2,7 @@
 
 [English](INSTALL.md) | 中文
 
-这是在 Mac 上跑通工作台的支持路径。未签名的 Release 压缩包（`.app`、`.command`）会被 Gatekeeper 拦截，不能当安装方式。Windows 仍可用 [Release 的 exe 压缩包](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases)。
+这是在 Mac 上跑通工作台的支持路径。别人凭这个 git 地址自己克隆，不需要你本机的文件。未签名的 Release 压缩包（`.app`、`.command`）会被 Gatekeeper 拦截，不能当安装方式。Windows 仍可用 [Release 的 exe 压缩包](https://github.com/chenrenhan91-art/deepseek-harness-easy/releases)。
 
 ## 用户应该发给助手的一段话
 
@@ -12,6 +12,7 @@
 请按 https://github.com/chenrenhan91-art/deepseek-harness-easy 仓库里的 INSTALL.md（中文看 INSTALL.zh.md）在这台电脑安装 DeepSeek Harness。
 克隆仓库、安装依赖、构建，然后执行 pnpm run desktop:install。
 不要下 GitHub 的 Source code zip，也不要把 GitHub Release 里未签名的 .command 或 .app 当成安装方式。
+不要提交或推送本机产生的文件（.env、API Key、网页成品、lib、dist）。
 ```
 
 ## 助手操作步骤
@@ -40,7 +41,7 @@ pnpm run desktop:install
 ```
 
 该命令会创建 `~/Desktop/DeepSeek Harness.app`（访达侧栏写「桌面」时路径仍是这个）并打开指向 `http://127.0.0.1:3080` 的 Electron 窗口。把窗口留在用户面前。若命令打印只支持 macOS，就改跑 `pnpm dsh web`，并用系统浏览器打开打印出的地址。
-5. 首次页让用户粘贴 DeepSeek API Key。官方链接：[创建 Key](https://platform.deepseek.com/api_keys)、[充值](https://platform.deepseek.com/top_up)。不要提交 `.env` 或 Key。
+5. 首次页让用户粘贴 DeepSeek API Key。官方链接：[创建 Key](https://platform.deepseek.com/api_keys)、[充值](https://platform.deepseek.com/top_up)。不要提交 `.env` 或 Key；它们在这台电脑的 `~/.dsh`。
 
 ## 不要做
 
@@ -48,6 +49,7 @@ pnpm run desktop:install
 - 不要把 GitHub Release 里未签名的 `.command` 或 `.app` 当成安装方法。
 - 除非用户明确要求未签名 zip 的变通办法，否则不要跑 `xattr` 或关 Gatekeeper。
 - 不要推送到 `deepseek-ai/deepseek-harness`。这份检出是新手分发库。
+- 不要把安装后本机产生的文件（`.env`、密钥、网页、`lib/`、`dist/`）`git add` 或 `git push`。
 
 `pnpm run desktop:install` 生成的桌面图标只指向这份克隆。用户以后可以点它；那和打开从网上下来的 Release zip 不是一回事。
 

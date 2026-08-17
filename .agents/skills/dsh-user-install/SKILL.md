@@ -13,4 +13,4 @@ Read and follow [INSTALL.md](../../../INSTALL.md) (Chinese users: [INSTALL.zh.md
 4. On macOS run `pnpm run desktop:install` (writes `~/Desktop/DeepSeek Harness.app` and opens the window). If that command refuses non-macOS, run `pnpm dsh web` and open the printed URL.
 5. Leave API key entry on the first-run page. Official key and top-up links are in INSTALL.md.
 
-Do not use the GitHub Source code zip or an unsigned Release `.command` / `.app` as the install method. Do not push to `deepseek-ai/deepseek-harness`.
+Do not use the GitHub Source code zip or an unsigned Release `.command` / `.app` as the install method. Do not push to `deepseek-ai/deepseek-harness`. Do not `git add` or `git push` files produced on the user's machine after install (`.env`, API keys, HTML pages, `lib/`, `dist/`).
