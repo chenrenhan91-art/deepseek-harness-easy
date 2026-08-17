@@ -157,9 +157,10 @@ describe('web-app runtime glue', () => {
   it('defers the URL line until Loader settlement and drops it on failure or teardown', async () => {
     stageDist()
     // Settlement path: the line waits for loader.await() so supervisors can
-    // RPC immediately after observing it.
+    // RPC immediately after observing it. Dist serving shares that wait.
     const settled = new Context()
-    settled.provide('webServer', fakeHttpServer().server)
+    const { server, seat } = fakeHttpServer()
+    settled.provide('webServer', server)
     let release: () => void
     const settlement = new Promise<void>((resolve) => { release = resolve })
     provideLoader(settled, () => settlement)
@@ -167,20 +168,24 @@ describe('web-app runtime glue', () => {
     apply(settled, new Config({ printUrl: true, surfaceContext: true, trustedHosts: [] }))
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(log).not.toHaveBeenCalled()
+    expect(seat()).toBeUndefined()
     release!()
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(log).toHaveBeenCalledWith('dsh web: http://127.0.0.1:4567')
+    expect(seat()).toBeDefined()
     await settled.fiber.dispose()
 
     // Failed path: Loader reports the sibling failure; the app prints no URL
-    // for a process that is about to exit.
+    // and serves no SPA for a process that is about to exit.
     log.mockClear()
     const failed = new Context()
-    failed.provide('webServer', fakeHttpServer().server)
+    const { server: failedServer, seat: failedSeat } = fakeHttpServer()
+    failed.provide('webServer', failedServer)
     provideLoader(failed, async () => { throw new Error('boot failed') })
     apply(failed, new Config({ printUrl: true, surfaceContext: true, trustedHosts: [] }))
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(log).not.toHaveBeenCalled()
+    expect(failedSeat()).toBeUndefined()
     await failed.fiber.dispose()
 
     // Torn-down path: settlement resolves after the webserver is gone — no

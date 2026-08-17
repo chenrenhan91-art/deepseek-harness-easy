@@ -3,9 +3,9 @@
  * plus the bundle patch (`cordis.patch.yml`, declared by the `dsh.bundle.patch`
  * manifest field). The plugin owns the browser-surface glue: it resolves
  * the built frontend dist (workspace knowledge of this bundle, never user
- * config), mounts the `frontend-static` fallback owner over it, registers the
- * harness-source and web-surface prompt sections, the bash-visible web runtime
- * variable, and the URL line. App command-line values arrive through the
+ * config), mounts the `frontend-static` fallback owner after Loader settlement,
+ * registers the harness-source and web-surface prompt sections, the bash-visible
+ * web runtime variable, and the URL line. App command-line values arrive through the
  * `webStartup` service expressions in the bundle patch.
  * @module @deepseek-ai/dsh-web-app
  */
@@ -127,8 +127,8 @@ function resolveDistIndex(): string {
 export const internals: { resolveDistIndex: () => string } = { resolveDistIndex }
 
 /**
- * Mount the Web runtime: dist serving, surface prompt, the bash runtime
- * variable, and the URL line.
+ * Mount the Web runtime: dist serving after host settlement, surface prompt,
+ * the bash runtime variable, and the URL line.
  * @param ctx - plugin context carrying the webServer service.
  * @param config - validated {@link Config}.
  */
@@ -136,7 +136,6 @@ export function apply(ctx: Context, config: Config): void {
   const runtime = resolveLanTrust(ctx.webServer.host, config.trustedHosts)
   // Release dependent rows only after bind-dependent trust has been sampled once.
   ctx.provide(WEB_RUNTIME_SERVICE, runtime)
-  ctx.plugin(FrontendStatic, { distIndex: internals.resolveDistIndex() })
   if (config.surfaceContext) {
     ctx.inject(['systemPrompt'], (promptCtx) => {
       addHarnessSourceSection(promptCtx, SOURCE_ROOT)
@@ -156,30 +155,27 @@ export function apply(ctx: Context, config: Config): void {
       })
     })
   }
-  if (config.printUrl) {
-    // The URL line is a readiness signal: supervisors (and the keyless CLI
-    // smoke) RPC as soon as they observe it, so it must not print while
-    // sibling rows (the /api route owner) are still mounting. Await Loader
-    // settlement first; a hand-built tree without a Loader prints at once.
-    const printUrl = (): void => {
-      // Reuse the exact LAN snapshot provided to the /api trust fence.
-      const lanCandidate = runtime.lanAddresses[0]
-      const port = ctx.webServer.port
-      console.log(`dsh web: ${localWebUrl(ctx)}${lanCandidate === undefined ? '' : ` (LAN: http://${lanCandidate}:${String(port)})`}`)
-    }
-    // This row's own activation can precede a sibling failure. The app owns
-    // readiness by waiting for its Loader tree, or prints at once in a
-    // hand-built context without Loader.
-    const settled = ctx.get('loader')?.await()
-    if (settled === undefined) printUrl()
-    else {
-      void settled.then(() => {
-        // The tree can be disposed while the boot was in flight (early
-        // SIGTERM); a URL line for a dead server would only mislead, and
-        // reading the torn-down port would turn a clean shutdown into a crash.
-        if (ctx.get('webServer') !== undefined) printUrl()
-      // Loader reports a failed boot; this row only stays quiet.
-      }, () => {})
-    }
+  // Dist serving and the URL line share readiness: the HTTP port binds as
+  // soon as webServer activates, and client-modules incrementally injects
+  // `__DSH_BOOT__`. Serving the SPA before Loader settlement boots a partial
+  // client graph that sticks on pending providers. A hand-built tree without
+  // a Loader announces at once. Loader boot failure stays quiet (no GUI, no URL).
+  const announce = (): void => {
+    ctx.plugin(FrontendStatic, { distIndex: internals.resolveDistIndex() })
+    if (!config.printUrl) return
+    const lanCandidate = runtime.lanAddresses[0]
+    const port = ctx.webServer.port
+    console.log(`dsh web: ${localWebUrl(ctx)}${lanCandidate === undefined ? '' : ` (LAN: http://${lanCandidate}:${String(port)})`}`)
+  }
+  const settled = ctx.get('loader')?.await()
+  if (settled === undefined) announce()
+  else {
+    void settled.then(() => {
+      // The tree can be disposed while the boot was in flight (early
+      // SIGTERM); a URL line or SPA for a dead server would only mislead, and
+      // reading the torn-down port would turn a clean shutdown into a crash.
+      if (ctx.get('webServer') !== undefined) announce()
+    // Loader reports a failed boot; this row only stays quiet.
+    }, () => {})
   }
 }

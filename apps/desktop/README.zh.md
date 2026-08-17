@@ -16,7 +16,7 @@ pnpm run desktop:install
 
 ## 运行
 
-`pnpm run desktop` 会启动 Electron，但不重写桌面图标。关掉窗口会结束由本壳拉起的 `dsh web` 子进程；已经在听的服务器不会被停掉。
+窗口只会在 `GET /` 返回 200、且 HTML 里的 `window.__DSH_BOOT__` 已含客户端提供方根节点之后才加载；端口开始接受连接还不够。`pnpm run desktop` 会启动 Electron，但不重写桌面图标。关掉窗口会结束由本壳拉起的 `dsh web` 子进程；已经在听的服务器不会被停掉。
 
 ## 限制
 

@@ -1,5 +1,6 @@
 /**
- * Electron main process: spawn `dsh web` if needed and load it in a window.
+ * Electron main process: spawn `dsh web` if needed and load it in a window
+ * after the composed boot graph is present.
  * @module @deepseek-ai/dsh-desktop/main
  */
 
@@ -8,7 +9,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { app, BrowserWindow, dialog } from 'electron'
-import { DEFAULT_WEB_URL, LISTEN_TIMEOUT_MS, isListening, waitForListening } from './listen.ts'
+import { DEFAULT_WEB_URL, LISTEN_TIMEOUT_MS, isListening, isWorkbenchReady, waitForListening } from './listen.ts'
 import { resolveRepoRoot } from './paths.ts'
 import { resolveDesktopNodePath, resolveDesktopPnpmPath } from './runtime.ts'
 import { spawnDshWeb } from './server.ts'
@@ -21,16 +22,18 @@ let ownedChild: ReturnType<typeof spawnDshWeb> | undefined
 
 async function openWorkbench(): Promise<void> {
   const url = DEFAULT_WEB_URL
-  if (!await isListening(url)) {
-    const logDir = join(homedir(), '.dsh')
-    await mkdir(logDir, { recursive: true })
-    ownedChild = spawnDshWeb({
-      repoRoot,
-      pnpmPath,
-      nodePath,
-      logPath: join(logDir, 'desktop-web.log'),
-    })
-    const up = await waitForListening(url, LISTEN_TIMEOUT_MS)
+  const logDir = join(homedir(), '.dsh')
+  if (!await isWorkbenchReady(url)) {
+    if (!await isListening(url)) {
+      await mkdir(logDir, { recursive: true })
+      ownedChild = spawnDshWeb({
+        repoRoot,
+        pnpmPath,
+        nodePath,
+        logPath: join(logDir, 'desktop-web.log'),
+      })
+    }
+    const up = await waitForListening(url, LISTEN_TIMEOUT_MS, isWorkbenchReady)
     if (!up) {
       dialog.showErrorBox(
         'DeepSeek Harness',

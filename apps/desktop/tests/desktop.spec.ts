@@ -16,13 +16,16 @@ import { afterEach, describe, expect, it } from 'vitest'
 import {
   APP_NAME,
   DEFAULT_WEB_URL,
+  WORKBENCH_BOOT_ROOTS,
   assertMacosDesktopHost,
+  bootGraphIsReady,
   defaultDesktopDir,
   desktopAppPath,
   dshWebSpawn,
   installMacosDesktop,
   isElectronProcess,
   isListening,
+  isWorkbenchReady,
   renderMacosLauncher,
   resolveDesktopNodePath,
   resolveDesktopPnpmPath,
@@ -115,6 +118,7 @@ describe('workbench listen polling', () => {
 
   it('reports a closed port as down', async () => {
     expect(await isListening('http://127.0.0.1:1/')).toBe(false)
+    expect(await isWorkbenchReady('http://127.0.0.1:1/')).toBe(false)
   })
 
   it('times out when TCP accepts but HTTP never starts', async () => {
@@ -124,6 +128,7 @@ describe('workbench listen polling', () => {
     if (address === null || typeof address === 'string') throw new Error('expected a TCP address')
     try {
       expect(await isListening(`http://127.0.0.1:${String(address.port)}/`)).toBe(false)
+      expect(await isWorkbenchReady(`http://127.0.0.1:${String(address.port)}/`)).toBe(false)
     } finally {
       server.close()
     }
@@ -135,6 +140,80 @@ describe('workbench listen polling', () => {
 
   it('gives up when every probe fails', async () => {
     expect(await waitForListening('http://example.invalid/', 0, async () => false)).toBe(false)
+  })
+
+  it('rejects HTML that has no composed boot-graph roots', () => {
+    expect(bootGraphIsReady('<html><body>ok</body></html>')).toBe(false)
+    expect(bootGraphIsReady('<script>window.__DSH_BOOT__ = </script>')).toBe(false)
+    expect(bootGraphIsReady('<script>window.__DSH_BOOT__ = {"rev":"x"}')).toBe(false)
+    expect(bootGraphIsReady('<script>window.__DSH_BOOT__ = {</script>')).toBe(false)
+    expect(bootGraphIsReady('<script>window.__DSH_BOOT__ = not-json</script>')).toBe(false)
+    expect(bootGraphIsReady('<script>window.__DSH_BOOT__ = {"rev":"x","entries":{}}</script>')).toBe(false)
+    expect(bootGraphIsReady('<script>window.__DSH_BOOT__ = {"rev":"x","entries":[null,1]}</script>')).toBe(false)
+    const partial = {
+      rev: 'x',
+      entries: WORKBENCH_BOOT_ROOTS.slice(1).map(id => ({ id })),
+    }
+    expect(bootGraphIsReady(`<script>window.__DSH_BOOT__ = ${JSON.stringify(partial)}</script>`)).toBe(false)
+  })
+
+  it('accepts HTML whose boot graph includes every provider root', () => {
+    const graph = {
+      rev: 'x',
+      entries: [...WORKBENCH_BOOT_ROOTS.map(id => ({ id })), { id: '@deepseek-ai/dsh-client-ui-layout' }],
+    }
+    expect(bootGraphIsReady(`<script>window.__DSH_BOOT__ = ${JSON.stringify(graph)};</script>`)).toBe(true)
+  })
+
+  it('treats a 200 without a boot graph as not ready, while still listening', async () => {
+    const server = http.createServer((_request, response) => {
+      response.end('ok')
+    })
+    await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
+    const address = server.address()
+    if (address === null || typeof address === 'string') throw new Error('expected a TCP address')
+    const url = `http://127.0.0.1:${String(address.port)}/`
+    try {
+      expect(await isListening(url)).toBe(true)
+      expect(await isWorkbenchReady(url)).toBe(false)
+    } finally {
+      server.close()
+    }
+  })
+
+  it('treats a 200 boot graph with the provider roots as ready', async () => {
+    const graph = {
+      rev: 'x',
+      entries: WORKBENCH_BOOT_ROOTS.map(id => ({ id })),
+    }
+    const html = `<head><script>window.__DSH_BOOT__ = ${JSON.stringify(graph)}</script></head>`
+    const server = http.createServer((_request, response) => {
+      response.writeHead(200, { 'content-type': 'text/html' })
+      response.end(html)
+    })
+    await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
+    const address = server.address()
+    if (address === null || typeof address === 'string') throw new Error('expected a TCP address')
+    try {
+      expect(await isWorkbenchReady(`http://127.0.0.1:${String(address.port)}/`)).toBe(true)
+    } finally {
+      server.close()
+    }
+  })
+
+  it('treats a non-200 workbench response as not ready', async () => {
+    const server = http.createServer((_request, response) => {
+      response.writeHead(404)
+      response.end()
+    })
+    await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
+    const address = server.address()
+    if (address === null || typeof address === 'string') throw new Error('expected a TCP address')
+    try {
+      expect(await isWorkbenchReady(`http://127.0.0.1:${String(address.port)}/`)).toBe(false)
+    } finally {
+      server.close()
+    }
   })
 })
 

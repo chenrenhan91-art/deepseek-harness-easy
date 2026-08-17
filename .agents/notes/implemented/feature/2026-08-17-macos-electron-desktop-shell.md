@@ -10,7 +10,7 @@ Beginners who give this fork's git URL to an agent still end without a Finder ic
 
 ## Decision
 
-**On the user's Mac, after clone and build, `pnpm run desktop:install` writes `~/Desktop/DeepSeek Harness.app` and opens an Electron window that loads this checkout's `pnpm dsh web` at `http://127.0.0.1:3080`.** The `.app` is created on this machine, so it is not internet-quarantined the way a downloaded Release zip is. The launcher bakes absolute paths to the clone, Node, pnpm, and the Electron binary because a Finder launch has a tiny PATH.
+**On the user's Mac, after clone and build, `pnpm run desktop:install` writes `~/Desktop/DeepSeek Harness.app` and opens an Electron window that loads this checkout's `pnpm dsh web` at `http://127.0.0.1:3080`.** The `.app` is created on this machine, so it is not internet-quarantined the way a downloaded Release zip is. The launcher bakes absolute paths to the clone, Node, pnpm, and the Electron binary because a Finder launch has a tiny PATH. The HTTP port binds before the host Loader tree settles, and `client-modules` injects `window.__DSH_BOOT__` as host rows appear, so a page opened at first TCP accept can boot a partial client graph and stick on pending `typert` / `connection` / `remote` / `slots`. The window therefore loads only after `GET /` is 200 HTML whose boot graph includes those provider roots. `dsh-web-app` mounts `frontend-static` after the same Loader settlement, so Chrome hitting the port early gets 404 rather than a lying SPA.
 
 ```sh
 pnpm run desktop:install
@@ -30,6 +30,10 @@ This shell is unsigned and macOS-only. It does not notarize, does not copy into 
 
 **A managed installer that copies into `/Applications`.** Rejected: source-run without a managed installer still holds; the `.app` is a pointer at this checkout.
 
+**Keep probing until any HTTP status answers, then `loadURL`.** Rejected: that is the failure. The workbench URL line already waits for Loader settlement; the shell must wait for the composed boot graph, not the bind.
+
+**Reload the Electron window when the boot card says plugins failed.** Rejected as the primary fix: Chrome would still load the incomplete page, and a reload still races the last graph flush.
+
 ## Consequences
 
 - Electron's install script is listed in `pnpm-workspace.yaml` `allowBuilds`; CI downloads the Electron binary on every platform.
@@ -39,5 +43,5 @@ This shell is unsigned and macOS-only. It does not notarize, does not copy into 
 
 ## Verification
 
-- `apps/desktop/tests/desktop.spec.ts` pins spawn argv, Info.plist/launcher install into a temp directory, listen polling, and baked-path quoting.
+- `apps/desktop/tests/desktop.spec.ts` pins spawn argv, Info.plist/launcher install into a temp directory, listen polling, boot-graph readiness, and baked-path quoting.
 - `scripts/install-docs.spec.ts` requires `desktop:install` in INSTALL.md, both READMEs, and `llms.txt`, and requires the user paste fence to match across those files.

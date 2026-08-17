@@ -16,7 +16,7 @@ The installer is macOS-only. It bakes absolute paths to this clone, Node, pnpm, 
 
 ## Run
 
-`pnpm run desktop` starts Electron without rewriting the Desktop icon. Closing the window stops an owned `dsh web` child; it does not stop a server that was already listening.
+The window loads only after `GET /` returns 200 HTML whose `window.__DSH_BOOT__` graph includes the client provider roots; a port that merely accepts connections is not enough. `pnpm run desktop` starts Electron without rewriting the Desktop icon. Closing the window stops an owned `dsh web` child; it does not stop a server that was already listening.
 
 ## Limits
 

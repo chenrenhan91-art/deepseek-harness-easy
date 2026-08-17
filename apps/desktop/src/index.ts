@@ -9,7 +9,10 @@ export {
   resolveInfoPlist,
   shellSingleQuote,
 } from './install-macos.ts'
-export { DEFAULT_WEB_URL, LISTEN_TIMEOUT_MS, isListening, waitForListening } from './listen.ts'
+export {
+  DEFAULT_WEB_URL, LISTEN_TIMEOUT_MS, WORKBENCH_BOOT_ROOTS,
+  bootGraphIsReady, isListening, isWorkbenchReady, waitForListening,
+} from './listen.ts'
 export { APP_NAME, defaultDesktopDir, desktopAppPath, resolveRepoRoot } from './paths.ts'
 export {
   assertMacosDesktopHost,
