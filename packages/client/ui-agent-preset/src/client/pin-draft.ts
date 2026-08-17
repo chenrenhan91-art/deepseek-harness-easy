@@ -25,7 +25,7 @@ const PRIMARY_PINS = new Set([
   'explain-clearly',
   'make-a-deck',
   'set-up-a-routine',
-  'first-project',
+  'source-roster',
 ])
 
 /** One catalog row the pin row can show. */

@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-15-localized-slash-menu-and-vision-skill.md
-2026-08-15-localized-slash-menu-and-vision-skill.md: 4945f925564629c7a624060054b9234a025e422b
-2026-08-15-localized-slash-menu-and-vision-skill.zh.md: d1ee65e8ff2060c031941b37bf586f87fe7adcb0
+2026-08-15-localized-slash-menu-and-vision-skill.md: 232d14cd230160f453fee874eb162fdf97d83a3d
+2026-08-15-localized-slash-menu-and-vision-skill.zh.md: ca2a6eccddf098f71f96c39d3ada20e8ec63c1d2

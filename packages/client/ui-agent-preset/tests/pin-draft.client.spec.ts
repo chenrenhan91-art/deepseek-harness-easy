@@ -42,6 +42,19 @@ describe('pin-draft', () => {
     expect(pins.some(pin => pin.name === SHARED_SKILL_ID)).toBe(false)
   })
 
+  it('leads the briefing row with the roster skill', () => {
+    expect(modePins([
+      { name: SHARED_SKILL_ID, description: '视觉技能：看图' },
+      { name: 'keep-the-source', description: '核对出处：打不开原文的条目不要写进简报' },
+      { name: 'draft-a-brief', description: '出短简报：按领域分组' },
+      { name: 'source-roster', description: '公开信源：优先用内置公开信源' },
+    ]).map(pin => pin.name)).toEqual([
+      'source-roster',
+      'draft-a-brief',
+      'keep-the-source',
+    ])
+  })
+
   it('prepends only the missing tokens and keeps user prose', () => {
     expect(prependPins('', ['explain-clearly', 'work-an-example'])).toBe(
       '/explain-clearly /work-an-example ',

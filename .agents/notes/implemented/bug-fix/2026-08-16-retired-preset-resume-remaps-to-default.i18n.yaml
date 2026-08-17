@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-08-16-retired-preset-resume-remaps-to-default.md
-2026-08-16-retired-preset-resume-remaps-to-default.md: 634532c0cb2c2b715c68fd486cb01e510f04ad8a
-2026-08-16-retired-preset-resume-remaps-to-default.zh.md: d29bce88533fd305344d72279885266ad90ffd8b
+2026-08-16-retired-preset-resume-remaps-to-default.md: 96c6d5234348732adee0c974997d223b1cd98477
+2026-08-16-retired-preset-resume-remaps-to-default.zh.md: 04d77790a3ce1bec2f2f6f9b246a3ea36fc46f7d

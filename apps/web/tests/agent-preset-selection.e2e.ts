@@ -146,7 +146,7 @@ describe('web e2e: agent-preset selection', () => {
     expect(snapshot).toContain('文件整理')
     expect(snapshot).toContain('做 PPT')
     expect(snapshot).toContain('电脑自动化')
-    expect(snapshot).toContain('学编程')
+    expect(snapshot).toContain('资讯收集')
     expect(await grid.getByRole('radio', { name: /学习答疑/ }).getAttribute('aria-checked')).toBe('true')
   })
 

@@ -12,7 +12,7 @@
 
 - `ctx.agentPresets.defaultId: string` 调用方未指定时挂载的 preset id。
 - `ctx.agentPresets.list(): Promise<AgentPreset[]>` 当前各根目录提供的全部 preset；id 重复时靠前的根目录胜出；损坏的 preset 也在其中，各自携带原因。
-- `ctx.agentPresets.resolve(id?): Promise<AgentPreset>` 按 id 取一个 preset，缺省取 `defaultId`。未指名的解析若发现 `defaultId` 已不在名册上，会再试 `config.default`，这样 settings 里仍写着已删除随附 id 的文档不会让每个未指名的会话都启动失败。显式 id 若是已退役的随附名（`standard`、`code`、`minimal`、`cordis`）也走同一回退，因此记在那些 id 下的旧会话仍能 resume；其他显式 id 仍会抛错，并列出可用 id。损坏的 preset 照样解析——删除、读取与上报都需要这一行。
+- `ctx.agentPresets.resolve(id?): Promise<AgentPreset>` 按 id 取一个 preset，缺省取 `defaultId`。未指名的解析若发现 `defaultId` 已不在名册上，会再试 `config.default`，这样 settings 里仍写着已删除随附 id 的文档不会让每个未指名的会话都启动失败。显式 id 若是已退役的随附名（`standard`、`code`、`minimal`、`cordis`、`learn-code`）也走同一回退，因此记在那些 id 下的旧会话仍能 resume；其他显式 id 仍会抛错，并列出可用 id。损坏的 preset 照样解析——删除、读取与上报都需要这一行。
 - `ctx.agentPresets.mount(agentCtx, id?): Promise<AgentPreset>` 用一个 preset 组装一个 agent——确保其常驻挂载（并发去重）并把 agent 的 scope key 认父到它——返回该 preset 供调用方记录。对损坏的 preset 直接以发现时记下的原因拒绝，所以每种不可加载的形态都在加载器介入之前以同一方式失败。
 - `ctx.agentPresets.composeFrom(agentCtx, parentCtx): string | undefined` 让一个 agent 加入另一个 agent 已在运行的常驻组装，返回所加入的 preset id——父方未加入任何 preset 时返回 `undefined`，那是无 roster 的部署，不是错误。这是认父而非挂载，因此同步、且自身没有组装失败模式；调用方用错（上下文无 scope、agent 已加入过）仍会拒绝。
 - `ctx.agentPresets.composedPreset(agentCtx): string | undefined` 某个**活着的** agent 正在运行的 preset，从其 scope 链读取而不是从其会话读取——对于持久化 header 尚在构建中的 agent，这是唯一能拿到的答案。

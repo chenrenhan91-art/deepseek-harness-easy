@@ -174,6 +174,7 @@ describe('the default preset as a user setting', () => {
     // leftover session unopenable.
     expect((await ctx.agentPresets.resolve('standard')).id).toBe('study')
     expect((await ctx.agentPresets.resolve('code')).id).toBe('study')
+    expect((await ctx.agentPresets.resolve('learn-code')).id).toBe('study')
     await expect(ctx.agentPresets.resolve('no-such-preset'))
       .rejects.toThrow(/preset "no-such-preset" not found/)
   })

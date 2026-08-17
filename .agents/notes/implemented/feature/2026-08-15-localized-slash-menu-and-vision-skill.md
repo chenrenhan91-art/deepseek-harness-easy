@@ -14,7 +14,7 @@ The Web slash menu showed Host command descriptions as English catalog strings e
 
 **Launcher lists every `/` source.** `toggleSource` still records which chrome control opened the menu, but it seeds and fetches every source registered on that trigger. Empty ready groups stay hidden. Typing `/` and pressing `+` therefore share the same command-plus-skill roster; `@` subagent sources stay on their own trigger.
 
-**Shipped `vision` skill.** [`apps/cli/config/skills/vision/`](../../../../apps/cli/config/skills/vision/) is a custom skill root on every shipped beginner mode (`web-page`, `writing`, `sheet`, `files`, `study`, `slides`, `autopilot`, `learn-code`), mounted via `../../skills/` beside each mode's own `skills/`. The skill is user-invocable; a menu pick inserts `/vision ` and the Host pre-step injects the body. The [beginner Web workbench](./2026-08-15-beginner-web-workbench.md) owns that roster.
+**Shipped `vision` skill.** [`apps/cli/config/skills/vision/`](../../../../apps/cli/config/skills/vision/) is a custom skill root on every shipped beginner mode (`web-page`, `writing`, `sheet`, `files`, `study`, `slides`, `autopilot`, `briefing`), mounted via `../../skills/` beside each mode's own `skills/`. The skill is user-invocable; a menu pick inserts `/vision ` and the Host pre-step injects the body. The [beginner Web workbench](./2026-08-15-beginner-web-workbench.md) owns that roster.
 
 ## Alternatives considered
 

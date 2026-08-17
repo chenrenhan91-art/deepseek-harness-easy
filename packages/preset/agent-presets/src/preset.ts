@@ -24,7 +24,7 @@ export const PRESET_ID = /^[a-z0-9][a-z0-9-]*$/
  * still fails loud.
  */
 export const RETIRED_SHIPPED_PRESET_IDS: ReadonlySet<string> = new Set([
-  'standard', 'code', 'minimal', 'cordis',
+  'standard', 'code', 'minimal', 'cordis', 'learn-code',
 ])
 
 /** One preset directory that carries a mountable agent composition. */

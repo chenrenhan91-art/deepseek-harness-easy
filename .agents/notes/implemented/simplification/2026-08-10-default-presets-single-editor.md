@@ -10,7 +10,7 @@ The `standard`, `code`, and `cordis` presets exposed both the `read`/`write`/`ed
 
 ## Decision
 
-The `web-page`, `writing`, `sheet`, `files`, `study`, `slides`, `autopilot`, and `learn-code` presets mount `dsh-tool-fs` and `dsh-tool-fs-search`, but do not mount `dsh-tool-str-replace-editor`. Code Mode therefore omits `str_replace_editor` from both its registry and generated SDK. The JSON-RPC [`minimal.cordis.yml`](../../../../examples/jsonrpc-agent/minimal.cordis.yml) continues to mount `dsh-tool-str-replace-editor`, and deployments or user-authored presets may still mount the plugin explicitly. The [beginner Web workbench](../feature/2026-08-15-beginner-web-workbench.md) owns the eight-mode roster.
+The `web-page`, `writing`, `sheet`, `files`, `study`, `slides`, `autopilot`, and `briefing` presets mount `dsh-tool-fs` and `dsh-tool-fs-search`, but do not mount `dsh-tool-str-replace-editor`. Code Mode therefore omits `str_replace_editor` from both its registry and generated SDK. The JSON-RPC [`minimal.cordis.yml`](../../../../examples/jsonrpc-agent/minimal.cordis.yml) continues to mount `dsh-tool-str-replace-editor`, and deployments or user-authored presets may still mount the plugin explicitly. The [beginner Web workbench](../feature/2026-08-15-beginner-web-workbench.md) owns the eight-mode roster.
 
 This decision narrows the preset roster rather than removing the tool package or its Python runtime support. The earlier [shared-roster decision](../feature/2026-07-31-even-out-shipped-tool-rosters.md) continues to own why surface-neutral tools live in preset composition; this note owns the editor exception.
 

@@ -14,7 +14,7 @@ Web 斜杠菜单在界面语言为中文时，仍显示 Host 命令目录里的�
 
 **启动器列出该触发符下的全部 source。** `toggleSource` 仍记录是哪个 chrome 控件打开了菜单，但会为该 trigger 上已注册的每一个 source 建组并拉取候选。空的 ready 组保持隐藏。键入 `/` 与按下 `+` 因此共用同一份命令加 skill 名册；`@` 的 subagent source 仍留在自己的 trigger 上。
 
-**随附 `vision` skill。** [`apps/cli/config/skills/vision/`](../../../../apps/cli/config/skills/vision/) 是每个随附新手模式（`web-page`、`writing`、`sheet`、`files`、`study`、`slides`、`autopilot`、`learn-code`）的自定义 skill 根，经 `../../skills/` 与各模式自己的 `skills/` 一并挂载。该 skill 可供用户调用；菜单 pick 会插入 `/vision `，由 Host 的 pre-step 注入正文。名册由[新手 Web 工作台](./2026-08-15-beginner-web-workbench.md)拥有。
+**随附 `vision` skill。** [`apps/cli/config/skills/vision/`](../../../../apps/cli/config/skills/vision/) 是每个随附新手模式（`web-page`、`writing`、`sheet`、`files`、`study`、`slides`、`autopilot`、`briefing`）的自定义 skill 根，经 `../../skills/` 与各模式自己的 `skills/` 一并挂载。该 skill 可供用户调用；菜单 pick 会插入 `/vision `，由 Host 的 pre-step 注入正文。名册由[新手 Web 工作台](./2026-08-15-beginner-web-workbench.md)拥有。
 
 ## Alternatives considered
 

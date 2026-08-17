@@ -18,7 +18,7 @@ import { WorkspaceManager, type WorkspaceListPhase } from './manager.ts'
  * `preset "standard" not found`.
  */
 const RETIRED_SHIPPED_PRESET_IDS: ReadonlySet<string> = new Set([
-  'standard', 'code', 'minimal', 'cordis',
+  'standard', 'code', 'minimal', 'cordis', 'learn-code',
 ])
 
 /** Workspace list plus the two-baseline readiness and default-target projection. */

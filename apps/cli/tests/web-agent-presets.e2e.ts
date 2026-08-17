@@ -30,7 +30,7 @@ const WEB_PATCH = join(REPO_ROOT, 'packages/bundle/web-app/cordis.patch.yml')
 const INSTALL_ANCHOR = join(REPO_ROOT, 'apps/cli/package.json')
 /** Every shipped beginner mode, in the order the roster presents them. */
 const MODES = [
-  'web-page', 'writing', 'sheet', 'files', 'study', 'slides', 'autopilot', 'learn-code',
+  'web-page', 'writing', 'sheet', 'files', 'study', 'slides', 'autopilot', 'briefing',
 ] as const
 
 /**
@@ -235,6 +235,22 @@ describe('the shipped Web composition', () => {
       ]))
       expect(studySkills).not.toContain('build-a-page')
       expect(pageSkills).not.toContain('explain-clearly')
+
+      const briefing = await ctx.agents.create({
+        sessionId: SessionId('preset-briefing'),
+        setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'briefing').then(() => undefined),
+      })
+      try {
+        const briefingSkills = (await ctx.skills.list({ scope: briefing.agent })).map(skill => skill.name)
+        expect(toolNames(ctx, briefing.agent)).toEqual(toolNames(ctx, study.agent))
+        expect(briefingSkills).toEqual(expect.arrayContaining([
+          'source-roster', 'draft-a-brief', 'keep-the-source', 'vision',
+        ]))
+        expect(briefingSkills).not.toContain('explain-clearly')
+        expect(studySkills).not.toContain('source-roster')
+      } finally {
+        await briefing.dispose()
+      }
     } finally {
       await page.dispose()
       await study.dispose()
@@ -267,8 +283,10 @@ describe('the shipped Web composition', () => {
     // A mode's skill root is derived from its own `baseUrl`, so the expertise
     // travels with the directory wherever the mode is installed.
     const skill = join(CONFIG_DIR, 'agent-presets', 'web-page', 'skills', 'build-a-page', 'SKILL.md')
+    const briefing = join(CONFIG_DIR, 'agent-presets', 'briefing', 'skills', 'source-roster', 'SKILL.md')
 
     expect((await readFile(skill, 'utf8')).startsWith('---\nname: build-a-page')).toBe(true)
+    expect((await readFile(briefing, 'utf8')).startsWith('---\nname: source-roster')).toBe(true)
   })
 
   it('merges the global skill layer into a mode agent\'s catalog, keeping local discovery preset-side', async () => {
@@ -295,11 +313,16 @@ describe('the shipped Web composition', () => {
       // local discovery moved behind the presets with `skill-filesystem`.
       expect((await ctx.skills.list({ cwd: proj })).map(skill => skill.name)).toEqual(['dsh-badge'])
 
-      // A mode agent's view merges the global layer with its own local
-      // discovery over the session cwd.
+      // A mode agent's view merges the global layer with the preset's own
+      // roots (domain skills plus vision). Beginner modes set
+      // `includeDefaultRoots: false`, so a workspace `.dsh/skills` file stays
+      // out of both the catalog and the model-facing skill tool.
       const scoped = (await ctx.skills.list({ cwd: proj, scope: handle.agent })).map(skill => skill.name)
       expect(scoped).toContain('dsh-badge')
-      expect(scoped).toContain('project-proof')
+      expect(scoped).toEqual(expect.arrayContaining([
+        'explain-clearly', 'check-understanding', 'work-an-example', 'vision',
+      ]))
+      expect(scoped).not.toContain('project-proof')
 
       // The mode's own loader tool resolves the global-layer skill.
       const loaded = await ctx.tools.execute({

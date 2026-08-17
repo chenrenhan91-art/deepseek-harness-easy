@@ -12,9 +12,9 @@ Status: implemented
 
 三处恢复：
 
-- `AgentPresets.resolve()` 在未传 id、且 `defaultId` 已不在名册上时，再试 `config.default`。显式 id 若是已退役的随附名（`standard`、`code`、`minimal`、`cordis`）也走同一回退，因为 resume、select 与 mount 都经过 `resolve`，一条仍写着 `standard` 的旧会话否则会让每一条都失败。其他显式 id 仍抛错。
+- `AgentPresets.resolve()` 在未传 id、且 `defaultId` 已不在名册上时，再试 `config.default`。显式 id 若是已退役的随附名（`standard`、`code`、`minimal`、`cordis`、`learn-code`）也走同一回退，因为 resume、select 与 mount 都经过 `resolve`，一条仍写着 `standard` 的旧会话否则会让每一条都失败。其他显式 id 仍抛错。
 - 网关 `composeAgent` 按名册成员关系回退**记录下来的** id，而不是 `instanceof UnknownPresetError`（第二份包副本会认不出这个类，并把 `preset "standard" not found` 原样抛回）。`session.create` 与 `agentPreset.select` 对显式未知 id 仍明确失败。
-- 模式网格不会对记录着名册里没有的 preset 的会话调用 `agentPreset.select`。那次 select 会先 resume 已退役身份并失败。点击会用 `session.create({ agentPreset })` 新建空白会话并打开它。新建会话也不会复用仍写着 `standard`、`code`、`minimal` 或 `cordis` 的空白会话，因此侧栏动作不会再次落到同一身份上。
+- 模式网格不会对记录着名册里没有的 preset 的会话调用 `agentPreset.select`。那次 select 会先 resume 已退役身份并失败。点击会用 `session.create({ agentPreset })` 新建空白会话并打开它。新建会话也不会复用仍写着 `standard`、`code`、`minimal`、`cordis` 或 `learn-code` 的空白会话，因此侧栏动作不会再次落到同一身份上。
 
 模式网格会忽略当前会话里不在名册上的 preset，改显示部署默认。preset 仍在名册上的已开始会话仍锁定（`agent-preset-locked`）；这种状态下点击也会新建会话，因此卡片仍能切到用户接下来要对话的组装。
 
@@ -36,4 +36,4 @@ Status: implemented
 
 ## 测试
 
-`packages/preset/agent-presets/tests/settings.spec.ts` 钉住未指名解析的回退，以及显式 id 仍然响亮失败。`packages/host/apiproxy/tests/api-proxy-agent-preset.spec.ts` 在 `study`/`writing` 名册上 resume 一条冷的 `standard` 会话并选中 `writing`。`packages/client/ui-agent-preset/tests/apply.client.spec.ts` 在当前会话仍写着 `standard` 时把网格开在 `study` 上，并新建 `writing` 会话而不是对该退役行或已开始会话调用 `select`。`packages/client/runtime/tests/workspaces-service.client.spec.ts` 跳过对仍写着 `standard` 的空白会话的新建会话复用。
+`packages/preset/agent-presets/tests/settings.spec.ts` 钉住未指名解析的回退，以及显式 id 仍然响亮失败，含 `learn-code`。`packages/host/apiproxy/tests/api-proxy-agent-preset.spec.ts` 在 `study`/`writing` 名册上 resume 一条冷的 `standard` 会话并选中 `writing`。`packages/client/ui-agent-preset/tests/apply.client.spec.ts` 在当前会话仍写着 `standard` 时把网格开在 `study` 上，并新建 `writing` 会话而不是对该退役行或已开始会话调用 `select`。`packages/client/runtime/tests/workspaces-service.client.spec.ts` 跳过对仍写着 `standard` 或 `learn-code` 的空白会话的新建会话复用。

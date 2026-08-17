@@ -18,7 +18,7 @@ import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-cli
 import {
   IconChecklistOutline14, IconCodeOutline16, IconDataOutline16, IconFolderOpenOutline16,
   IconGlobeOutline14, IconListPenOutline16, IconQuestionOutline14, IconRefreshOutline16,
-  IconSparkle16,
+  IconSearchOutline16, IconSparkle16,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 // Type-only: pulls the ui-conversation SlotMap merge (the hero mode seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -51,6 +51,7 @@ const MODE_ICONS: Readonly<Partial<Record<string, ComponentType<{ className?: st
   slides: IconChecklistOutline14,
   repeat: IconRefreshOutline16,
   code: IconCodeOutline16,
+  search: IconSearchOutline16,
 }
 
 const FALLBACK_ICON = IconSparkle16

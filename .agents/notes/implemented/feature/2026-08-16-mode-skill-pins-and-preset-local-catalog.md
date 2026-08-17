@@ -25,7 +25,7 @@ The composer `+` menu listed every user-invocable skill the session could see. B
 | `study` | `explain-clearly`, `check-understanding`, `work-an-example` |
 | `slides` | `make-a-deck`, `one-point`, `speak-the-deck` |
 | `autopilot` | `set-up-a-routine`, `check-it-ran`, `safe-batch` |
-| `learn-code` | `first-project`, `debug-out-loud`, `run-and-show` |
+| `briefing` | `source-roster`, `draft-a-brief`, `keep-the-source` |
 
 ## Alternatives considered
 
@@ -46,4 +46,4 @@ The composer `+` menu listed every user-invocable skill the session could see. B
 
 ## Testing
 
-`packages/client/ui-agent-preset` unit tests pin draft swap/remove, catalog-to-pin mapping (vision dropped, cap 3), dock registration, and tag toggle. `apps/cli/tests/web-agent-presets.e2e.ts` pins the three-plus-vision catalogs on `study` and `web-page`. `apps/web/tests/agent-preset-selection.e2e.ts` pins the writing and study pin rows, the matching slash catalogs, and the absence of a seeded workspace skill.
+`packages/client/ui-agent-preset` unit tests pin draft swap/remove, catalog-to-pin mapping (vision dropped, cap 3), dock registration, tag toggle, and the briefing primary pin. `apps/cli/tests/web-agent-presets.e2e.ts` pins the three-plus-vision catalogs on `study`, `web-page`, and `briefing`, and that a workspace `.dsh/skills` file stays out of a beginner mode catalog. `apps/web/tests/agent-preset-selection.e2e.ts` pins the writing and study pin rows, the matching slash catalogs, and the absence of a seeded workspace skill.

@@ -25,7 +25,7 @@ Status: implemented
 | `study` | `explain-clearly`、`check-understanding`、`work-an-example` |
 | `slides` | `make-a-deck`、`one-point`、`speak-the-deck` |
 | `autopilot` | `set-up-a-routine`、`check-it-ran`、`safe-batch` |
-| `learn-code` | `first-project`、`debug-out-loud`、`run-and-show` |
+| `briefing` | `source-roster`、`draft-a-brief`、`keep-the-source` |
 
 ## 考虑过的替代方案
 
@@ -46,4 +46,4 @@ Status: implemented
 
 ## 验证
 
-`packages/client/ui-agent-preset` 的单元测试钉住草稿替换/删除、目录到标签的映射（去掉 vision、上限 3）、dock 注册，以及标签开关。`apps/cli/tests/web-agent-presets.e2e.ts` 钉住 `study` 与 `web-page` 上「三个领域 skill 加 vision」的目录。`apps/web/tests/agent-preset-selection.e2e.ts` 钉住写作与学习答疑的标签行、对应的斜杠目录，以及已播种的工作区 skill 不会出现。
+`packages/client/ui-agent-preset` 的单元测试钉住草稿替换/删除、目录到标签的映射（去掉 vision、上限 3）、dock 注册、标签开关，以及 briefing 的主 skill 标签。`apps/cli/tests/web-agent-presets.e2e.ts` 钉住 `study`、`web-page` 与 `briefing` 上「三个领域 skill 加 vision」的目录，以及工作区 `.dsh/skills` 不会进入新手模式目录。`apps/web/tests/agent-preset-selection.e2e.ts` 钉住写作与学习答疑的标签行、对应的斜杠目录，以及已播种的工作区 skill 不会出现。

@@ -12,7 +12,7 @@ Status: implemented
 
 **一份新手 Web 组合。** [`packages/bundle/web-app/cordis.patch.yml`](../../../../packages/bundle/web-app/cordis.patch.yml) 就是 Web 产品：它禁用目标、后台任务、子智能体、Ralph、workflow 与插件配置工具的宿主行，并且不加载这些行所驱动的专业向客户端包。Chat 是唯一的会话视图；只组合 Chat 时隐藏视图标签页。
 
-**八个模式替换原先四个随附 preset。** `apps/cli/config/agent-presets/` 持有 `web-page`、`writing`、`sheet`、`files`、`study`、`slides`、`autopilot` 与 `learn-code`。每个目录有中文 `preset.yml` 元数据、同一套 agent 平面工具清单（文件系统、shell、skill、计划、todo、web、日程、提问、读图）、一份人设，以及三份原创中文领域 skill。`study` 是部署默认，因为它回答问题而不产出文件。八个模式都通过 `../../skills/` 额外挂载共享视觉 skill [`apps/cli/config/skills/vision/`](../../../../apps/cli/config/skills/vision/)，再挂载各自的 `skills/`，并设置 `includeDefaultRoots: false`，因此 `+` 不会列出 `~/.agents/skills` 或工作区 skill。名册中不再有 `standard`、`code`、`minimal` 与 `cordis`。JSON-RPC 的 [`minimal.cordis.yml`](../../../../examples/jsonrpc-agent/minimal.cordis.yml) 仍是该启动路径上的双工具 RL 组合（[minimal-preset 组合](../bug-fix/2026-08-10-minimal-preset-owns-rl-composition.md)，[裸双工具运行时](./2026-08-11-minimal-profiles-bare-two-tool-runtime.md)）。点选模式会把它的领域 skill 武装成编辑器标签（[模式 skill 标签](./2026-08-16-mode-skill-pins-and-preset-local-catalog.md)）。
+**八个模式替换原先四个随附 preset。** `apps/cli/config/agent-presets/` 持有 `web-page`、`writing`、`sheet`、`files`、`study`、`slides`、`autopilot` 与 `briefing`。每个目录有中文 `preset.yml` 元数据、同一套 agent 平面工具清单（文件系统、shell、skill、计划、todo、web、日程、提问、读图）、一份人设，以及三份原创中文领域 skill。`study` 是部署默认，因为它回答问题而不产出文件。八个模式都通过 `../../skills/` 额外挂载共享视觉 skill [`apps/cli/config/skills/vision/`](../../../../apps/cli/config/skills/vision/)，再挂载各自的 `skills/`，并设置 `includeDefaultRoots: false`，因此 `+` 不会列出 `~/.agents/skills` 或工作区 skill。名册中不再有 `standard`、`code`、`minimal`、`cordis` 与 `learn-code`。JSON-RPC 的 [`minimal.cordis.yml`](../../../../examples/jsonrpc-agent/minimal.cordis.yml) 仍是该启动路径上的双工具 RL 组合（[minimal-preset 组合](../bug-fix/2026-08-10-minimal-preset-owns-rl-composition.md)，[裸双工具运行时](./2026-08-11-minimal-profiles-bare-two-tool-runtime.md)）。点选模式会把它的领域 skill 武装成编辑器标签（[模式 skill 标签](./2026-08-16-mode-skill-pins-and-preset-local-catalog.md)）。第八张卡片是资讯简报编辑（[资讯收集模式](./2026-08-17-briefing-mode-replaces-learn-code.md)）。
 
 **新会话页上的模式卡片。** `@deepseek-ai/dsh-client-ui-agent-preset` 占据 `conversation.hero.modes`，以单选卡片组呈现。选择会暂存，直到出现空白会话。已开始的会话会被拒绝（`agent-preset-locked`）。展示文案按各 `preset.yml` 原文显示。
 
@@ -44,5 +44,5 @@ Status: implemented
 - 占用随附 id 的用户自有 preset 仍输给更靠前的系统根（家目录里的 `study` 会被随附 `study` 遮蔽）。
 - 英文界面语言不会把权限 chip 译成英文：名称写在 Web 的 permission 行上。
 - JSON-RPC 的 minimal 示例是剩下的双工具 RL 组合；Web 不再随附 `minimal`。
-- 会话或 settings 默认值若仍写着已删除的随附 id（`standard` / `code` / `minimal` / `cordis`），会经未指名的默认回退，而不是拒绝打开（[已退役 preset 的 resume](../bug-fix/2026-08-16-retired-preset-resume-remaps-to-default.md)）。
+- 会话或 settings 默认值若仍写着已删除的随附 id（`standard` / `code` / `minimal` / `cordis` / `learn-code`），会经未指名的默认回退，而不是拒绝打开（[已退役 preset 的 resume](../bug-fix/2026-08-16-retired-preset-resume-remaps-to-default.md)）。
 - Windows：每个新手模式都用插值后的 `disabled` 门控 `tool-bash` / `tool-pwsh`，与原先通用 preset 相同（[Loader `disabled` 插值](../architecture/2026-08-11-loader-entry-disabled-interpolation.md)）。
