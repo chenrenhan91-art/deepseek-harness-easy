@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DeepSeek Harness · 是什么、为什么用</title>
+  <style>
+    :root {
+      --bg: #e6ebe3;
+      --paper: #f4f7f1;
+      --ink: #121714;
+      --muted: #4c564e;
+      --line: #c3cbc0;
+      --rail: #d5ddd0;
+      --accent: #c4452a;
+      --accent-ink: #8e2e1c;
+      --fill: #1c2420;
+      --tick: #2a332e;
+      --before: #6d5a56;
+      --radius: 0;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { animation: none !important; transition: none !important; }
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Source Han Sans SC", sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    a { color: var(--accent-ink); }
+    a:hover { color: var(--accent); }
+    button { font: inherit; color: inherit; }
+
+    .skip {
+      position: absolute;
+      left: -999px;
+      top: 0;
+    }
+    .skip:focus {
+      left: 12px;
+      top: 12px;
+      z-index: 20;
+      background: var(--fill);
+      color: var(--paper);
+      padding: 8px 12px;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 0 28px;
+      background: color-mix(in srgb, var(--bg) 88%, white);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+    }
+    .brand strong { font-weight: 650; letter-spacing: -0.02em; }
+    .brand span { color: var(--muted); font-size: 13px; }
+
+    nav {
+      display: flex;
+      gap: 22px;
+      font-size: 14px;
+    }
+    nav a {
+      color: var(--ink);
+      text-decoration: none;
+    }
+    nav a:hover { color: var(--accent); }
+
+    .wrap {
+      width: min(var(--max), calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.92fr);
+      gap: 40px;
+      align-items: end;
+      padding: 36px 0 48px;
+      min-height: auto;
+    }
+
+    .hero h1 {
+      margin: 0 0 14px;
+      font-size: clamp(2rem, 4.2vw, 3.35rem);
+      line-height: 1.12;
+      letter-spacing: -0.035em;
+      font-weight: 650;
+      max-width: 14ch;
+    }
+
+    .hero p.lead {
+      margin: 0 0 22px;
+      max-width: 32ch;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      background: var(--accent);
+      color: #fff8f5;
+      text-decoration: none;
+      padding: 11px 16px;
+      border: 1px solid var(--accent);
+    }
+    .hero-cta:hover { filter: brightness(1.05); color: #fff; }
+    .hero-cta:active { transform: translateY(1px); }
+
+    .hero figure {
+      margin: 0;
+      border: 1px solid var(--line);
+      background: var(--rail);
+    }
+    .hero img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-height: 360px;
+      object-fit: cover;
+    }
+    .hero figcaption {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    section { padding: 56px 0; }
+    section + section { border-top: 1px solid var(--line); }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: clamp(1.45rem, 2.4vw, 1.9rem);
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      font-weight: 650;
+    }
+    .section-body {
+      margin: 0 0 28px;
+      max-width: 62ch;
+      color: var(--muted);
+    }
+
+    .define p {
+      margin: 0 0 14px;
+      font-size: 1.18rem;
+      line-height: 1.5;
+      max-width: 46rem;
+    }
+    .define .quiet {
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .why {
+      margin: 32px 0 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid var(--line);
+    }
+    .why li {
+      display: grid;
+      grid-template-columns: 4.2rem minmax(0, 1fr);
+      gap: 18px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .why .n {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 13px;
+      color: var(--accent);
+      padding-top: 3px;
+    }
+    .why h3 {
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+    }
+    .why p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 58ch;
+    }
+
+    .arch {
+      margin-top: 36px;
+      background: var(--fill);
+      color: var(--paper);
+      padding: 28px 24px 8px;
+    }
+    .arch > p {
+      margin: 0 0 18px;
+      color: #c9d4cc;
+      font-size: 14px;
+      max-width: 62ch;
+    }
+    .arch dl {
+      margin: 0;
+    }
+    .arch dt {
+      font-weight: 650;
+      padding-top: 16px;
+      border-top: 1px solid #2c3832;
+    }
+    .arch dd {
+      margin: 6px 0 16px;
+      color: #c9d4cc;
+      max-width: 62ch;
+    }
+
+    .versus {
+      margin-top: 40px;
+    }
+    .versus > h3 {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+    }
+    .versus > p {
+      margin: 0 0 8px;
+      color: var(--muted);
+      max-width: 62ch;
+    }
+    .versus-row {
+      display: grid;
+      grid-template-columns: 12.5rem minmax(0, 1fr);
+      gap: 28px;
+      padding: 22px 0;
+      border-top: 1px solid var(--line);
+    }
+    .versus-row h4 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+    }
+    .versus-row .vs {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .versus-row ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+    .versus-row li {
+      padding-left: 0;
+      border-left: 2px solid var(--accent);
+      padding: 0 0 0 12px;
+    }
+    .versus-row li strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    .versus-row li span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .easy-line {
+      margin-top: 28px;
+      padding: 16px 18px;
+      background: var(--paper);
+      border-left: 3px solid var(--accent);
+      max-width: 62ch;
+    }
+    .easy-line p { margin: 0; }
+
+    .pipe {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+    .step {
+      background: var(--paper);
+      padding: 18px 16px 20px;
+    }
+    .step b {
+      display: block;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .step h3 {
+      margin: 0 0 8px;
+      font-size: 1.02rem;
+    }
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .pipe figure {
+      margin: 0;
+      border: 1px solid var(--line);
+    }
+    .pipe img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      min-height: 280px;
+    }
+    .pipe figcaption {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--paper);
+      border-top: 1px solid var(--line);
+    }
+
+    .atlas {
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+      gap: 0;
+      border: 1px solid var(--line);
+      min-height: 640px;
+      background: var(--paper);
+    }
+
+    .rail {
+      background: var(--rail);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+    }
+    .rail p {
+      margin: 0;
+      padding: 14px 14px 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .rail button {
+      appearance: none;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+      text-align: left;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .rail button:hover { background: color-mix(in srgb, var(--paper) 55%, var(--rail)); }
+    .rail button[aria-selected="true"] {
+      background: var(--fill);
+      color: var(--paper);
+    }
+    .rail button[aria-selected="true"] .idx { color: #f0a090; }
+    .rail .idx {
+      display: block;
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 10px;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+    .rail .nm { font-weight: 650; }
+    .rail .bl { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .rail button[aria-selected="true"] .bl { color: #c9d4cc; }
+
+    .panel { padding: 22px 24px 28px; }
+    .panel-kicker {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 11px;
+      color: var(--accent);
+      margin: 0 0 6px;
+    }
+    .panel h2 { margin-bottom: 6px; }
+    .when { margin: 0 0 20px; color: var(--muted); max-width: 58ch; }
+
+    .meters {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .meter {
+      border-top: 2px solid var(--ink);
+      padding-top: 10px;
+    }
+    .meter h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      font-weight: 650;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    .dots {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+    .dots i {
+      display: block;
+      height: 8px;
+      background: var(--line);
+    }
+    .dots i.on { background: var(--fill); }
+    .dots.now i.on { background: var(--accent); }
+    .hint {
+      margin: 0 0 22px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+    .pair article {
+      border: 1px solid var(--line);
+      padding: 14px 14px 16px;
+    }
+    .pair .bad { background: #efe8e4; }
+    .pair .good { background: #eef3ea; }
+    .pair h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+    .pair p { margin: 0; font-size: 14px; }
+
+    .skills h3 {
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
+    .skill-list {
+      display: grid;
+      gap: 10px;
+    }
+    .skill {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+    }
+    .tag {
+      font-size: 11px;
+      padding: 4px 6px;
+      border: 1px solid var(--ink);
+      height: fit-content;
+      width: fit-content;
+    }
+    .tag.plus {
+      border-color: var(--muted);
+      color: var(--muted);
+    }
+    .skill h4 { margin: 0 0 4px; font-size: 15px; }
+    .skill p { margin: 0; font-size: 14px; color: var(--muted); }
+
+    .shared {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+    .shared article {
+      background: var(--paper);
+      padding: 22px 20px;
+    }
+    .shared h3 { margin: 0 0 8px; }
+    .shared p { margin: 0; color: var(--muted); }
+
+    @media (max-width: 960px) {
+      header { padding: 0 16px; }
+      nav { display: none; }
+      .wrap { width: min(var(--max), calc(100% - 32px)); }
+      .hero, .pipe, .atlas, .shared, .pair, .meters, .why li, .versus-row {
+        grid-template-columns: 1fr;
+      }
+      .atlas { min-height: 0; }
+      .rail {
+        flex-direction: row;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .rail p { display: none; }
+      .rail button {
+        min-width: 160px;
+        scroll-snap-align: start;
+        border-top: 0;
+        border-right: 1px solid var(--line);
+      }
+      .hero img { max-height: 220px; }
+      .pipe img { min-height: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#atlas">跳到模式图鉴</a>
+  <header>
+    <div class="brand">
+      <strong>新手工作台</strong>
+      <span>DeepSeek Harness Easy</span>
+    </div>
+    <nav aria-label="页内">
+      <a href="#harness">引擎</a>
+      <a href="#quality">质量流程</a>
+      <a href="#atlas">模式图鉴</a>
+      <a href="#shared">共用做法</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <h1 id="hero-title">聊天框只会说话。这一版把成品交到你手上。</h1>
+          <p class="lead">选一张中文卡片，说出你要的。网页、文稿、表格会写进电脑，双击就能打开。</p>
+          <a class="hero-cta" href="#harness">什么是 Harness</a>
+        </div>
+        <figure>
+          <img src="workbench-hero.jpg" width="1600" height="900" alt="书桌上的笔记本浏览器里打开一份简洁中文单页，旁边放着同一页的打印纸">
+          <figcaption>目标不是更长的回答，是你能打开、能用、能发出去的那一份。</figcaption>
+        </figure>
+      </section>
+    </div>
+
+    <section id="harness">
+      <div class="wrap">
+        <h2>什么是 DeepSeek Harness</h2>
+        <div class="define">
+          <p>DeepSeek Harness 是 DeepSeek 开源的智能体运行时。它不只在窗口里说话：模型可以读你选中的文件夹、改文件、跑命令、上网查资料、按 skill 做事。底层用一套叫 Cordis 的插件框架，模型适配、工具、会话、循环本身都是插件，没有一块改不了的内核。</p>
+          <p class="quiet">官方仓库给开发者改引擎。你桌面上的图标跑的就是这套引擎。MIT 许可，代码在 <a href="https://github.com/deepseek-ai/deepseek-harness">github.com/deepseek-ai/deepseek-harness</a>。</p>
+        </div>
+
+        <ol class="why">
+          <li>
+            <span class="n">01</span>
+            <div>
+              <h3>聊天框交差交不出去</h3>
+              <p>网页、表格、改名、定时任务要落在你电脑里。对话框里的「我已经写好了」不是文件。Harness 的工作区就是你选的那一层文件夹。</p>
+            </div>
+          </li>
+          <li>
+            <span class="n">02</span>
+            <div>
+              <h3>能力要能加，不必换一家产品</h3>
+              <p>新工具、新界面、新策略用插件挂上去，用配置叠上去。不必因为缺一个节点就搬到另一家平台，也不必为了加能力把整份源码改穿。</p>
+            </div>
+          </li>
+          <li>
+            <span class="n">03</span>
+            <div>
+              <h3>关掉再打开，上次还在</h3>
+              <p>发给模型的内容要能从会话日志还原。刷新页面、隔天再来，不是一段消失的聊天记录。这是产品约定，不是靠记忆力。</p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="arch">
+          <p>三层机制。小白不必会写插件，但值得知道为什么它和聊天窗不是同一种东西。</p>
+          <dl>
+            <dt>一切都是插件</dt>
+            <dd>模型、文件工具、命令、网页界面、agent 循环都可以替换或卸载。注册会随插件卸走，不会在后台留一套改不掉的核。</dd>
+            <dt>用配置叠上去</dt>
+            <dd>启动时按层拼出一棵插件树：组合包、本机补丁、命令行覆盖。改行为是改配置行，不是去源码里打补丁。</dd>
+            <dt>模型看见的都记在日志里</dt>
+            <dd>进模型请求的内容必须能从会话日志重建。新的模型可见输入要写成会话事件。所以它能回放，也能核对「刚才到底看过什么」。</dd>
+          </dl>
+        </div>
+
+        <div class="versus">
+          <h3>相比别的，优势在干活方式，不在更会聊天</h3>
+          <p>不宣称比某家模型更聪明。差在：东西写在哪、谁说了算、关掉以后还在不在。</p>
+
+          <div class="versus-row">
+            <div>
+              <h4>普通聊天框</h4>
+              <p class="vs">ChatGPT、通义、网页对话</p>
+            </div>
+            <ul>
+              <li><strong>文件在你电脑上</strong><span>工作区里的 html、表格、文稿可以双击打开。聊天框通常只给你一段可以复制的字。</span></li>
+              <li><strong>能动手，不只出主意</strong><span>读文件、改文件、跑命令、按 skill 执行。聊天框默认停在建议。</span></li>
+              <li><strong>会话能接着、能回放</strong><span>日志在本机。不是每次打开都像第一次见面，也不是平台一清记录就没了。</span></li>
+            </ul>
+          </div>
+
+          <div class="versus-row">
+            <div>
+              <h4>拖拽搭 agent 的平台</h4>
+              <p class="vs">扣子、Coze、Dify</p>
+            </div>
+            <ul>
+              <li><strong>跑在你这台机器上</strong><span>密钥和工作区默认在本机。不是先把流程和文件交到别人的画布上才能跑。</span></li>
+              <li><strong>开源，能力用插件加</strong><span>MIT。缺能力就挂插件或改配置，不是只能用平台提供的节点，也不是流程锁在一家商店里。</span></li>
+              <li><strong>有沙箱和审批，不是连完就全盘动手</strong><span>文件和命令可以按策略拦住。拖拽编排很容易「看起来自动了」，实际权限边界不清楚。</span></li>
+            </ul>
+          </div>
+
+          <div class="versus-row">
+            <div>
+              <h4>代码库和编程辅手</h4>
+              <p class="vs">LangChain、Agents SDK、Cursor、Claude Code</p>
+            </div>
+            <ul>
+              <li><strong>打开就是产品，不是还要自己拼一层</strong><span>有窗口、会话、工具、权限、桌面图标。LangChain 和 Agents SDK 是给你写程序用的零件。</span></li>
+              <li><strong>作业不默认等于改代码</strong><span>Cursor 和 Claude Code 很强，默认把你当程序员。Harness 的作业可以是网页、表格、简报、整理文件夹。</span></li>
+              <li><strong>循环、日志、权限是装好的约定</strong><span>不是在笔记本里临时串一条链。模型看见的必须能还原；工具执行走登记过的管道。</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="easy-line">
+          <p>这一版 Easy 只是套在引擎外面的小白外壳：八张中文模式卡片、发送时带上做法。引擎仍是官方 DeepSeek Harness。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="quality">
+      <div class="wrap">
+        <h2>质量不是靠多说几句。是四道挡板。</h2>
+        <p class="section-body">左边四步挡住常见坏结果。右边是同一件事的两种纸样：堆满装饰的模板，和能发出去的一页。</p>
+        <div class="pipe">
+          <div class="steps">
+            <article class="step">
+              <b>01 选模式</b>
+              <h3>先定「你要哪种东西」</h3>
+              <p>做网页不会被当成写作。答疑不会被扩成一课 PPT。模式选错，后面再努力也对不上。</p>
+            </article>
+            <article class="step">
+              <b>02 钉做法</b>
+              <h3>发送时自动带上 1 到 3 条</h3>
+              <p>标签就是这个模式最常用的做法。点掉这次不带。学习答疑默认只带「讲明白」，避免短问被教成一堂课。</p>
+            </article>
+            <article class="step">
+              <b>03 交文件</b>
+              <h3>磁盘上要有，口头不算</h3>
+              <p>html、文稿、表格、简报要能打开。助手说「做好了」不算数。网页做完会尝试在浏览器里打开。</p>
+            </article>
+            <article class="step">
+              <b>04 适配度</b>
+              <h3>做成品时再点 /fit</h3>
+              <p>三句核对：是不是他要的那种、打开后能不能用、有没有多做。不自动钉上，短答不必走这步。</p>
+            </article>
+          </div>
+          <figure>
+            <img src="quality-before-after.jpg" width="1600" height="900" alt="并排两张打印纸：左边花哨拥挤，右边留白清楚的中文单页">
+            <figcaption>左：常见「看起来很 AI」的堆砌。右：一份能交出去的最小成品。</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="atlas">
+      <div class="wrap">
+        <h2>点一个模式，看它挡住什么</h2>
+        <p class="section-body">右侧三条杠是示意，不是实验室分数。看「聊天框常见结果」和「这一版要交的」差在哪。</p>
+        <div class="atlas">
+          <div class="rail" role="tablist" aria-label="八个模式" id="mode-rail"></div>
+          <div class="panel" id="mode-panel" role="tabpanel"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="shared">
+      <div class="wrap">
+        <h2>两个共用做法，故意不自动带上</h2>
+        <p class="section-body">八个模式都能在「+」里找到它们。自动钉上会占掉领域标签，短问也会被多教一截。</p>
+        <div class="shared">
+          <article>
+            <h3>视觉 /vision</h3>
+            <p>用来看图、对比图、说明图里有什么。没有图就不要点。它不负责做网页好不好看，好看走「好看」这条。</p>
+          </article>
+          <article>
+            <h3>适配度 /fit</h3>
+            <p>用来在交稿前核对自己看见的文件和命令输出。禁止再开一套模型去打分。口头短答跳过。再加共用做法时，必须写进「不要自动钉」的名单，否则会挤掉领域标签。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const MODES = [
+      {
+        id: "web-page",
+        idx: "01",
+        name: "做网页",
+        blurb: "做一个能直接打开的网页、落地页或小工具",
+        when: "你要一份别人双击就能打开的页面：作品集、报名表、说明页、小工具。",
+        meters: [
+          { label: "是不是网页", chat: 2, now: 5 },
+          { label: "打得开能用", chat: 1, now: 5 },
+          { label: "没有多做", chat: 2, now: 4 }
+        ],
+        before: "一段「你可以这样写 HTML」的说明，或一张紫渐变、三张一样卡片、大标题但没有能点按钮的模板脸。文件不在你电脑里。",
+        after: "工作区里一个 html。浏览器打开就能用。风格先定再画。做完按窄屏看一遍，不横滑、按钮点得到。",
+        skills: [
+          { pin: true, name: "做网页", id: "build-a-page", text: "从一句话做出单文件页面。价值：交的是文件，不是教程。" },
+          { pin: true, name: "好看", id: "look-distinct", text: "先定风格再动手。价值：挡住千篇一律的模板脸。" },
+          { pin: true, name: "手机也能看", id: "check-on-phone", text: "做完按窄屏检查。价值：挡住横滑和点不到。" }
+        ]
+      },
+      {
+        id: "writing",
+        idx: "02",
+        name: "写作",
+        blurb: "公众号、周报、简历、邮件，帮你写也帮你改",
+        when: "你要一封能发出去的邮件、一篇能贴的成稿，而不是「写作建议十条」。",
+        meters: [
+          { label: "是不是成稿", chat: 3, now: 5 },
+          { label: "一遍能抓住", chat: 2, now: 5 },
+          { label: "事实没被改", chat: 2, now: 5 }
+        ],
+        before: "套话开头、空洞金句，擅自把你的数字和日期改圆。读完不知道下一步做什么。",
+        after: "一份能直接用的中文成稿。人话，去掉空话。你提供的姓名、数字、日期原样保留，不确定的单独标出。",
+        skills: [
+          { pin: true, name: "写作", id: "draft-and-revise", text: "起草与改稿。价值：产出是成稿，不是提纲课。" },
+          { pin: true, name: "写人话", id: "write-plain", text: "去掉套话。价值：读者一遍抓住要做什么。" },
+          { pin: true, name: "事实不动", id: "keep-the-facts", text: "数字姓名日期原样保留。价值：挡住「帮你优化」时改错事实。" }
+        ]
+      },
+      {
+        id: "sheet",
+        idx: "03",
+        name: "表格数据",
+        blurb: "整理 Excel 和 CSV，做统计、去重、出图",
+        when: "你手里有表，要去重、合计、看出趋势，并且要拿得走的文件。",
+        meters: [
+          { label: "是不是表和图", chat: 2, now: 5 },
+          { label: "文件能打开", chat: 1, now: 5 },
+          { label: "图只答一问", chat: 2, now: 4 }
+        ],
+        before: "口头说「已经去重了」，没有新表。图没有单位，一张图想讲完所有故事。",
+        after: "清洗后的表在工作区。先给结论，再指出异常。一张图只回答一个问题，轴和单位写清。",
+        skills: [
+          { pin: true, name: "表格处理", id: "clean-a-sheet", text: "清洗、统计、去重。价值：交表，不交步骤作文。" },
+          { pin: true, name: "看懂数字", id: "read-the-numbers", text: "先结论，再异常。价值：挡住把表重抄一遍当分析。" },
+          { pin: true, name: "做成图", id: "make-a-chart", text: "一图一问。价值：挡住装饰性饼图。" }
+        ]
+      },
+      {
+        id: "files",
+        idx: "04",
+        name: "文件整理",
+        blurb: "批量改名、分类归档、格式转换、找重复文件",
+        when: "下载文件夹乱了，要改名、归档、找重复，而且不能悄悄删错。",
+        meters: [
+          { label: "先给对照表", chat: 1, now: 5 },
+          { label: "能撤回地做", chat: 2, now: 5 },
+          { label: "不静默删除", chat: 1, now: 5 }
+        ],
+        before: "直接改名或删除。你看不到对照，重复文件被静默清掉。",
+        after: "先预演：对照表、重复清单。你点头再执行。规则统一，名字好认。",
+        skills: [
+          { pin: true, name: "文件整理", id: "tidy-files", text: "改名归档转换。价值：先预演后执行。" },
+          { pin: true, name: "名字好认", id: "name-clearly", text: "统一规则再动手。价值：挡住每次一个风格的改名。" },
+          { pin: true, name: "找重复", id: "find-twins", text: "先列相同文件再问。价值：挡住静默删除。" }
+        ]
+      },
+      {
+        id: "study",
+        idx: "05",
+        name: "学习答疑",
+        blurb: "把复杂的事讲明白，陪你一步步搞懂",
+        when: "你卡在一个概念或一道题。只要口头讲清，不要一份课件。这是打开软件后的默认模式。",
+        meters: [
+          { label: "对准卡住点", chat: 3, now: 5 },
+          { label: "零基础能跟", chat: 2, now: 5 },
+          { label: "没有扩成课", chat: 2, now: 5 }
+        ],
+        before: "一上来长课文，术语不拆，也不问你卡在哪。短问被扩成一章教材。",
+        after: "跟你的卡住点讲。默认只带「讲明白」。要检验或带做题时，再从 + 点另外两条。",
+        skills: [
+          { pin: true, name: "讲明白", id: "explain-clearly", text: "拆成零基础能跟上的解释。价值：短问得到短而准的讲解。" },
+          { pin: false, name: "真懂了吗", id: "check-understanding", text: "讲完出小应用题，答错换角度。价值：不把原话再念一遍。留在 +，避免每次都考试。" },
+          { pin: false, name: "带做一道", id: "work-an-example", text: "从他的题走完，不跳步骤。价值：挡住「其余同理」。留在 +，避免每句答疑都演练。" }
+        ]
+      },
+      {
+        id: "slides",
+        idx: "06",
+        name: "做 PPT",
+        blurb: "从一句话到能直接讲的成稿",
+        when: "你要能全屏讲的幻灯，不是一份密密麻麻的讲稿假装成分页。",
+        meters: [
+          { label: "能全屏讲", chat: 1, now: 5 },
+          { label: "一页一点", chat: 2, now: 5 },
+          { label: "能开口讲", chat: 2, now: 4 }
+        ],
+        before: "每页堆满段落。标题不像一句话。你没法对着它讲，只能自己念。",
+        after: "浏览器里能全屏的成稿。每页只让人记住一件事。旁边有口播和时间提示。",
+        skills: [
+          { pin: true, name: "做 PPT", id: "make-a-deck", text: "从大纲到能讲的成稿。价值：交的是幻灯，不是大纲。" },
+          { pin: true, name: "一页一点", id: "one-point", text: "标题就是那句话。价值：挡住一页五件事。" },
+          { pin: true, name: "能讲出来", id: "speak-the-deck", text: "每页配口播。价值：挡住「看起来完整但讲不出口」。" }
+        ]
+      },
+      {
+        id: "autopilot",
+        idx: "07",
+        name: "电脑自动化",
+        blurb: "定时抓取、批量处理，你只看结果",
+        when: "你要它每天或每周替你做一件小事，结果落到文件里，失败了人能看懂。",
+        meters: [
+          { label: "先小样本", chat: 1, now: 5 },
+          { label: "结果在文件里", chat: 2, now: 5 },
+          { label: "失败能看懂", chat: 2, now: 5 }
+        ],
+        before: "一上来对全部文件动手。定时了但你不知道跑没跑。报错是一串英文。",
+        after: "先对 3 个样本跑通再放大。先跑通一次再定时。上次结果能核对，失败写成白话。",
+        skills: [
+          { pin: true, name: "电脑自动化", id: "set-up-a-routine", text: "先跑通再定时。价值：结果落文件，不是「我设置好了」。" },
+          { pin: true, name: "批量先小做", id: "safe-batch", text: "3 个样本再放大。价值：失败可撤回。" },
+          { pin: true, name: "跑过没有", id: "check-it-ran", text: "核对上次结果。价值：挡住静默失败。" }
+        ]
+      },
+      {
+        id: "briefing",
+        idx: "08",
+        name: "资讯收集",
+        blurb: "整理 AI、金融、科技的公开信源，写成短简报",
+        when: "你要一份能点开原文的短简报，不是搜索摘要拼盘。",
+        meters: [
+          { label: "是短简报", chat: 3, now: 5 },
+          { label: "原文打得开", chat: 1, now: 5 },
+          { label: "没有编出处", chat: 2, now: 5 }
+        ],
+        before: "把搜索摘要写成「据报道」。链接打不开也写进去。领域混成一锅。",
+        after: "先走公开信源名单。每条有标题、为什么重要、原始链接。打不开的不写。",
+        skills: [
+          { pin: true, name: "公开信源", id: "source-roster", text: "优先内置公开信源再抓原文。价值：挡住随手搜当权威。" },
+          { pin: true, name: "出短简报", id: "draft-a-brief", text: "按领域分组的短条目。价值：挡住长文综述。" },
+          { pin: true, name: "核对出处", id: "keep-the-source", text: "打不开原文的不写。价值：挡住假链接。" }
+        ]
+      }
+    ];
+
+    function dots(n, cls) {
+      return `<span class="dots ${cls}">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span>`;
+    }
+
+    function renderPanel(mode) {
+      const meters = mode.meters.map((m) => `
+        <div class="meter">
+          <h3>${m.label}</h3>
+          <div class="row"><span>聊天框</span>${dots(m.chat, "")}</div>
+          <div class="row"><span>这一版</span>${dots(m.now, "now")}</div>
+        </div>
+      `).join("");
+      const skills = mode.skills.map((s) => `
+        <div class="skill">
+          <span class="tag ${s.pin ? "" : "plus"}">${s.pin ? "发送时带上" : "在 + 里"}</span>
+          <div>
+            <h4>${s.name} <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted)">/${s.id}</span></h4>
+            <p>${s.text}</p>
+          </div>
+        </div>
+      `).join("");
+      document.getElementById("mode-panel").innerHTML = `
+        <p class="panel-kicker">${mode.idx} / 08</p>
+        <h2>${mode.name}</h2>
+        <p class="when">${mode.when}</p>
+        <div class="meters">${meters}</div>
+        <p class="hint">杠的高低只用来对照习惯，不是测评分数。</p>
+        <div class="pair">
+          <article class="bad">
+            <h3>没有这些做法时</h3>
+            <p>${mode.before}</p>
+          </article>
+          <article class="good">
+            <h3>这一版要交的</h3>
+            <p>${mode.after}</p>
+          </article>
+        </div>
+        <div class="skills">
+          <h3>这个模式的三条做法</h3>
+          <div class="skill-list">${skills}</div>
+        </div>
+      `;
+    }
+
+    function select(id) {
+      const mode = MODES.find((m) => m.id === id) || MODES[4];
+      document.querySelectorAll("#mode-rail button").forEach((btn) => {
+        const on = btn.dataset.id === mode.id;
+        btn.setAttribute("aria-selected", on ? "true" : "false");
+        btn.tabIndex = on ? 0 : -1;
+      });
+      renderPanel(mode);
+      if (location.hash.replace("#", "") !== mode.id) {
+        history.replaceState(null, "", "#" + mode.id);
+      }
+    }
+
+    const rail = document.getElementById("mode-rail");
+    rail.innerHTML = `<p>点一行，右侧换内容。键盘上下键也可。</p>` + MODES.map((m) => `
+      <button type="button" role="tab" data-id="${m.id}" aria-selected="false">
+        <span class="idx">${m.idx}</span>
+        <span class="nm">${m.name}</span>
+        <span class="bl">${m.blurb}</span>
+      </button>
+    `).join("");
+
+    rail.addEventListener("click", (event) => {
+      const btn = event.target.closest("button[data-id]");
+      if (btn) select(btn.dataset.id);
+    });
+
+    rail.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+      event.preventDefault();
+      const ids = MODES.map((m) => m.id);
+      const current = (location.hash.replace("#", "") || "study");
+      const i = Math.max(0, ids.indexOf(current));
+      const next = event.key === "ArrowDown" ? Math.min(ids.length - 1, i + 1) : Math.max(0, i - 1);
+      select(ids[next]);
+      rail.querySelector(`[data-id="${ids[next]}"]`).focus();
+    });
+
+    const start = MODES.some((m) => m.id === location.hash.replace("#", ""))
+      ? location.hash.replace("#", "")
+      : "study";
+    select(start);
+  </script>
+</body>
+</html>
