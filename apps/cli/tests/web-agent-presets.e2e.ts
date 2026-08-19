@@ -228,10 +228,10 @@ describe('the shipped Web composition', () => {
       const pageSkills = (await ctx.skills.list({ scope: page.agent })).map(skill => skill.name)
       const studySkills = (await ctx.skills.list({ scope: study.agent })).map(skill => skill.name)
       expect(pageSkills).toEqual(expect.arrayContaining([
-        'build-a-page', 'look-distinct', 'check-on-phone', 'vision',
+        'build-a-page', 'look-distinct', 'check-on-phone', 'vision', 'fit',
       ]))
       expect(studySkills).toEqual(expect.arrayContaining([
-        'explain-clearly', 'check-understanding', 'work-an-example', 'vision',
+        'explain-clearly', 'check-understanding', 'work-an-example', 'vision', 'fit',
       ]))
       expect(studySkills).not.toContain('build-a-page')
       expect(pageSkills).not.toContain('explain-clearly')
@@ -244,7 +244,7 @@ describe('the shipped Web composition', () => {
         const briefingSkills = (await ctx.skills.list({ scope: briefing.agent })).map(skill => skill.name)
         expect(toolNames(ctx, briefing.agent)).toEqual(toolNames(ctx, study.agent))
         expect(briefingSkills).toEqual(expect.arrayContaining([
-          'source-roster', 'draft-a-brief', 'keep-the-source', 'vision',
+          'source-roster', 'draft-a-brief', 'keep-the-source', 'vision', 'fit',
         ]))
         expect(briefingSkills).not.toContain('explain-clearly')
         expect(studySkills).not.toContain('source-roster')
@@ -284,9 +284,11 @@ describe('the shipped Web composition', () => {
     // travels with the directory wherever the mode is installed.
     const skill = join(CONFIG_DIR, 'agent-presets', 'web-page', 'skills', 'build-a-page', 'SKILL.md')
     const briefing = join(CONFIG_DIR, 'agent-presets', 'briefing', 'skills', 'source-roster', 'SKILL.md')
+    const fit = join(CONFIG_DIR, 'skills', 'fit', 'SKILL.md')
 
     expect((await readFile(skill, 'utf8')).startsWith('---\nname: build-a-page')).toBe(true)
     expect((await readFile(briefing, 'utf8')).startsWith('---\nname: source-roster')).toBe(true)
+    expect((await readFile(fit, 'utf8')).startsWith('---\nname: fit')).toBe(true)
   })
 
   it('merges the global skill layer into a mode agent\'s catalog, keeping local discovery preset-side', async () => {
@@ -314,13 +316,13 @@ describe('the shipped Web composition', () => {
       expect((await ctx.skills.list({ cwd: proj })).map(skill => skill.name)).toEqual(['dsh-badge'])
 
       // A mode agent's view merges the global layer with the preset's own
-      // roots (domain skills plus vision). Beginner modes set
+      // roots (domain skills plus shared vision and fit). Beginner modes set
       // `includeDefaultRoots: false`, so a workspace `.dsh/skills` file stays
       // out of both the catalog and the model-facing skill tool.
       const scoped = (await ctx.skills.list({ cwd: proj, scope: handle.agent })).map(skill => skill.name)
       expect(scoped).toContain('dsh-badge')
       expect(scoped).toEqual(expect.arrayContaining([
-        'explain-clearly', 'check-understanding', 'work-an-example', 'vision',
+        'explain-clearly', 'check-understanding', 'work-an-example', 'vision', 'fit',
       ]))
       expect(scoped).not.toContain('project-proof')
 

@@ -31,5 +31,5 @@ Command UI tests pin Chinese overlay of owned Host names and pass-through of unk
 ## Consequences
 
 - Chinese Web shows localized Host command captions; English Web matches the Host catalog.
-- The `+` menu can list skills. Beginner modes set `includeDefaultRoots: false`, so that list is the mode's own skills plus `vision`, not `~/.agents/skills` or the workspace ([mode skill pins](./2026-08-16-mode-skill-pins-and-preset-local-catalog.md)).
+- The `+` menu can list skills. Beginner modes set `includeDefaultRoots: false`, so that list is the mode's own skills plus `vision` and `fit`, not `~/.agents/skills` or the workspace ([mode skill pins](./2026-08-16-mode-skill-pins-and-preset-local-catalog.md)).
 - Changing a Host command's English catalog string requires the matching `description.*` English dictionary entry or the English menu diverges.

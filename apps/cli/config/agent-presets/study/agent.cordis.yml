@@ -51,11 +51,11 @@
     sampleOverCapGlobResults: false
 
 # `skills/` is this mode's own expertise; `../../skills/` is the shared set
-# every mode carries (the `vision` image skill).
+# every mode carries (`vision` and `fit`).
 - id: skill-filesystem
   name: '@deepseek-ai/dsh-skill-filesystem'
   config:
-    # Only this mode's skills and the shared vision root. Default roots
+    # Only this mode's skills and the shared skills root. Default roots
     # would also list ~/.agents/skills and the workspace, which fills the
     # + menu with unrelated personal skills.
     includeDefaultRoots: false

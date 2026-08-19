@@ -4,7 +4,10 @@
  * that loads that skill's body.
  */
 
-/** Shared skill every beginner mode mounts; listed in `+`, never auto-pinned. */
+/** Shared skills every beginner mode mounts; listed in `+`, never auto-pinned. */
+export const SHARED_SKILL_IDS = new Set(['vision', 'fit'])
+
+/** Shared vision skill id; listed in `+`, never auto-pinned. */
 export const SHARED_SKILL_ID = 'vision'
 
 /** A mode arms at most this many of its own skills. */
@@ -73,15 +76,14 @@ export function pinLabel(description: string, id: string): string {
 }
 
 /**
- * Mode-owned pins from a session catalog: drop the shared vision skill and
- * catalog-only companions, keep at most {@link PIN_CAP}, primary domain skill
- * first.
+ * Mode-owned pins from a session catalog: drop shared skills and catalog-only
+ * companions, keep at most {@link PIN_CAP}, primary domain skill first.
  * @param skills - user-invocable catalog rows.
  * @returns pins to arm in the composer.
  */
 export function modePins(skills: readonly SkillPinSource[]): SkillPin[] {
   return skills
-    .filter(skill => skill.name !== SHARED_SKILL_ID && !CATALOG_ONLY_PINS.has(skill.name))
+    .filter(skill => !SHARED_SKILL_IDS.has(skill.name) && !CATALOG_ONLY_PINS.has(skill.name))
     .slice()
     .sort((a, b) => pinRank(a.name) - pinRank(b.name) || a.name.localeCompare(b.name))
     .slice(0, PIN_CAP)

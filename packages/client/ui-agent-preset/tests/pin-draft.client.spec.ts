@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   armedNames, draftProse, modePins, PIN_CAP, pinLabel, prependPins, removePin, SHARED_SKILL_ID,
-  swapPins,
+  SHARED_SKILL_IDS, swapPins,
 } from '../src/client/pin-draft.ts'
 
 describe('pin-draft', () => {
@@ -25,9 +25,10 @@ describe('pin-draft', () => {
     expect(pinLabel('：leading colon', 'explain-clearly')).toBe('explain-clearly')
   })
 
-  it('drops vision and study companions, leaving explain-clearly first', () => {
+  it('drops shared skills and study companions, leaving explain-clearly first', () => {
     const pins = modePins([
       { name: SHARED_SKILL_ID, description: '视觉技能：看图' },
+      { name: 'fit', description: '适配度：最小成品再核对' },
       { name: 'work-an-example', description: '带做一道：走完例子' },
       { name: 'explain-clearly', description: '讲明白：拆开讲' },
       { name: 'check-understanding', description: '真懂了吗：出一道小题' },
@@ -35,7 +36,7 @@ describe('pin-draft', () => {
     ])
     expect(pins.map(pin => pin.name)).toEqual(['explain-clearly', 'zz-extra'])
     expect(pins[0]?.label).toBe('讲明白')
-    expect(pins.some(pin => pin.name === SHARED_SKILL_ID)).toBe(false)
+    expect(pins.some(pin => SHARED_SKILL_IDS.has(pin.name))).toBe(false)
   })
 
   it('caps a non-study catalog at PIN_CAP and leads with the primary', () => {

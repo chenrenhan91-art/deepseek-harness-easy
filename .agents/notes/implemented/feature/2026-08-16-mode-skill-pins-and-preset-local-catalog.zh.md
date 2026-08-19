@@ -10,11 +10,11 @@ Status: implemented
 
 ## 决策
 
-**Preset 本地目录。** 每个随附新手模式都在自己的 `skill-filesystem` 行上设置 `includeDefaultRoots: false`，并保留两个 `customSkillDirs`：该模式自己的 `skills/`，以及共享的 `../../skills/` 视觉根。因此 `+` 列出的是该模式的领域 skill 加上 `vision`，而不是操作者个人的 Cursor 或 Cloudflare skill。
+**Preset 本地目录。** 每个随附新手模式都在自己的 `skill-filesystem` 行上设置 `includeDefaultRoots: false`，并保留两个 `customSkillDirs`：该模式自己的 `skills/`，以及共享的 `../../skills/` 根（`vision` 和 `fit`）。因此 `+` 列出的是该模式的领域 skill 加上这些共享 skill，而不是操作者个人的 Cursor 或 Cloudflare skill。
 
-**每个模式三份原创 skill。** 每个模式随附原来的领域 skill，再加上两份为本产品写的中文同伴。同伴只吸收公开 skill 的方向（做网页的 `look-distinct` 参考 Anthropic 的 `frontend-design`），不复制那些文件。`vision` 留在目录和 `+` 里，但从不自动钉上。
+**每个模式三份原创 skill。** 每个模式随附原来的领域 skill，再加上两份为本产品写的中文同伴。同伴只吸收公开 skill 的方向（做网页的 `look-distinct` 参考 Anthropic 的 `frontend-design`），不复制那些文件。共享 skill `vision` 和 `fit` 留在目录和 `+` 里，但从不自动钉上。
 
-**编辑器标签武装当前模式。** `@deepseek-ai/dsh-client-ui-agent-preset` 以 `SkillPins` 占据 `conversation.input.dock` 的 order 25。目录加载以及 `agent-preset/selected` 时，它钉上至多三个非 `vision` 的 skill，并把它们的 `/name` 写进草稿。宿主 `dsh-tool-skill` 的 pre-step 本来就会注入每一个这样的 token。芯片文案取目录 description 里第一个 `：` 之前的文字，因此「学习答疑」显示「讲明白」；`check-understanding` 和 `work-an-example` 留在 `+` 里（[空会话默认](2026-08-19-workbench-empty-session-and-turn-actions.md)）。点掉一枚芯片会去掉对应 token；再点一次加回去。换模式会替换上一模式的 token，并留下无关 token（`/vision`）和用户正文。
+**编辑器标签武装当前模式。** `@deepseek-ai/dsh-client-ui-agent-preset` 以 `SkillPins` 占据 `conversation.input.dock` 的 order 25。目录加载以及 `agent-preset/selected` 时，它钉上至多三个不在 `SHARED_SKILL_IDS`、也不是目录专属同伴的 skill，并把它们的 `/name` 写进草稿。宿主 `dsh-tool-skill` 的 pre-step 本来就会注入每一个这样的 token。芯片文案取目录 description 里第一个 `：` 之前的文字，因此「学习答疑」显示「讲明白」；`check-understanding` 和 `work-an-example` 留在 `+` 里（[空会话默认](2026-08-19-workbench-empty-session-and-turn-actions.md)）。点掉一枚芯片会去掉对应 token；再点一次加回去。换模式会替换上一模式的 token，并留下无关 token（`/vision`、`/fit`）和用户正文。
 
 | 模式 | 标签 |
 |---|---|
@@ -31,7 +31,7 @@ Status: implemented
 
 **保留默认根，只在浏览器里过滤 `+` 菜单。** 否决：目录仍会把个人 skill 注入面向模型的 `skill` 工具，过滤器只会藏起会话其实还拥有的能力。
 
-**把 `vision` 和模式 skill 一起钉上。** 否决：看图在每个模式里都是可选项；纯文本轮次自动注入会浪费上下文。
+**把 `vision` 或 `fit` 和模式 skill 一起钉上。** 否决：看图和成品适配度检查在口头短答里都是可选项；自动注入会浪费上下文。[全局适配度 skill](2026-08-19-global-fit-skill.md) 拥有 `fit`。
 
 **新增一个发送钩子，把草稿里看不见的名字偷偷补上。** 否决：宿主已经把用户消息里的 `/name` 当作调用手势，现有的 text-ref 装饰也会标出这些 token。再开一条线会让 TUI、ACP 和 Web 分叉。
 
@@ -46,4 +46,4 @@ Status: implemented
 
 ## 验证
 
-`packages/client/ui-agent-preset` 的单元测试钉住草稿替换/删除、目录到标签的映射（去掉 vision 和学习答疑同伴、其他模式上限 3）、dock 注册、标签开关，以及 briefing 的主 skill 标签。`apps/cli/tests/web-agent-presets.e2e.ts` 钉住 `study`、`web-page` 与 `briefing` 上「三个领域 skill 加 vision」的目录，以及工作区 `.dsh/skills` 不会进入新手模式目录。`apps/web/tests/agent-preset-selection.e2e.ts` 钉住写作标签行、学习答疑标签行（只有 `explain-clearly`）、对应的斜杠目录，以及已播种的工作区 skill 不会出现。
+`packages/client/ui-agent-preset` 的单元测试钉住草稿替换/删除、目录到标签的映射（去掉共享 skill 和学习答疑同伴、其他模式上限 3）、dock 注册、标签开关，以及 briefing 的主 skill 标签。`apps/cli/tests/web-agent-presets.e2e.ts` 钉住 `study`、`web-page` 与 `briefing` 上「三个领域 skill 加共享 skill」的目录，以及工作区 `.dsh/skills` 不会进入新手模式目录。`apps/web/tests/agent-preset-selection.e2e.ts` 钉住写作标签行、学习答疑标签行（只有 `explain-clearly`）、对应的斜杠目录，以及已播种的工作区 skill 不会出现。

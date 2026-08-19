@@ -21,6 +21,7 @@ export type ModePromptId = (typeof MODE_PROMPT_IDS)[number]
 const MODE_PROMPT_ID_SET: ReadonlySet<string> = new Set(MODE_PROMPT_IDS)
 
 /**
+ * Whether a preset id owns mode-specific composer copy.
  * @param id - a session or grid preset id.
  * @returns whether that id owns mode-specific composer copy.
  */

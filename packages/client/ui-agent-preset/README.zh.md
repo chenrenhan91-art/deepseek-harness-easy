@@ -20,7 +20,7 @@ preset 在 `preset.yml` 里按名字指定图标（`icon: question`）。未指�
 
 ## 模式 skill 标签
 
-位于编辑器输入卡片正上方：当前会话模式自有 skill 的标签（至多三枚；学习答疑只钉 `explain-clearly`，`check-understanding` / `work-an-example` 留在 `+`）。网格上的选择会刷新 `skill.list`，并把这些 `/name` 写进草稿，以便宿主在发送时注入 skill 正文。共享的 `vision` skill 留在 `+` 里，不会被钉上。点掉一枚标签会去掉对应 token；换模式会替换上一模式的 token，并留下用户正文。空白会话上，同一张卡片为每个随附模式提供两条示例，hero placeholder 则是该模式自己的那句话。回复之后，助手 IconActions 行上的**再生成**会把该轮用户句再发一次；对照两个版本仍然用分支。见[模式 skill 标签](../../../.agents/notes/implemented/feature/2026-08-16-mode-skill-pins-and-preset-local-catalog.md)和[空会话默认](../../../.agents/notes/implemented/feature/2026-08-19-workbench-empty-session-and-turn-actions.md)。
+位于编辑器输入卡片正上方：当前会话模式自有 skill 的标签（至多三枚；学习答疑只钉 `explain-clearly`，`check-understanding` / `work-an-example` 留在 `+`）。网格上的选择会刷新 `skill.list`，并把这些 `/name` 写进草稿，以便宿主在发送时注入 skill 正文。共享的 `vision` 和 `fit` skill 留在 `+` 里，不会被钉上。点掉一枚标签会去掉对应 token；换模式会替换上一模式的 token，并留下用户正文。空白会话上，同一张卡片为每个随附模式提供两条示例，hero placeholder 则是该模式自己的那句话。回复之后，助手 IconActions 行上的**再生成**会把该轮用户句再发一次；对照两个版本仍然用分支。见[模式 skill 标签](../../../.agents/notes/implemented/feature/2026-08-16-mode-skill-pins-and-preset-local-catalog.md)和[空会话默认](../../../.agents/notes/implemented/feature/2026-08-19-workbench-empty-session-and-turn-actions.md)。
 
 ## 会话标题旁的标签
 

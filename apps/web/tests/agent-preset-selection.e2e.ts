@@ -170,6 +170,8 @@ describe('web e2e: agent-preset selection', () => {
     expect(await page.locator('[data-skill-pin="draft-and-revise"]').textContent()).toContain('写作')
     expect(await page.locator('[data-skill-pin="write-plain"]').count()).toBe(1)
     expect(await page.locator('[data-skill-pin="keep-the-facts"]').count()).toBe(1)
+    expect(await page.locator('[data-skill-pin="fit"]').count()).toBe(0)
+    expect(await page.locator('[data-skill-pin="vision"]').count()).toBe(0)
 
     await composer.fill('/')
     await expect.poll(() => menuOptions(page), { timeout: 15_000 })
@@ -181,6 +183,7 @@ describe('web e2e: agent-preset selection', () => {
     expect(onWriting.some(option => option.includes('keep-the-facts'))).toBe(true)
     expect(onWriting.some(option => option.includes('explain-clearly'))).toBe(false)
     expect(onWriting.some(option => option.startsWith('vision'))).toBe(true)
+    expect(onWriting.some(option => option.startsWith('fit'))).toBe(true)
     expect(onWriting.some(option => option.startsWith('compact'))).toBe(true)
     expect(onWriting.some(option => option.startsWith('plan'))).toBe(true)
     await composer.fill('')
@@ -192,6 +195,8 @@ describe('web e2e: agent-preset selection', () => {
     expect(await page.locator('[data-skill-pin="check-understanding"]').count()).toBe(0)
     expect(await page.locator('[data-skill-pin="work-an-example"]').count()).toBe(0)
     expect(await page.locator('[data-skill-pin="draft-and-revise"]').count()).toBe(0)
+    expect(await page.locator('[data-skill-pin="fit"]').count()).toBe(0)
+    expect(await page.locator('[data-skill-pin="vision"]').count()).toBe(0)
 
     await composer.fill('/')
     await expect.poll(() => menuOptions(page), { timeout: 15_000 })
@@ -203,6 +208,7 @@ describe('web e2e: agent-preset selection', () => {
     expect(onStudy.some(option => option.includes('work-an-example'))).toBe(true)
     expect(onStudy.some(option => option.includes('draft-and-revise'))).toBe(false)
     expect(onStudy.some(option => option.startsWith('vision'))).toBe(true)
+    expect(onStudy.some(option => option.startsWith('fit'))).toBe(true)
     expect(onStudy.some(option => option.startsWith('compact'))).toBe(true)
     expect(onStudy.some(option => option.startsWith('plan'))).toBe(true)
     await composer.fill('')

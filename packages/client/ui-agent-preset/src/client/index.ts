@@ -44,7 +44,8 @@ export type { ModeGridInjected, ModeGridProps } from './ModeGrid.tsx'
 export type { ModeGridState, ModeSessionSummary } from './grid-store.ts'
 export type { SkillPin, SkillPinSource } from './pin-draft.ts'
 export {
-  armedNames, modePins, PIN_CAP, pinLabel, prependPins, removePin, SHARED_SKILL_ID, swapPins,
+  armedNames, modePins, PIN_CAP, pinLabel, prependPins, removePin, SHARED_SKILL_ID,
+  SHARED_SKILL_IDS, swapPins,
 } from './pin-draft.ts'
 export type { SkillPinsInjected, SkillPinsProps } from './SkillPins.tsx'
 export type { AgentPresetOption, AgentPresetSettingsState } from './settings-store.ts'

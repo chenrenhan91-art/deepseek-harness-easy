@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-16-mode-skill-pins-and-preset-local-catalog.md
-2026-08-16-mode-skill-pins-and-preset-local-catalog.md: d067993bbd93b0658f20573dbeda4eb00c1c3f00
-2026-08-16-mode-skill-pins-and-preset-local-catalog.zh.md: 50d2a34742e34e59b493d8f8ac1dbb35cbc7439d
+2026-08-16-mode-skill-pins-and-preset-local-catalog.md: 8922d7ebc70a02a2b90d93096e4726d3a02064ee
+2026-08-16-mode-skill-pins-and-preset-local-catalog.zh.md: 002bbb1c7c1e66bf7d9e2752556ef6f1817389fb

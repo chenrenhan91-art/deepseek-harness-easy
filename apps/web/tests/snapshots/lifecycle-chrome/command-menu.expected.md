@@ -11,5 +11,6 @@
   - text: 技能
   - option "check-understanding 真懂了吗：讲完出一道小应用题，答错就换角度，不重复原话"
   - option "explain-clearly 讲明白：把复杂概念拆成零基础也能跟上的解释，并检验是否真懂"
+  - option "fit 适配度：先做够用的最小成品，交稿前用看得见的证据核对是不是用户要的"
   - option "vision 视觉技能：观察、对比并说明会话中的图片"
   - option "work-an-example 带做一道：从他的题或一个具体例子走完，不跳步骤"

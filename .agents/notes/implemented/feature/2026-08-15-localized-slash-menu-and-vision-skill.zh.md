@@ -31,5 +31,5 @@ Web 斜杠菜单在界面语言为中文时，仍显示 Host 命令目录里的�
 ## Consequences
 
 - 中文 Web 显示本地化的 Host 命令说明；英文 Web 与 Host 目录一致。
-- `+` 菜单可以列出 skill。新手模式设置 `includeDefaultRoots: false`，因此该列表是本模式自己的 skill 加上 `vision`，而不是 `~/.agents/skills` 或工作区（[模式 skill 标签](./2026-08-16-mode-skill-pins-and-preset-local-catalog.md)）。
+- `+` 菜单可以列出 skill。新手模式设置 `includeDefaultRoots: false`，因此该列表是本模式自己的 skill 加上 `vision` 和 `fit`，而不是 `~/.agents/skills` 或工作区（[模式 skill 标签](./2026-08-16-mode-skill-pins-and-preset-local-catalog.md)）。
 - 更改 Host 命令的英文目录字符串时，必须同步 `description.*` 的英文词典条目，否则英文菜单会分叉。
