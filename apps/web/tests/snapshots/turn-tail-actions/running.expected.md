@@ -37,6 +37,9 @@
   - text: 上下文注入 time-context
 - paragraph: partial
 - status: Deep diving...
+- text: 这个模式会用到这些做法，发送时自动带上。点掉的这次不带。 讲明白
+- button "用上讲明白":
+  - img
 - textbox "给智能体发消息"
 - button "命令":
   - img

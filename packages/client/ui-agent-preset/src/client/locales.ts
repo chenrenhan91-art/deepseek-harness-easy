@@ -1,10 +1,49 @@
-/** Locale bundles for the agent-preset settings row, mode grid, and header label. */
+/** Locale bundles for the agent-preset settings row, mode grid, header label, pins, and turn actions. */
+
+/** Simplified Chinese copy (the key-set source of truth). */
+export const zh = {
+  title: '模式',
+  description: '对此后新建的会话生效。已经开始的会话保持它开始时的模式。',
+  loading: '正在加载模式…',
+  error: '无法加载模式。',
+  userTrust: '自定义',
+  headerHint: '本次会话使用的模式，开始后不再更改',
+  gridHeading: '你想让它帮你做什么？',
+  gridHint: '选一个，然后在上面的框里说出你要做的事。发送前都可以换。',
+  noDescription: '暂无说明。',
+  pinsHint: '这个模式会用到这些做法，发送时自动带上。点掉的这次不带。',
+  pinRemove: '不用{name}',
+  pinArm: '用上{name}',
+  regenerate: '再生成',
+  regenerateUnavailable: '只有最新一条回复可以再生成，等它说完再点。',
+  'prompt.study.placeholder': '你卡在哪一步？',
+  'prompt.study.example1': '用大白话解释一下 inflation',
+  'prompt.study.example2': '帮我对一下这道题的答案',
+  'prompt.writing.placeholder': '写给谁、做什么用、大概多长？',
+  'prompt.writing.example1': '给面试官写一封约访谈的邮件，大约 200 字',
+  'prompt.writing.example2': '把这段改成口语一点的公众号',
+  'prompt.web-page.placeholder': '这页给谁看、打开后要对方做什么？',
+  'prompt.web-page.example1': '做一份作品集首页',
+  'prompt.web-page.example2': '做一张手机上能填的报名表',
+  'prompt.slides.placeholder': '讲给谁听、几分钟、要对方记住什么？',
+  'prompt.slides.example1': '做 8 页周会汇报',
+  'prompt.slides.example2': '把这份大纲做成能讲的幻灯',
+  'prompt.sheet.placeholder': '表从哪来、要整理成什么样？',
+  'prompt.sheet.example1': '把这份表去重，再按月合计',
+  'prompt.sheet.example2': '根据这列数据画一张趋势图',
+  'prompt.briefing.placeholder': '关注哪个领域、要看最近多久？',
+  'prompt.briefing.example1': '最近一周 AI 开源有什么值得看的',
+  'prompt.briefing.example2': '整理最近的公开股票观点',
+  'prompt.files.placeholder': '哪些文件、想整理成什么样？',
+  'prompt.files.example1': '把下载文件夹归档，先给我对照表',
+  'prompt.files.example2': '找出重复的照片，先不要删',
+  'prompt.autopilot.placeholder': '要定期做什么、结果放哪？',
+  'prompt.autopilot.example1': '每天把天气写进一个 txt',
+  'prompt.autopilot.example2': '每周一把新文件汇总发给我',
+}
 
 /** Locale keys these surfaces render. */
-export type AgentPresetSettingsKey =
-  | 'title' | 'description' | 'loading' | 'error' | 'userTrust' | 'headerHint'
-  | 'gridHeading' | 'gridHint' | 'noDescription'
-  | 'pinsHint' | 'pinRemove' | 'pinArm'
+export type AgentPresetSettingsKey = keyof typeof zh
 
 /** English copy. */
 export const en: Record<AgentPresetSettingsKey, string> = {
@@ -20,20 +59,30 @@ export const en: Record<AgentPresetSettingsKey, string> = {
   pinsHint: 'This mode will use these methods. They are sent with your message. Dismiss one to skip it.',
   pinRemove: 'Don’t use {name}',
   pinArm: 'Use {name}',
-}
-
-/** Simplified Chinese copy. */
-export const zh: Record<AgentPresetSettingsKey, string> = {
-  title: '模式',
-  description: '对此后新建的会话生效。已经开始的会话保持它开始时的模式。',
-  loading: '正在加载模式…',
-  error: '无法加载模式。',
-  userTrust: '自定义',
-  headerHint: '本次会话使用的模式，开始后不再更改',
-  gridHeading: '你想让它帮你做什么？',
-  gridHint: '选一个，然后在上面的框里说出你要做的事。发送前都可以换。',
-  noDescription: '暂无说明。',
-  pinsHint: '这个模式会用到这些做法，发送时自动带上。点掉的这次不带。',
-  pinRemove: '不用{name}',
-  pinArm: '用上{name}',
+  regenerate: 'Regenerate',
+  regenerateUnavailable: 'Only the latest reply can be regenerated. Wait until it finishes.',
+  'prompt.study.placeholder': 'Where are you stuck?',
+  'prompt.study.example1': 'Explain inflation in plain language',
+  'prompt.study.example2': 'Help me check this answer',
+  'prompt.writing.placeholder': 'Who is it for, what’s it for, roughly how long?',
+  'prompt.writing.example1': 'Write a ~200-word interview-request email',
+  'prompt.writing.example2': 'Rewrite this as a conversational newsletter',
+  'prompt.web-page.placeholder': 'Who is this page for, and what should they do when it opens?',
+  'prompt.web-page.example1': 'Make a portfolio homepage',
+  'prompt.web-page.example2': 'Make a sign-up form that works on a phone',
+  'prompt.slides.placeholder': 'Who’s listening, how many minutes, what should they remember?',
+  'prompt.slides.example1': 'Make an 8-page weekly update deck',
+  'prompt.slides.example2': 'Turn this outline into slides I can present',
+  'prompt.sheet.placeholder': 'Where is the table from, and what should it look like after?',
+  'prompt.sheet.example1': 'Deduplicate this sheet and total it by month',
+  'prompt.sheet.example2': 'Chart a trend from this column',
+  'prompt.briefing.placeholder': 'Which topic, and how recent?',
+  'prompt.briefing.example1': 'What’s worth watching in AI open source this week',
+  'prompt.briefing.example2': 'Collect recent public stock commentary',
+  'prompt.files.placeholder': 'Which files, and how should they be organized?',
+  'prompt.files.example1': 'Archive the Downloads folder — give me a review table first',
+  'prompt.files.example2': 'Find duplicate photos, but don’t delete yet',
+  'prompt.autopilot.placeholder': 'What should run on a schedule, and where do results go?',
+  'prompt.autopilot.example1': 'Write the weather into a txt file every day',
+  'prompt.autopilot.example2': 'Every Monday, summarize new files for me',
 }

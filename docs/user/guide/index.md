@@ -12,7 +12,7 @@ The [model configuration guide](./providers.md) covers other providers and custo
 
 ## Choose a workspace and a mode
 
-Click **选择工作区**, add the project directory where you started `dsh`, and select it. The session composer remains unavailable until a workspace is selected. On the new-session screen, pick a mode card (the default is **学习答疑**); that choice composes the next blank session.
+Click **选择工作区**, add the project directory where you started `dsh`, and select it. The session composer remains unavailable until a workspace is selected. On the new-session screen, pick a mode card (the default is **学习答疑**); that choice composes the next blank session. The composer then shows that mode's placeholder and, while the session is still blank, two example prompts.
 
 ## Set a scheduled task
 
@@ -24,7 +24,7 @@ Start a session and send:
 
 > Summarize this repository and identify its main packages.
 
-The agent can read and edit workspace files, run commands, and maintain a plan. New Web sessions start in **完全放开** (full access); switching into that preset from a safer one still asks you to confirm.
+The agent can read and edit workspace files, run commands, and maintain a plan. New Web sessions start in **完全放开** (full access); switching into that preset from a safer one still asks you to confirm. After a reply, **再生成** resends the same prompt. **做网页** and **做 PPT** open the HTML file in the system browser when the turn finishes.
 
 ## Continue
 

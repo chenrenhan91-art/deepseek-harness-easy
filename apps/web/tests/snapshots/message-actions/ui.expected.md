@@ -15,6 +15,7 @@
 - paragraph: I will read both files before answering.
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -42,6 +43,7 @@
 - paragraph: DONE
 - button "复制":
   - img
+- button "再生成"
 - button "好的回答":
   - img
 - button "有问题的回答":

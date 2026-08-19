@@ -1,12 +1,12 @@
 - banner:
   - navigation "会话层级":
-    - button "Use the ask_user_question tool to" [disabled]
+    - button "/explain-clearly Use the ask_user_questi" [disabled]
   - img
   - text: 学习答疑
   - button "会话日志":
     - text: 会话日志
     - img
-- text: Use the ask_user_question tool to ask me exactly one question with id "checkpoint", question "Ready to continue?", header "Checkpoint", and options labeled "Yes" and "No". After I answer, reply with one short sentence acknowledging my answer and stop. {{clock}}
+- text: /explain-clearly Use the ask_user_question tool to ask me exactly one question with id "checkpoint", question "Ready to continue?", header "Checkpoint", and options labeled "Yes" and "No". After I answer, reply with one short sentence acknowledging my answer and stop. {{clock}}
 - button "复制":
   - img
 - button "上下文注入 @deepseek-ai/dsh-system-prompt":
@@ -17,6 +17,10 @@
   - img
   - img
   - text: 上下文注入 skill-catalog
+- button "上下文注入 explain-clearly":
+  - img
+  - img
+  - text: 上下文注入 explain-clearly
 - button "上下文注入 time-context":
   - img
   - img
@@ -43,13 +47,16 @@
 - paragraph: Great, let's move forward. BANANA!
 - button "复制":
   - img
+- button "再生成"
 - button "好的回答":
   - img
 - button "有问题的回答":
   - img
 - button "在新对话中分支":
   - img
-- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s 这个模式会用到这些做法，发送时自动带上。点掉的这次不带。 讲明白
+- button "用上讲明白":
+  - img
 - textbox "给智能体发消息"
 - button "命令":
   - img

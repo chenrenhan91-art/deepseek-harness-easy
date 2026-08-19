@@ -26,20 +26,14 @@
   - img
   - text: workspace
   - img
-- text: 这个模式会用到这些做法，发送时自动带上。点掉的这次不带。
-- text: 讲明白
-- button "不用讲明白":
+- text: 这个模式会用到这些做法，发送时自动带上。点掉的这次不带。 讲明白
+- button "不用讲明白" [pressed]:
   - img
-- text: 真懂了吗
-- button "不用真懂了吗":
-  - img
-- text: 带做一道
-- button "不用带做一道":
-  - img
-- textbox "/explain-clearly /check-understanding /work-an-example "
+- button "用大白话解释一下 inflation"
+- button "帮我对一下这道题的答案"
+- textbox "你卡在哪一步？": /explain-clearly
 - button "命令":
   - img
-- tooltip "命令"
 - button "访问模式，当前：完全放开": 完全放开
 - button "选择模型，当前 DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash

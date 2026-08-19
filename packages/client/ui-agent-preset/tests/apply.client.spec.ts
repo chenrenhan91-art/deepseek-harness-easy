@@ -19,6 +19,8 @@ import { ModeGrid } from '../src/client/ModeGrid.tsx'
 import type { ModeGridInjected } from '../src/client/ModeGrid.tsx'
 import { SkillPins } from '../src/client/SkillPins.tsx'
 import type { SkillPinsInjected } from '../src/client/SkillPins.tsx'
+import { RegenerateActions } from '../src/client/RegenerateActions.tsx'
+import type { RegenerateActionsInjected } from '../src/client/RegenerateActions.tsx'
 
 // The service reads its initial locale from the browser; these specs assert
 // the shipped Chinese copy, so they state the browser they assume.
@@ -123,6 +125,7 @@ function declareConversation(slots: SlotRegistry): () => void {
       'conversation.hero.modes': { kind: 'single', scope: 'root' },
       'conversation.session.header.actions': { kind: 'list', scope: 'session' },
       'conversation.input.dock': { kind: 'list', scope: 'session' },
+      'conversation.chat.assistant-actions': { kind: 'list', scope: 'session' },
     },
   } as never, () => null)
 }
@@ -161,7 +164,9 @@ function sessionsDouble(state: {
   byId: Record<string, { id: string; blank: boolean; agentPreset?: string }>
 }, calls: string[]) {
   const listeners = new Set<() => void>()
+  const send = vi.fn(() => Promise.resolve())
   return {
+    conversationSend: send,
     list: {
       getSnapshot: () => state,
       subscribe: (fn: () => void) => {
@@ -187,6 +192,9 @@ function sessionsDouble(state: {
     },
     /** Push a list change the way the runtime's store does. */
     notify: () => { for (const fn of listeners) fn() },
+    scope: (_id: string): { get: (name: string) => { send: typeof send } | undefined } | undefined => ({
+      get: (name: string) => name === 'conversation' ? { send } : undefined,
+    }),
   }
 }
 
@@ -198,7 +206,8 @@ async function withConversation(state: {
   const harness = await bench()
   declareRoot(harness.slots)
   const conversation = declareConversation(harness.slots)
-  harness.ctx.provide('conversation', {} as never)
+  const hints = { set: vi.fn() }
+  harness.ctx.provide('conversation', { hints } as never)
   const sessions = sessionsDouble(state, harness.calls)
   harness.ctx.provide('sessions', sessions as never)
   harness.ctx.provide('workspaces', workspacesDouble(state) as never)
@@ -206,7 +215,7 @@ async function withConversation(state: {
     inject: [...inject, 'conversation', 'sessions', 'workspaces'], apply,
   })
   await fiber.await()
-  return { ...harness, sessions, fiber, conversation }
+  return { ...harness, sessions, fiber, conversation, hints }
 }
 
 /** The grid's business face, as the renderer would resolve it. */
@@ -250,12 +259,16 @@ describe('ui-agent-preset apply', () => {
     const pins = slots.entries('conversation.input.dock')[0]!
     expect(pins.component).toBe(SkillPins)
     expect(pins.options).toMatchObject({ id: 'skill-pins', order: 25 })
+    const regenerate = slots.entries('conversation.chat.assistant-actions')[0]!
+    expect(regenerate.component).toBe(RegenerateActions)
+    expect(regenerate.options).toMatchObject({ id: 'regenerate', order: 0 })
 
     await fiber.dispose()
 
     expect(slots.entries('conversation.hero.modes')).toHaveLength(0)
     expect(slots.entries('conversation.session.header.actions')).toHaveLength(0)
     expect(slots.entries('conversation.input.dock')).toHaveLength(0)
+    expect(slots.entries('conversation.chat.assistant-actions')).toHaveLength(0)
     expect(slots.entries('settings.general.item')).toHaveLength(0)
     conversation()
   })
@@ -492,5 +505,28 @@ describe('ui-agent-preset apply', () => {
     ctx.emit('connection/reset')
     expect(hits).toBe(2)
     stop()
+  })
+
+  it('publishes a mode placeholder through conversation.hints', async () => {
+    const { slots, hints } = await withConversation()
+    const pins = (slots.entries('conversation.input.dock')[0]!.inject as unknown as () => SkillPinsInjected)()
+
+    pins.setPlaceholder('s1' as never, '你卡在哪一步？')
+    expect(hints.set).toHaveBeenCalledWith('s1', { placeholder: '你卡在哪一步？' })
+    pins.setPlaceholder('s1' as never, undefined)
+    expect(hints.set).toHaveBeenCalledWith('s1', undefined)
+    expect(pins.hooks.modeGrid).toBe(gridFace(slots).hooks.modeGrid)
+  })
+
+  it('regenerate send uses the scoped conversation and fails loud when it is missing', async () => {
+    const { slots, sessions } = await withConversation()
+    const regen = (slots.entries('conversation.chat.assistant-actions')[0]!
+      .inject as unknown as (sessionId: string) => RegenerateActionsInjected)('s1')
+
+    await regen.send('/explain-clearly 讲一下')
+    expect(sessions.conversationSend).toHaveBeenCalledWith('/explain-clearly 讲一下')
+
+    sessions.scope = () => undefined
+    await expect(regen.send('again')).rejects.toThrow(/session "s1" has no conversation/)
   })
 })

@@ -10,6 +10,8 @@ export const zh = {
   'produced.more': '+ {count} 个文件',
   'produced.open': '打开 {name}',
   'produced.showInFolder': '在文件夹中显示',
+  'preview.opened': '已在浏览器打开 {name}',
+  'preview.remote': '成品在 {path}。远程会话无法在此打开，请在那台电脑上打开这个文件。',
 }
 
 /** English dictionary (same key set). */
@@ -19,6 +21,8 @@ export const en: Record<DeliverablesKey, string> = {
   'produced.more': '+ {count} files',
   'produced.open': 'Open {name}',
   'produced.showInFolder': 'Show in folder',
+  'preview.opened': 'Opened {name} in the browser',
+  'preview.remote': 'The file is at {path}. A remote session cannot open it here; open it on that machine.',
 }
 
 /** Union of this namespace's dictionary keys. */

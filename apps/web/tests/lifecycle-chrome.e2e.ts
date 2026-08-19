@@ -62,38 +62,59 @@ describe('web e2e: lifecycle & chrome (workspace flow / reload / dark mode)', ()
   })
 
   it.skipIf(MODE === 'record')('opens the shared slash menu from plus with Command and Skill candidates', async () => {
-    onTestFailed(() => saveFailureShot(page, 'web-e2e-command-menu-launcher'))
-    const launcher = page.getByRole('button', { name: '命令' })
-    await launcher.click()
-    const menu = page.getByRole('listbox', { name: '触发候选建议' })
-    await menu.waitFor({ timeout: 10_000 })
-    const snapshot = await captureStableAria(page, '[role="listbox"]', scaffold.workspaceCwd)
-    await compareOrRefreshGolden(COMMAND_MENU_EXPECTED, snapshot, MODE)
-    expect(snapshot).toContain('text: 命令')
-    expect(snapshot).toContain('text: 技能')
-    expect(snapshot).toContain('vision')
-    expect(snapshot).not.toContain('text: Subagents')
-    const launchedBox = await menu.boundingBox()
-    await page.locator('textarea').first().press('Escape')
-    await expect.poll(() => menu.count()).toBe(0)
-    const input = page.locator('textarea').first()
-    await input.fill('/')
-    await menu.waitFor({ timeout: 10_000 })
-    const typedBox = await menu.boundingBox()
-    expect(launchedBox).not.toBeNull()
-    expect(typedBox).not.toBeNull()
-    expect(Math.abs(launchedBox!.x - typedBox!.x)).toBeLessThan(1)
-    expect(Math.abs(
-      launchedBox!.y + launchedBox!.height - typedBox!.y - typedBox!.height,
-    )).toBeLessThan(1)
-    await input.fill('/cpt')
-    await expect.poll(() => menu.getByRole('option').allTextContents()).toEqual([
-      'compact压缩较早的对话历史',
-    ])
-    const fuzzySnapshot = await captureStableAria(page, '[role="listbox"]', scaffold.workspaceCwd)
-    await compareOrRefreshGolden(FUZZY_COMMAND_MENU_EXPECTED, fuzzySnapshot, MODE)
-    await input.fill('')
-    await expect.poll(() => menu.count()).toBe(0)
+    const menuScaffold = await launchWebScaffold()
+    const menuPage = await newEnglishPage(browser)
+    try {
+      await menuPage.goto(menuScaffold.baseUrl, { waitUntil: 'load' })
+      await menuPage.waitForSelector('[class*="frame"]', { timeout: 30_000 })
+      await connectFreshWorkspace(menuPage, menuScaffold.workspaceCwd)
+      const input = menuPage.locator('textarea').first()
+      await expect.poll(() => input.inputValue(), { timeout: 10_000 }).toMatch(/explain-clearly/)
+      const launcher = menuPage.getByRole('button', { name: '命令' })
+      await launcher.click()
+      const menu = menuPage.getByRole('listbox', { name: '触发候选建议' })
+      await menu.waitFor({ timeout: 10_000 })
+      const snapshot = await captureStableAria(menuPage, '[role="listbox"]', menuScaffold.workspaceCwd)
+      await compareOrRefreshGolden(COMMAND_MENU_EXPECTED, snapshot, MODE)
+      expect(snapshot).toContain('text: 命令')
+      expect(snapshot).toContain('text: 技能')
+      expect(snapshot).toContain('vision')
+      expect(snapshot).not.toContain('text: Subagents')
+      await menuPage.locator('textarea').first().press('Escape')
+      await expect.poll(() => menu.count()).toBe(0)
+      // Example chips collapse when the draft is no longer pin-only; measure
+      // plus vs typed `/` after that so both menus share one composer height.
+      await input.fill('x')
+      await expect.poll(() => menuPage.locator('[data-mode-examples]').count()).toBe(0)
+      await launcher.click()
+      await menu.waitFor({ timeout: 10_000 })
+      const launchedBox = await menu.boundingBox()
+      await input.press('Escape')
+      await expect.poll(() => menu.count()).toBe(0)
+      await input.fill('/')
+      await menu.waitFor({ timeout: 10_000 })
+      const typedBox = await menu.boundingBox()
+      expect(launchedBox).not.toBeNull()
+      expect(typedBox).not.toBeNull()
+      expect(Math.abs(launchedBox!.x - typedBox!.x)).toBeLessThan(1)
+      expect(Math.abs(
+        launchedBox!.y + launchedBox!.height - typedBox!.y - typedBox!.height,
+      )).toBeLessThan(1)
+      await input.fill('/cpt')
+      await expect.poll(() => menu.getByRole('option').allTextContents()).toEqual([
+        'compact压缩较早的对话历史',
+      ])
+      const fuzzySnapshot = await captureStableAria(menuPage, '[role="listbox"]', menuScaffold.workspaceCwd)
+      await compareOrRefreshGolden(FUZZY_COMMAND_MENU_EXPECTED, fuzzySnapshot, MODE)
+      await input.fill('')
+      await expect.poll(() => menu.count()).toBe(0)
+    } catch (error) {
+      await saveFailureShot(menuPage, 'web-e2e-command-menu-launcher').catch(() => undefined)
+      throw error
+    } finally {
+      await menuPage.close()
+      await menuScaffold.close()
+    }
   })
 
   it.skipIf(MODE === 'record')('shows active Plan as the warn-state status action', async () => {
@@ -105,6 +126,7 @@ describe('web e2e: lifecycle & chrome (workspace flow / reload / dark mode)', ()
       await activePage.waitForSelector('[class*="frame"]', { timeout: 30_000 })
       await connectFreshWorkspace(activePage, activeScaffold.workspaceCwd)
       const input = activePage.locator('textarea').first()
+      await expect.poll(() => input.inputValue(), { timeout: 10_000 }).toMatch(/explain-clearly/)
       await activePage.getByRole('button', { name: '命令' }).click()
       const menu = activePage.getByRole('listbox', { name: '触发候选建议' })
       await menu.waitFor({ timeout: 10_000 })
@@ -165,6 +187,10 @@ describe('web e2e: lifecycle & chrome (workspace flow / reload / dark mode)', ()
     const input = page.locator('textarea').first()
     await input.waitFor({ timeout: 10_000 })
     if (MODE !== 'record') {
+      await expect.poll(
+        () => page.getByRole('button', { name: '用大白话解释一下 inflation' }).count(),
+        { timeout: 15_000 },
+      ).toBe(1)
       // Golden of the hero's stable waiting state (captured before any send;
       // the conversation-region goldens belong to the other scenarios).
       const snapshot = await captureStableAria(page, '[class*="frame"]', scaffold.workspaceCwd)

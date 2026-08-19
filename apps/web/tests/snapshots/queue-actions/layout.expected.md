@@ -26,6 +26,9 @@
 - region "任务":
   - button "任务 1 已完成 · 1 进行中"
 - button "2 条排队消息"
+- text: 这个模式会用到这些做法，发送时自动带上。点掉的这次不带。 讲明白
+- button "用上讲明白":
+  - img
 - textbox "Cmd/Ctrl+Enter 插话发送全部排队消息"
 - button "命令":
   - img

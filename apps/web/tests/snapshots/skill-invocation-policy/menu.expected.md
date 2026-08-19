@@ -1,4 +1,3 @@
 - listbox "触发候选建议":
   - text: 技能
-  - option "policy-shared Available to both model and user invocation" [selected]
-  - option "policy-user-only 仅用户 · Available only to user invocation"
+  - option "explain-clearly 讲明白：把复杂概念拆成零基础也能跟上的解释，并检验是否真懂" [selected]

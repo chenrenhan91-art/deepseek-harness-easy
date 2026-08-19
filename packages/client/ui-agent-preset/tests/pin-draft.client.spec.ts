@@ -5,7 +5,8 @@
 
 import { describe, expect, it } from 'vitest'
 import {
-  armedNames, modePins, PIN_CAP, pinLabel, prependPins, removePin, SHARED_SKILL_ID, swapPins,
+  armedNames, draftProse, modePins, PIN_CAP, pinLabel, prependPins, removePin, SHARED_SKILL_ID,
+  swapPins,
 } from '../src/client/pin-draft.ts'
 
 describe('pin-draft', () => {
@@ -24,7 +25,7 @@ describe('pin-draft', () => {
     expect(pinLabel('：leading colon', 'explain-clearly')).toBe('explain-clearly')
   })
 
-  it('drops the shared vision skill, caps the row, and leads with the primary', () => {
+  it('drops vision and study companions, leaving explain-clearly first', () => {
     const pins = modePins([
       { name: SHARED_SKILL_ID, description: '视觉技能：看图' },
       { name: 'work-an-example', description: '带做一道：走完例子' },
@@ -32,14 +33,24 @@ describe('pin-draft', () => {
       { name: 'check-understanding', description: '真懂了吗：出一道小题' },
       { name: 'zz-extra', description: '多余：不应入选' },
     ])
-    expect(pins).toHaveLength(PIN_CAP)
-    expect(pins.map(pin => pin.name)).toEqual([
-      'explain-clearly',
-      'check-understanding',
-      'work-an-example',
-    ])
+    expect(pins.map(pin => pin.name)).toEqual(['explain-clearly', 'zz-extra'])
     expect(pins[0]?.label).toBe('讲明白')
     expect(pins.some(pin => pin.name === SHARED_SKILL_ID)).toBe(false)
+  })
+
+  it('caps a non-study catalog at PIN_CAP and leads with the primary', () => {
+    expect(modePins([
+      { name: SHARED_SKILL_ID, description: '视觉技能：看图' },
+      { name: 'write-plain', description: '写人话：少套话' },
+      { name: 'keep-the-facts', description: '事实不动：数字要对' },
+      { name: 'draft-and-revise', description: '起草改稿：先出全文' },
+      { name: 'zz-extra', description: '多余：不应入选' },
+    ]).map(pin => pin.name)).toEqual([
+      'draft-and-revise',
+      'keep-the-facts',
+      'write-plain',
+    ])
+    expect(PIN_CAP).toBe(3)
   })
 
   it('leads the briefing row with the roster skill', () => {
@@ -75,6 +86,13 @@ describe('pin-draft', () => {
     )
     expect(removePin('没有这个', 'explain-clearly')).toBe('没有这个')
     expect(removePin('/explain-clearly  \n下一行', 'explain-clearly')).toBe('下一行')
+  })
+
+  it('strips /name tokens so an empty remainder means the composer holds only pins', () => {
+    expect(draftProse('')).toBe('')
+    expect(draftProse('/explain-clearly /work-an-example ')).toBe('')
+    expect(draftProse('/explain-clearly 帮我讲导数')).toBe('帮我讲导数')
+    expect(draftProse('没有技能')).toBe('没有技能')
   })
 
   it('swaps one mode’s pins for another and leaves unrelated tokens', () => {

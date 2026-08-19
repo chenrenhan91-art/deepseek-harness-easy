@@ -156,7 +156,7 @@ describe('web e2e: startup auto-selection', () => {
     expect(await page.locator('textarea').first().isVisible()).toBe(true)
 
     releaseHistory()
-    await page.locator('textarea:enabled[placeholder="描述你想要构建的内容"]')
+    await page.locator('textarea:enabled[placeholder="你卡在哪一步？"]')
       .waitFor({ timeout: 15_000 })
     acknowledgeReloadConnectionLoss(tripwire, warningsBefore)
 

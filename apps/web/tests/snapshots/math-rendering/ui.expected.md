@@ -30,6 +30,7 @@
 - paragraph: MATH_RENDERING_DONE
 - button "复制":
   - img
+- button "再生成"
 - button "好的回答":
   - img
 - button "有问题的回答":

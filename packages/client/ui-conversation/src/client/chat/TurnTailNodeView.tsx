@@ -2,7 +2,7 @@ import { memo } from 'react'
 import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ChatNodeViewProps, TurnTailOwnerProps } from '../contract/slots.ts'
 import { MessageIconActions } from './MessageIconActions.tsx'
-import { assistantText } from './turn-assistant.ts'
+import { assistantText, turnPromptText } from './turn-assistant.ts'
 import css from './TurnTailNodeView.module.css'
 
 type TurnTailNodeViewProps = ChatNodeViewProps<'turn-tail'>
@@ -15,6 +15,11 @@ export const TurnTailNodeView = memo(function TurnTailNodeView({
   const data = node.data
   const hasLaterChatNode = useSession(snapshot =>
     snapshot.chat.locations.getTurn(data.turn).at(-1) !== node.key)
+  const promptText = useSession(snapshot => turnPromptText(snapshot.chat, data.turn))
+  const regenerable = useSession(snapshot =>
+    !snapshot.running
+    && snapshot.chat.timeline.turnOrder.at(-1) === data.turn
+    && snapshot.chat.locations.getTurn(data.turn).at(-1) === node.key)
   const turn = node.location.kind === 'turn' || node.location.kind === 'step'
     ? node.location.turn
     : undefined
@@ -31,7 +36,11 @@ export const TurnTailNodeView = memo(function TurnTailNodeView({
   const messageId = closing.finalNode.messageId
   const assistantActions = messageId === undefined
     ? null
-    : renderSlot('conversation.chat.assistant-actions', { messageId })
+    : renderSlot('conversation.chat.assistant-actions', {
+      messageId,
+      regenerable,
+      ...promptText === undefined ? {} : { promptText },
+    })
   return (
     <div className={css.root} data-turn-tail={data.turn} data-time-hover-root>
       {tail}

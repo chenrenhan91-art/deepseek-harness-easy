@@ -28,14 +28,17 @@
 - paragraph: LIGHTHOUSE
 - button "复制":
   - img
+- button "再生成"
 - button "好的回答":
   - img
 - button "有问题的回答":
   - img
 - button "在新对话中分支":
   - img
-- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
-- textbox "给智能体发消息"
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s 这个模式会用到这些做法，发送时自动带上。点掉的这次不带。 讲明白
+- button "不用讲明白" [pressed]:
+  - img
+- textbox "给智能体发消息": /explain-clearly
 - button "命令":
   - img
 - button "访问模式，当前：完全放开": 完全放开
@@ -43,5 +46,5 @@
   - text: DeepSeek-V4-Flash
   - img
 - button "上下文已用 6%"
-- button "发送消息" [disabled]
+- button "发送消息"
 - text: 1 轮 · 1 步 LLM {{duration}} 首 token 平均 {{duration}} · {{throughput}} tok/s 缓存命中 99% 输入 7.8K tok · 输出 21 tok

@@ -11,6 +11,7 @@ import { createSnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import { SkillPins } from '../src/client/SkillPins.tsx'
 import type { SkillPinsProps } from '../src/client/SkillPins.tsx'
 import type { SkillPin } from '../src/client/pin-draft.ts'
+import type { ModeGridState } from '../src/client/grid-store.ts'
 import { en } from '../src/client/locales.ts'
 
 afterEach(cleanup)
@@ -31,11 +32,21 @@ function renderPins(options: {
   pins?: readonly SkillPin[] | Promise<readonly SkillPin[]>
   reject?: boolean
   draft?: string
+  current?: string
+  composerPhase?: 'blank' | 'active'
 }) {
   const input = createSnapshotStore({ draft: options.draft ?? '' })
+  const grid = createSnapshotStore<ModeGridState>({
+    current: options.current ?? 'study',
+    options: [],
+    busy: false,
+    error: null,
+  })
+  const session = createSnapshotStore({ composerPhase: options.composerPhase ?? 'blank' })
   const setDraft = vi.fn((text: string) => {
     input.set({ draft: text })
   })
+  const setPlaceholder = vi.fn()
   let catalog = options.reject
     ? Promise.reject(new Error('catalog down'))
     : Promise.resolve(options.pins ?? STUDY)
@@ -43,7 +54,10 @@ function renderPins(options: {
   const props = {
     sessionId: 's1',
     useInput: bindSnapshotSelector(input),
+    useSession: bindSnapshotSelector(session),
+    useModeGrid: bindSnapshotSelector(grid),
     inputActions: { setDraft, submit: () => {} },
+    setPlaceholder,
     load: () => catalog,
     watchCatalog: (_sessionId: string, onChange: () => void) => {
       watchers.add(onChange)
@@ -59,6 +73,7 @@ function renderPins(options: {
   const view = render(<SkillPins {...(props as unknown as SkillPinsProps)} />)
   return {
     setDraft,
+    setPlaceholder,
     input,
     reload: (next: readonly SkillPin[]) => {
       catalog = Promise.resolve(next)
@@ -150,5 +165,53 @@ describe('SkillPins', () => {
     await waitFor(() => { expect(screen.getByText('写人话')).toBeTruthy() })
     expect(setDraft).toHaveBeenCalledWith('/draft-and-revise /write-plain /keep-the-facts 帮我写')
     expect(screen.queryByText('讲明白')).toBeNull()
+  })
+
+  it('publishes the mode placeholder and two empty-session examples', async () => {
+    const { setPlaceholder } = renderPins({ pins: [{ name: 'explain-clearly', label: '讲明白' }] })
+    await waitFor(() => {
+      expect(screen.getByText('讲明白')).toBeTruthy()
+      expect(screen.getByText(en['prompt.study.example1'])).toBeTruthy()
+      expect(screen.getByText(en['prompt.study.example2'])).toBeTruthy()
+    })
+    expect(setPlaceholder).toHaveBeenCalledWith('s1', en['prompt.study.placeholder'])
+  })
+
+  it('fills the draft from an example while keeping armed pins', async () => {
+    const { input } = renderPins({ pins: [{ name: 'explain-clearly', label: '讲明白' }] })
+    await waitFor(() => { expect(screen.getByText(en['prompt.study.example1'])).toBeTruthy() })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: en['prompt.study.example1'] }))
+    })
+    expect(input.getSnapshot().draft).toBe(`/explain-clearly ${en['prompt.study.example1']}`)
+  })
+
+  it('hides examples once the user has typed prose or the session is no longer blank', async () => {
+    renderPins({
+      pins: [{ name: 'explain-clearly', label: '讲明白' }],
+      draft: '/explain-clearly 帮我讲',
+    })
+    await waitFor(() => { expect(screen.getByText('讲明白')).toBeTruthy() })
+    expect(screen.queryByText(en['prompt.study.example1'])).toBeNull()
+
+    cleanup()
+    renderPins({
+      pins: [{ name: 'explain-clearly', label: '讲明白' }],
+      composerPhase: 'active',
+    })
+    await waitFor(() => { expect(screen.getByText('讲明白')).toBeTruthy() })
+    expect(screen.queryByText(en['prompt.study.example1'])).toBeNull()
+  })
+
+  it('clears the placeholder for an unknown mode and on unmount', async () => {
+    const { setPlaceholder, view } = renderPins({
+      pins: [{ name: 'draft-and-revise', label: '起草改稿' }],
+      current: 'mine',
+    })
+    await waitFor(() => { expect(screen.getByText('起草改稿')).toBeTruthy() })
+    expect(screen.queryByText(en['prompt.writing.example1'])).toBeNull()
+    expect(setPlaceholder).toHaveBeenCalledWith('s1', undefined)
+    view.unmount()
+    expect(setPlaceholder).toHaveBeenLastCalledWith('s1', undefined)
   })
 })

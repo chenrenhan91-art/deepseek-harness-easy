@@ -259,6 +259,9 @@ describe('web e2e: composer draft scrolling', () => {
     await page.goto(scaffold.baseUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
     await connectFreshWorkspace(page, scaffold.workspaceCwd, 'composer-draft-scroll')
+    // Study arms `/explain-clearly` after connect. Wait so that arming cannot
+    // prepend a claim chip onto the long draft this scenario measures.
+    await page.locator('[data-skill-pin="explain-clearly"]').waitFor({ timeout: 15_000 })
     await page.locator('textarea:enabled').first().fill(DRAFT)
   }, 180_000)
 

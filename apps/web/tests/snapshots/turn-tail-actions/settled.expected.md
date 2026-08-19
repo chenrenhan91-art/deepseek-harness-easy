@@ -41,7 +41,9 @@
 - tooltip "复制"
 - button "在新对话中分支":
   - img
-- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s
+- text: {{clock}} 用时 {{duration}} 首 token {{duration}} {{throughput}} tok/s 这个模式会用到这些做法，发送时自动带上。点掉的这次不带。 讲明白
+- button "用上讲明白":
+  - img
 - textbox "给智能体发消息"
 - button "命令":
   - img

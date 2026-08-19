@@ -22,6 +22,8 @@ import { ConversationController, UnsupportedImageMediaTypeError } from './servic
 import type { IConversation } from './service.ts'
 import { ComposerBlockRegistry } from './input/blocks.ts'
 import type { ComposerBlock } from './input/blocks.ts'
+import { ComposerHintRegistry } from './input/hints.ts'
+import type { ComposerHint } from './input/hints.ts'
 import { InputHub } from './input/hub.ts'
 import { ComposerSubmissionPolicy } from './input/submission-policy.ts'
 import { InputBar } from './skeleton/InputBar.tsx'
@@ -63,6 +65,11 @@ const ABSENT_NOTICES = {
 /** No session, therefore nothing to block; same one-identity rule as above. */
 const ABSENT_BLOCK = {
   getSnapshot: (): ComposerBlock | undefined => undefined,
+  subscribe: () => () => {},
+}
+/** No session, therefore no hero hint; same one-identity rule as above. */
+const ABSENT_HINT = {
+  getSnapshot: (): ComposerHint | undefined => undefined,
   subscribe: () => () => {},
 }
 const EMPTY_LEXICON: ReadonlyMap<'/' | '@', readonly string[]> = new Map()
@@ -174,6 +181,7 @@ export function apply(ctx: Context): void {
   // here, and the bar reads its own session's store. It cannot flow the other
   // way: this package must not import the plugins that would know.
   const composerBlocks = new ComposerBlockRegistry()
+  const composerHints = new ComposerHintRegistry()
 
   // The input machine feeds every session-scope slot
   // component through the standard provide channel — the 'input' hook plus
@@ -210,7 +218,10 @@ export function apply(ctx: Context): void {
       'conversation.hero.modes': { kind: 'single', scope: 'root' },
     },
     inject: (sessionId: SessionId | undefined): ConversationInjected => ({
-      hooks: { composerBlock: sessionId === undefined ? ABSENT_BLOCK : composerBlocks.storeFor(sessionId) },
+      hooks: {
+        composerBlock: sessionId === undefined ? ABSENT_BLOCK : composerBlocks.storeFor(sessionId),
+        composerHint: sessionId === undefined ? ABSENT_HINT : composerHints.storeFor(sessionId),
+      },
       selectWorkspace: async (workspaceId) => {
         const nextId = await workspaces.connectWorkspace(workspaceId)
         if (sessionId !== undefined && nextId !== sessionId) {
@@ -330,14 +341,18 @@ export function apply(ctx: Context): void {
           submissionPolicy.resolve(running, gesture, steeringAvailable),
         toggleCommandMenu: inputTriggers === undefined
           ? undefined
-          : (selection) => {
+          : (_selection) => {
             shell.dismissPopup()
             const snapshot = shell.snapshot
             inputTriggers.toggleSource('command', {
               trigger: '/',
               query: '',
-              position: snapshot.draft.slice(0, selection.start).trim() === '' ? 'leading' : 'inline',
-              span: { ...selection, draftRev: snapshot.draftRev },
+              // A dedicated directory, not inline slash completion: pin
+              // tokens in the draft must not hide /plan, and the claim span
+              // must start at 0 so begin-command's leading-trigger check
+              // can replace the whole composer.
+              position: 'leading',
+              span: { start: 0, end: snapshot.draft.length, draftRev: snapshot.draftRev },
             })
           },
         stop: () => {
@@ -426,7 +441,9 @@ export function apply(ctx: Context): void {
   // registers itself as `conversation` and lives on its own child fiber.
   // Presentation registrants depend directly on their slot declarations;
   // this service remains only where conversation actions are required.
-  ctx.plugin(ConversationController, { input: inputHub, blocks: composerBlocks })
+  ctx.plugin(ConversationController, {
+    input: inputHub, blocks: composerBlocks, hints: composerHints,
+  })
 
   // The plan strip rides the input dock above the queue rows (same posture).
   ctx.plugin(todoDockEntry)

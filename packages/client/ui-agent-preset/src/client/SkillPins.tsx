@@ -1,25 +1,39 @@
 /**
  * Mode skill pins: Chinese tags inside the composer stack. Clicking a mode
- * arms that mode's 2–3 domain skills as `/name` tokens in the draft so the
- * host injects their bodies on send.
+ * arms that mode's domain skills (at most three; study only explain-clearly)
+ * as `/name` tokens in the draft so the host injects their bodies on send.
+ * On a blank session the same card offers two example prompts for the
+ * current shipped mode.
  */
 
 import { useEffect, useRef, useState } from 'react'
-import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client'
+import type { SessionId, SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import { IconCloseOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls the ui-conversation SlotMap merge (the input dock seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { ModeGridState } from './grid-store.ts'
+import { isModePromptId, modePromptKeys } from './mode-prompts.ts'
 import type { SkillPin } from './pin-draft.ts'
-import { armedNames, prependPins, removePin, swapPins } from './pin-draft.ts'
+import { armedNames, draftProse, prependPins, removePin, swapPins } from './pin-draft.ts'
 import css from './SkillPins.module.css'
 
-/** Registration-side face: catalog read plus invalidation. */
+/** Registration-side face: catalog read, mode grid, and hero placeholder. */
 export interface SkillPinsInjected {
   /** User-invocable mode pins for this session's composition. */
   load: (sessionId: SessionId) => Promise<readonly SkillPin[]>
   /** Fire when the session's skill catalog may have changed. */
   watchCatalog: (sessionId: SessionId, onChange: () => void) => () => void
+  /**
+   * Set or clear this session's non-blocking hero placeholder.
+   * @param sessionId - the session whose composer is affected.
+   * @param placeholder - localized copy, or undefined to restore the generic hero text.
+   */
+  setPlaceholder: (sessionId: SessionId, placeholder: string | undefined) => void
+  hooks: {
+    /** Grid snapshot bound by the renderer as useModeGrid. */
+    modeGrid: SnapshotStore<ModeGridState>
+  }
 }
 
 /** Full component props. */
@@ -34,9 +48,12 @@ export type SkillPinsProps =
  * @returns the pin row, or null while this session has no mode-owned skills.
  */
 export function SkillPins({
-  sessionId, useInput, inputActions, load, watchCatalog, t,
+  sessionId, useInput, useSession, inputActions, load, watchCatalog,
+  setPlaceholder, useModeGrid, t,
 }: SkillPinsProps) {
   const draft = useInput(s => s.draft)
+  const current = useModeGrid(s => s.current)
+  const composerPhase = useSession(s => s.composerPhase)
   const [pins, setPins] = useState<readonly SkillPin[]>([])
   const draftRef = useRef(draft)
   const lastNames = useRef<string[]>([])
@@ -70,14 +87,31 @@ export function SkillPins({
     if (swapped !== draftRef.current) inputActions.setDraft(swapped)
   }, [pins, sessionId, inputActions])
 
+  useEffect(() => {
+    return () => { setPlaceholder(sessionId, undefined) }
+  }, [sessionId, setPlaceholder])
+
+  useEffect(() => {
+    setPlaceholder(
+      sessionId,
+      isModePromptId(current) ? t(modePromptKeys(current).placeholder) : undefined,
+    )
+  }, [sessionId, current, setPlaceholder, t])
+
   if (pins.length === 0) return null
 
   const armed = new Set(armedNames(draft))
+  const keys = isModePromptId(current) ? modePromptKeys(current) : undefined
+  const showExamples = keys !== undefined && composerPhase === 'blank' && draftProse(draft) === ''
 
   const toggle = (name: string): void => {
     inputActions.setDraft(
       armed.has(name) ? removePin(draft, name) : prependPins(draft, [name]),
     )
+  }
+
+  const useExample = (text: string): void => {
+    inputActions.setDraft(prependPins(text, armedNames(draft)))
   }
 
   return (
@@ -105,6 +139,20 @@ export function SkillPins({
           </span>
         )
       })}
+      {showExamples && keys !== undefined && (
+        <div className={css.examples} data-mode-examples="">
+          {([keys.example1, keys.example2] as const).map(key => (
+            <button
+              key={key}
+              type="button"
+              className={css.example}
+              onClick={() => { useExample(t(key)) }}
+            >
+              {t(key)}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

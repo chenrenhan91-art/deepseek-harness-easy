@@ -14,7 +14,7 @@ The composer `+` menu listed every user-invocable skill the session could see. B
 
 **Three original skills per mode.** Each mode ships its original domain skill plus two companions written in Chinese for this product. The companions take direction from widely used public skills (notably Anthropic's `frontend-design` for 做网页's `look-distinct`) and do not copy those files. `vision` stays in the catalog and in `+`; it is never auto-pinned.
 
-**Composer tags arm the mode.** `@deepseek-ai/dsh-client-ui-agent-preset` occupies `conversation.input.dock` at order 25 with `SkillPins`. On catalog load and on `agent-preset/selected`, it pins up to three non-`vision` skills and writes their `/name` tokens into the draft. The host `dsh-tool-skill` pre-step already injects every such token. The chip label is the catalog description text before the first `：`, so 学习答疑 shows 讲明白 / 真懂了吗 / 带做一道. Dismissing a chip removes that token; clicking it again puts the token back. Switching mode replaces the previous mode's tokens and leaves unrelated ones (`/vision`) and the user's prose.
+**Composer tags arm the mode.** `@deepseek-ai/dsh-client-ui-agent-preset` occupies `conversation.input.dock` at order 25 with `SkillPins`. On catalog load and on `agent-preset/selected`, it pins up to three non-`vision` skills and writes their `/name` tokens into the draft. The host `dsh-tool-skill` pre-step already injects every such token. The chip label is the catalog description text before the first `：`, so 学习答疑 shows 讲明白; `check-understanding` and `work-an-example` stay in `+` ([empty-session defaults](2026-08-19-workbench-empty-session-and-turn-actions.md)). Dismissing a chip removes that token; clicking it again puts the token back. Switching mode replaces the previous mode's tokens and leaves unrelated ones (`/vision`) and the user's prose.
 
 | Mode | Pins |
 |---|---|
@@ -22,7 +22,7 @@ The composer `+` menu listed every user-invocable skill the session could see. B
 | `writing` | `draft-and-revise`, `write-plain`, `keep-the-facts` |
 | `sheet` | `clean-a-sheet`, `read-the-numbers`, `make-a-chart` |
 | `files` | `tidy-files`, `name-clearly`, `find-twins` |
-| `study` | `explain-clearly`, `check-understanding`, `work-an-example` |
+| `study` | `explain-clearly` (`check-understanding` and `work-an-example` stay in `+`) |
 | `slides` | `make-a-deck`, `one-point`, `speak-the-deck` |
 | `autopilot` | `set-up-a-routine`, `check-it-ran`, `safe-batch` |
 | `briefing` | `source-roster`, `draft-a-brief`, `keep-the-source` |
@@ -46,4 +46,4 @@ The composer `+` menu listed every user-invocable skill the session could see. B
 
 ## Testing
 
-`packages/client/ui-agent-preset` unit tests pin draft swap/remove, catalog-to-pin mapping (vision dropped, cap 3), dock registration, tag toggle, and the briefing primary pin. `apps/cli/tests/web-agent-presets.e2e.ts` pins the three-plus-vision catalogs on `study`, `web-page`, and `briefing`, and that a workspace `.dsh/skills` file stays out of a beginner mode catalog. `apps/web/tests/agent-preset-selection.e2e.ts` pins the writing and study pin rows, the matching slash catalogs, and the absence of a seeded workspace skill.
+`packages/client/ui-agent-preset` unit tests pin draft swap/remove, catalog-to-pin mapping (vision and study companions dropped, cap 3 on other modes), dock registration, tag toggle, and the briefing primary pin. `apps/cli/tests/web-agent-presets.e2e.ts` pins the three-plus-vision catalogs on `study`, `web-page`, and `briefing`, and that a workspace `.dsh/skills` file stays out of a beginner mode catalog. `apps/web/tests/agent-preset-selection.e2e.ts` pins the writing pin row, the study pin row (only `explain-clearly`), the matching slash catalogs, and the absence of a seeded workspace skill.

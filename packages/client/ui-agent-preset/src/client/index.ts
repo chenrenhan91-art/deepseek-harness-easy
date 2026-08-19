@@ -1,8 +1,9 @@
 /**
- * Agent-preset surface plugin, browser half — four surfaces over one roster:
+ * Agent-preset surface plugin, browser half — five surfaces over one roster:
  * the mode grid on the new-session screen, a General-settings row for the
- * default mode, a read-only label in the session header, and the composer
- * skill-pin tags for the mode's 2–3 domain skills.
+ * default mode, a read-only label in the session header, the composer
+ * skill-pin tags for the mode's domain skills, and the assistant-row
+ * regenerate action.
  *
  * A running session keeps the composition it began with (the host refuses to
  * adopt an existing session under a different preset). That is what splits
@@ -18,6 +19,8 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
 // Type-only: pulls the settings shell's SlotMap merge (the 'settings.general.item' entry).
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
+// Type-only: pulls the conversation SlotMap merge (dock + assistant-actions) and ctx.conversation.hints.
+import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import { AgentPresetLabel } from './AgentPresetLabel.tsx'
 import type { AgentPresetLabelInjected } from './AgentPresetLabel.tsx'
@@ -32,6 +35,8 @@ import { modePins } from './pin-draft.ts'
 import { AGENT_PRESET_SETTINGS_NS, AgentPresetSettingsController } from './settings-store.ts'
 import { SkillPins } from './SkillPins.tsx'
 import type { SkillPinsInjected } from './SkillPins.tsx'
+import { RegenerateActions } from './RegenerateActions.tsx'
+import type { RegenerateActionsInjected } from './RegenerateActions.tsx'
 
 export type { AgentPresetLabelInjected, AgentPresetLabelProps } from './AgentPresetLabel.tsx'
 export type { AgentPresetRowInjected, AgentPresetRowProps } from './AgentPresetRow.tsx'
@@ -49,7 +54,7 @@ export { AGENT_PRESET_SETTINGS_NS, writeDefaultPreset } from './settings-store.t
 export const inject = ['slots', 'locale', 'connection', 'remote']
 
 /**
- * Mount the General-settings row, the mode grid, the header label, and the skill pins.
+ * Mount the General-settings row, the mode grid, the header label, the skill pins, and regenerate.
  * @param ctx - the browser plugin context.
  */
 export function apply(ctx: ClientContext): void {
@@ -121,7 +126,13 @@ export function apply(ctx: ClientContext): void {
       load: () => controller.load(),
     })
 
+    const setPlaceholder = (sessionId: Parameters<SkillPinsInjected['setPlaceholder']>[0], placeholder: string | undefined): void => {
+      scope.conversation.hints.set(sessionId, placeholder === undefined ? undefined : { placeholder })
+    }
+
     const pinsInjected = (): SkillPinsInjected => ({
+      hooks: { modeGrid: grid.store },
+      setPlaceholder,
       load: async (sessionId) => {
         const { result } = await api.skills.list({ sessionId })
         if (!result.ok) throw new Error(`skill.list failed: ${result.error.code}: ${result.error.message}`)
@@ -136,6 +147,16 @@ export function apply(ctx: ClientContext): void {
           presetMoved()
           reset()
         }
+      },
+    })
+
+    const regenerateInjected = (sessionId: Parameters<SkillPinsInjected['load']>[0]): RegenerateActionsInjected => ({
+      send: async (text) => {
+        const conversation = scope.sessions.scope(sessionId)?.get('conversation')
+        if (conversation === undefined) {
+          throw new Error(`ui-agent-preset: session "${sessionId}" has no conversation`)
+        }
+        await conversation.send(text)
       },
     })
 
@@ -179,6 +200,14 @@ export function apply(ctx: ClientContext): void {
         locale: 'settings.agentPreset',
         inject: pinsInjected,
       }, SkillPins)
+      const regenerateSlot = scope.slots.inject('conversation.chat.assistant-actions', () =>
+        scope.slots.register({
+          name: 'conversation.chat.assistant-actions',
+          id: 'regenerate',
+          order: 0,
+          locale: 'settings.agentPreset',
+          inject: regenerateInjected,
+        }, RegenerateActions))
       return () => {
         stop()
         settingsMoved()
@@ -186,8 +215,9 @@ export function apply(ctx: ClientContext): void {
         gridSlot()
         labelSlot()
         pinsSlot()
+        regenerateSlot()
       }
-    }, 'ui-agent-preset: mode grid, header label, and skill pins')
+    }, 'ui-agent-preset: mode grid, header label, skill pins, and regenerate')
   })
 
   ctx.slots.inject('settings.general.item', () => ctx.slots.register({

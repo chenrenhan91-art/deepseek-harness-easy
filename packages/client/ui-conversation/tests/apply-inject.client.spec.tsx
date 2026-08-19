@@ -194,6 +194,27 @@ describe('conversation slot inject API', () => {
     await b.runtime.dispose()
   })
 
+  it('the plus launcher opens the command directory at leading position', async () => {
+    const b = await bench()
+    const toggleSource = vi.fn()
+    b.runtime.provide('inputTriggers', {
+      sessionOf: () => ({
+        toggleSource,
+        launcher: { getSnapshot: () => null, subscribe: () => () => {} },
+      }),
+    } as never)
+    const { actions, state } = b.inputApi(ROOT)
+    actions.setDraft('/explain-clearly 讲一下')
+    b.composerApi(ROOT).toggleCommandMenu!({ start: 22, end: 22 })
+    expect(toggleSource).toHaveBeenCalledExactlyOnceWith('command', {
+      trigger: '/',
+      query: '',
+      position: 'leading',
+      span: { start: 0, end: state.getSnapshot().draft.length, draftRev: expect.any(Number) },
+    })
+    await b.runtime.dispose()
+  })
+
   it('inject fails loud when the session resolves no binding or the scope lacks the service', async () => {
     const b = await bench()
     const entry = b.entryOf('conversation.composer.bar')

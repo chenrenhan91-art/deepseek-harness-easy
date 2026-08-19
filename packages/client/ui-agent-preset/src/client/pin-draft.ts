@@ -28,6 +28,12 @@ const PRIMARY_PINS = new Set([
   'source-roster',
 ])
 
+/** Catalog skills that stay in `+` and are never auto-pinned. */
+const CATALOG_ONLY_PINS = new Set([
+  'check-understanding',
+  'work-an-example',
+])
+
 /** One catalog row the pin row can show. */
 export interface SkillPinSource {
   readonly name: string
@@ -67,14 +73,15 @@ export function pinLabel(description: string, id: string): string {
 }
 
 /**
- * Mode-owned pins from a session catalog: drop the shared vision skill, keep
- * at most {@link PIN_CAP}, primary domain skill first.
+ * Mode-owned pins from a session catalog: drop the shared vision skill and
+ * catalog-only companions, keep at most {@link PIN_CAP}, primary domain skill
+ * first.
  * @param skills - user-invocable catalog rows.
  * @returns pins to arm in the composer.
  */
 export function modePins(skills: readonly SkillPinSource[]): SkillPin[] {
   return skills
-    .filter(skill => skill.name !== SHARED_SKILL_ID)
+    .filter(skill => skill.name !== SHARED_SKILL_ID && !CATALOG_ONLY_PINS.has(skill.name))
     .slice()
     .sort((a, b) => pinRank(a.name) - pinRank(b.name) || a.name.localeCompare(b.name))
     .slice(0, PIN_CAP)
@@ -110,7 +117,7 @@ export function removePin(draft: string, name: string): string {
   SKILL_GESTURE.lastIndex = 0
   for (const match of draft.matchAll(SKILL_GESTURE)) {
     if (match[2] !== name) continue
-    const lead = match[1] ?? ''
+    const lead = match[1] as string
     const tokenStart = match.index + lead.length
     out += draft.slice(start, tokenStart)
     start = tokenStart + token.length
@@ -118,6 +125,17 @@ export function removePin(draft: string, name: string): string {
   }
   out += draft.slice(start)
   return out.replace(/[ \t]+\n/g, '\n').replace(/^\s+/, '').replace(/[ \t]+$/, '')
+}
+
+/**
+ * Draft text with `/name` tokens stripped. Empty means the composer holds
+ * only pins (or nothing), so the empty-session example prompts may show.
+ * @param draft - current composer text.
+ * @returns remaining prose, trimmed.
+ */
+export function draftProse(draft: string): string {
+  SKILL_GESTURE.lastIndex = 0
+  return draft.replace(SKILL_GESTURE, '$1').replace(/[ \t]+/g, ' ').trim()
 }
 
 /**

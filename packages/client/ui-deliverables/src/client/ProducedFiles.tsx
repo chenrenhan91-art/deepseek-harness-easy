@@ -2,12 +2,14 @@
 // come pre-matched by the turn-tail chain from the mutation tools'
 // follow-along locations, never from the closing prose. Clicking one goes
 // through the same openFile the tool rows use — the Host's own opener, on the
-// Host machine.
+// Host machine. 做网页 / 做 PPT also open the HTML deliverable when that
+// Turn goes idle.
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { HostDescriptionSource } from '@deepseek-ai/dsh-client-connection/client'
-import type { InjectFace, PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { TurnTailOwnerProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
+import { AUTO_OPEN_PRESETS, htmlPreviewPath, shouldAutoOpenPreview } from './preview-open.ts'
 import { basename } from './turn-deliverables.ts'
 import type { NS } from './locales.ts'
 import css from './ProducedFiles.module.css'
@@ -56,10 +58,13 @@ export interface ProducedFilesInjected {
   }
 }
 
-/** Matched paths plus the opener, locale, and injected Host capability. */
-export type ProducedFilesProps = Pick<TurnTailOwnerProps, 'openFile'> & {
-  matched: readonly string[]
-} & PropsLocale<typeof NS> & InjectFace<ProducedFilesInjected>
+/** Matched paths plus the opener, locale, session kit, and injected Host capability. */
+export type ProducedFilesProps =
+  Pick<TurnTailOwnerProps, 'openFile' | 'turn'>
+  & { matched: readonly string[] }
+  & PropsLocale<typeof NS>
+  & InjectFace<ProducedFilesInjected>
+  & Pick<PropsRuntime<'conversation.chat.turnTail'>, 'sessionId' | 'useSession' | 'useSessions'>
 
 function moreLabel(t: ProducedFilesProps['t'], count: number): string {
   return count === 1 ? t('produced.moreOne') : t('produced.more', { count: String(count) })
@@ -72,14 +77,37 @@ function moreLabel(t: ProducedFilesProps['t'], count: number): string {
  */
 export function ProducedFiles({
   matched: paths, openFile, isLoopback, useHostDescription, t,
+  sessionId, useSession, useSessions, turn,
 }: ProducedFilesProps) {
   const hostCanOpenPath = useHostDescription(description => description?.canOpenPath === true)
   const canOpenPath = isLoopback && hostCanOpenPath
+  const preset = useSessions(s => s.byId[sessionId]?.agentPreset)
+  const running = useSession(s => s.running)
+  const latestTurn = useSession(s => s.chat.timeline.turnOrder.at(-1) === turn.turn)
+  const html = htmlPreviewPath(paths)
+  const wasRunning = useRef(false)
+  const opened = useRef(false)
+  const [openedName, setOpenedName] = useState<string | undefined>()
   const limit = Math.min(paths.length, SHOWN_LIMIT)
   const [shownCount, setShownCount] = useState(limit)
   const rowRef = useRef<HTMLDivElement>(null)
   const chipProbes = useRef<Array<HTMLButtonElement | null>>([])
   const moreProbe = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    const should = shouldAutoOpenPreview({
+      preset,
+      running,
+      wasRunning: wasRunning.current,
+      latestTurn,
+      alreadyOpened: opened.current,
+    })
+    wasRunning.current = running
+    if (!should || html === undefined || !canOpenPath) return
+    opened.current = true
+    openFile(html)
+    setOpenedName(basename(html))
+  }, [preset, running, latestTurn, html, canOpenPath, openFile])
 
   useLayoutEffect(() => {
     const row = rowRef.current
@@ -112,6 +140,7 @@ export function ProducedFiles({
   const visibleCount = Math.min(shownCount, limit)
   const shown = paths.slice(0, visibleCount)
   const hidden = paths.length - shown.length
+  const showRemote = AUTO_OPEN_PRESETS.has(preset ?? '') && html !== undefined && !canOpenPath
   return (
     <div className={css.root}>
       <span className={css.label}>{t('produced.label')}</span>
@@ -136,6 +165,16 @@ export function ProducedFiles({
         <button type="button" className={css.showFolder} onClick={() => { openFile('.') }}>
           {t('produced.showInFolder')}
         </button>
+      )}
+      {openedName !== undefined && (
+        <span className={css.notice} data-preview-notice="opened">
+          {t('preview.opened', { name: openedName })}
+        </span>
+      )}
+      {showRemote && html !== undefined && (
+        <span className={css.notice} data-preview-notice="remote">
+          {t('preview.remote', { path: html })}
+        </span>
       )}
       <div className={css.measure} aria-hidden="true">
         {paths.slice(0, limit).map((path, index) => (

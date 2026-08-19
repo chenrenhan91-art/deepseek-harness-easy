@@ -26,7 +26,12 @@
   - img
   - text: workspace
   - img
-- textbox "描述你想要构建的内容"
+- text: 这个模式会用到这些做法，发送时自动带上。点掉的这次不带。 讲明白
+- button "用上讲明白":
+  - img
+- button "用大白话解释一下 inflation"
+- button "帮我对一下这道题的答案"
+- textbox "你卡在哪一步？"
 - button "命令":
   - img
 - button "访问模式，当前：完全放开": 完全放开

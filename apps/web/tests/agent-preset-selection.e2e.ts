@@ -189,6 +189,8 @@ describe('web e2e: agent-preset selection', () => {
     await expect.poll(() => livePreset(scaffold.baseUrl), { timeout: 15_000 }).toBe('study')
 
     await expect.poll(() => page.locator('[data-skill-pin="explain-clearly"]').count(), { timeout: 15_000 }).toBe(1)
+    expect(await page.locator('[data-skill-pin="check-understanding"]').count()).toBe(0)
+    expect(await page.locator('[data-skill-pin="work-an-example"]').count()).toBe(0)
     expect(await page.locator('[data-skill-pin="draft-and-revise"]').count()).toBe(0)
 
     await composer.fill('/')

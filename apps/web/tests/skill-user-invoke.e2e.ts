@@ -1,10 +1,13 @@
-// Web e2e scenario: a user invokes a disable-model-invocation skill through
-// the composer (issue #1470). The entered `/name args` line claims into
-// skill.invoke: the real host forwards the gesture as an ordinary user
-// prompt, injects the rendered body as instructions context named after the
-// skill, and starts a turn answered by the replay adapter. The transcript shows
-// the gesture bubble, the collapsed context-injection row, and the reply.
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+// Web e2e scenario: a user invokes a mode-catalog skill through the composer
+// (issue #1470's claim-into-skill.invoke path). Beginner modes set
+// `includeDefaultRoots: false`, so a workspace disable-model-invocation file
+// never appears in `/`; `explain-clearly` is the study catalog stand-in.
+// The entered `/name args` line claims into skill.invoke: the real host
+// forwards the gesture as an ordinary user prompt, injects the rendered body
+// as instructions context named after the skill, and starts a turn answered
+// by the replay adapter. The transcript shows the gesture bubble, the
+// collapsed context-injection row, and the reply.
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
@@ -27,24 +30,10 @@ const SNAPSHOT_DIR = fileURLToPath(new URL('./snapshots/skill-user-invoke', impo
 const UI_EXPECTED = join(SNAPSHOT_DIR, 'ui.expected.md')
 const MODE = webSnapshotMode()
 
-const SKILL_NAME = 'user-invoke-demo'
+const SKILL_NAME = 'explain-clearly'
 const ARGS_TEXT = 'and confirm the fixture wiring'
 const REPLY = 'USER_INVOKE_REPLY acknowledged; following the injected skill.'
-
-async function seedUserOnlySkill(workspaceCwd: string): Promise<void> {
-  const directory = join(workspaceCwd, 'workspace', '.agents', 'skills', SKILL_NAME)
-  await mkdir(directory, { recursive: true })
-  await writeFile(join(directory, 'SKILL.md'), [
-    '---',
-    `name: ${SKILL_NAME}`,
-    'description: Prove user-explicit invocation of a model-hidden skill',
-    'disable-model-invocation: true',
-    '---',
-    '',
-    'Reply with the fixture acknowledgement line.',
-    '',
-  ].join('\n'))
-}
+const SKILL_BODY = '先用一句话给答案，再展开为什么。不要用铺垫开头。'
 
 const REPLAY: ReplayOverrideDoc = [{
   kind: 'chunks',
@@ -75,7 +64,6 @@ describe.skipIf(MODE === 'record')('web e2e: user-explicit skill invocation thro
       // deterministically; instant playback races it in and out of the golden.
       paceMs: 10,
     })
-    await seedUserOnlySkill(scaffold.workspaceCwd)
     browser = await chromium.launch()
     page = await newEnglishPage(browser)
     tripwire = watchConsole(page)
@@ -99,9 +87,9 @@ describe.skipIf(MODE === 'record')('web e2e: user-explicit skill invocation thro
   it('claims /name args into a gesture bubble, an injection row, and a replayed answer', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-skill-user-invoke'))
     const composer = page.locator('textarea:enabled').last()
-    await composer.waitFor({ timeout: 15_000 })
+    await expect.poll(() => composer.inputValue(), { timeout: 15_000 }).toMatch(/explain-clearly/)
 
-    // The menu lists the user-only skill (its only entry point) before enter.
+    // The menu lists the mode skill before enter.
     await composer.fill(`/${SKILL_NAME}`)
     const menu = page.getByRole('listbox', { name: '触发候选建议' })
     await expect.poll(
@@ -130,7 +118,7 @@ describe.skipIf(MODE === 'record')('web e2e: user-explicit skill invocation thro
       .filter({ hasText: `<skill_content name="${SKILL_NAME}">` })
     await injectionBody.waitFor({ timeout: 10_000 })
     const injected = await injectionBody.textContent()
-    expect(injected).toContain('Reply with the fixture acknowledgement line.')
+    expect(injected).toContain(SKILL_BODY)
     expect(injected).not.toContain(ARGS_TEXT)
     await injectionRow.click()
 

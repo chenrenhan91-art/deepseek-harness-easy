@@ -1,0 +1,31 @@
+/* Text action in the assistant IconActions row, matching feedback's noteOpen. */
+
+.action {
+  max-width: 220px;
+  overflow: hidden;
+  padding: 0 8px;
+  border: none;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+  line-height: 28px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.action:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.action[data-unavailable] {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.action[data-unavailable]:hover {
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+}

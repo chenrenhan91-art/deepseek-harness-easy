@@ -140,13 +140,13 @@ async function scopedBench(register?: (inputTriggers: InputTriggerService) => vo
     removeImage: () => {},
     draftImages: () => [],
     resolveSubmitMode: () => 'queue',
-    toggleCommandMenu: (selection) => {
+    toggleCommandMenu: (_selection) => {
       const snapshot = shell.snapshot
       controller.toggleSource('command', {
         trigger: '/',
         query: '',
-        position: snapshot.draft.slice(0, selection.start).trim() === '' ? 'leading' : 'inline',
-        span: { ...selection, draftRev: snapshot.draftRev },
+        position: 'leading',
+        span: { start: 0, end: snapshot.draft.length, draftRev: snapshot.draftRev },
       })
     },
     useNotices: bindSnapshotSelector(shell.notices),

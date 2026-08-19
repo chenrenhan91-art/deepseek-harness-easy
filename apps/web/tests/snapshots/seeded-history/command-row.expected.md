@@ -28,6 +28,7 @@
 - paragraph: DONE
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":

@@ -10,6 +10,7 @@
 - paragraph: r1
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -22,6 +23,7 @@
 - paragraph: r2
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -34,6 +36,7 @@
 - paragraph: r3
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -46,6 +49,7 @@
 - paragraph: r4
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -58,6 +62,7 @@
 - paragraph: r5
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -70,6 +75,7 @@
 - paragraph: r6
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -82,6 +88,7 @@
 - paragraph: r7
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -94,6 +101,7 @@
 - paragraph: r8
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -106,6 +114,7 @@
 - paragraph: r9
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -118,6 +127,7 @@
 - paragraph: r10
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -130,6 +140,7 @@
 - paragraph: r11
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -142,6 +153,7 @@
 - paragraph: r12
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -154,6 +166,7 @@
 - paragraph: r13
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -166,6 +179,7 @@
 - paragraph: r14
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -178,6 +192,7 @@
 - paragraph: r15
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -190,6 +205,7 @@
 - paragraph: r16
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -202,6 +218,7 @@
 - paragraph: r17
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -214,6 +231,7 @@
 - paragraph: r18
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -226,6 +244,7 @@
 - paragraph: r19
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -238,6 +257,7 @@
 - paragraph: r20
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -250,6 +270,7 @@
 - paragraph: r21
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -262,6 +283,7 @@
 - paragraph: r22
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -274,6 +296,7 @@
 - paragraph: r23
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -286,6 +309,7 @@
 - paragraph: r24
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -298,6 +322,7 @@
 - paragraph: r25
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -310,6 +335,7 @@
 - paragraph: r26
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -322,6 +348,7 @@
 - paragraph: r27
 - button "复制":
   - img
+- button "再生成" [disabled]
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -334,6 +361,7 @@
 - paragraph: r28
 - button "复制":
   - img
+- button "再生成"
 - button "好的回答":
   - img
 - button "有问题的回答":

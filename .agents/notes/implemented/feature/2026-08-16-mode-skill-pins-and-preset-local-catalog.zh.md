@@ -14,7 +14,7 @@ Status: implemented
 
 **每个模式三份原创 skill。** 每个模式随附原来的领域 skill，再加上两份为本产品写的中文同伴。同伴只吸收公开 skill 的方向（做网页的 `look-distinct` 参考 Anthropic 的 `frontend-design`），不复制那些文件。`vision` 留在目录和 `+` 里，但从不自动钉上。
 
-**编辑器标签武装当前模式。** `@deepseek-ai/dsh-client-ui-agent-preset` 以 `SkillPins` 占据 `conversation.input.dock` 的 order 25。目录加载以及 `agent-preset/selected` 时，它钉上至多三个非 `vision` 的 skill，并把它们的 `/name` 写进草稿。宿主 `dsh-tool-skill` 的 pre-step 本来就会注入每一个这样的 token。芯片文案取目录 description 里第一个 `：` 之前的文字，因此「学习答疑」显示「讲明白 / 真懂了吗 / 带做一道」。点掉一枚芯片会去掉对应 token；再点一次加回去。换模式会替换上一模式的 token，并留下无关 token（`/vision`）和用户正文。
+**编辑器标签武装当前模式。** `@deepseek-ai/dsh-client-ui-agent-preset` 以 `SkillPins` 占据 `conversation.input.dock` 的 order 25。目录加载以及 `agent-preset/selected` 时，它钉上至多三个非 `vision` 的 skill，并把它们的 `/name` 写进草稿。宿主 `dsh-tool-skill` 的 pre-step 本来就会注入每一个这样的 token。芯片文案取目录 description 里第一个 `：` 之前的文字，因此「学习答疑」显示「讲明白」；`check-understanding` 和 `work-an-example` 留在 `+` 里（[空会话默认](2026-08-19-workbench-empty-session-and-turn-actions.md)）。点掉一枚芯片会去掉对应 token；再点一次加回去。换模式会替换上一模式的 token，并留下无关 token（`/vision`）和用户正文。
 
 | 模式 | 标签 |
 |---|---|
@@ -22,7 +22,7 @@ Status: implemented
 | `writing` | `draft-and-revise`、`write-plain`、`keep-the-facts` |
 | `sheet` | `clean-a-sheet`、`read-the-numbers`、`make-a-chart` |
 | `files` | `tidy-files`、`name-clearly`、`find-twins` |
-| `study` | `explain-clearly`、`check-understanding`、`work-an-example` |
+| `study` | `explain-clearly`（`check-understanding` 和 `work-an-example` 留在 `+`） |
 | `slides` | `make-a-deck`、`one-point`、`speak-the-deck` |
 | `autopilot` | `set-up-a-routine`、`check-it-ran`、`safe-batch` |
 | `briefing` | `source-roster`、`draft-a-brief`、`keep-the-source` |
@@ -46,4 +46,4 @@ Status: implemented
 
 ## 验证
 
-`packages/client/ui-agent-preset` 的单元测试钉住草稿替换/删除、目录到标签的映射（去掉 vision、上限 3）、dock 注册、标签开关，以及 briefing 的主 skill 标签。`apps/cli/tests/web-agent-presets.e2e.ts` 钉住 `study`、`web-page` 与 `briefing` 上「三个领域 skill 加 vision」的目录，以及工作区 `.dsh/skills` 不会进入新手模式目录。`apps/web/tests/agent-preset-selection.e2e.ts` 钉住写作与学习答疑的标签行、对应的斜杠目录，以及已播种的工作区 skill 不会出现。
+`packages/client/ui-agent-preset` 的单元测试钉住草稿替换/删除、目录到标签的映射（去掉 vision 和学习答疑同伴、其他模式上限 3）、dock 注册、标签开关，以及 briefing 的主 skill 标签。`apps/cli/tests/web-agent-presets.e2e.ts` 钉住 `study`、`web-page` 与 `briefing` 上「三个领域 skill 加 vision」的目录，以及工作区 `.dsh/skills` 不会进入新手模式目录。`apps/web/tests/agent-preset-selection.e2e.ts` 钉住写作标签行、学习答疑标签行（只有 `explain-clearly`）、对应的斜杠目录，以及已播种的工作区 skill 不会出现。

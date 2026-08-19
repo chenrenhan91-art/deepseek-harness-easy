@@ -97,6 +97,8 @@ function mount(
     summaryOrigin?: 'subagent'
     /** A composer block another plugin raised for this session. */
     composerBlock?: { reason: string }
+    /** A non-blocking hero placeholder another plugin set for this session. */
+    composerHint?: { placeholder: string }
     /** Mutable view ledger used by registration-order regressions. */
     viewTabs?: ViewTab[]
   } = {},
@@ -242,6 +244,7 @@ function mount(
     useWorkspaces: bindSnapshotSelector(workspaces),
     useProjection: (() => undefined),
     useComposerBlock: select => select(options.composerBlock),
+    useComposerHint: select => select(options.composerHint),
     useInput,
     inputActions,
     renderSlot,
@@ -266,6 +269,31 @@ describe('Hero chrome', () => {
 })
 
 describe('ConversationRoot resident composer', () => {
+  it('uses a composer hint as the hero placeholder while the bar is live', () => {
+    const b = mount(
+      conversationSnapshot({ composerPhase: 'blank', blank: true }),
+      undefined,
+      undefined,
+      { composerHint: { placeholder: '你卡在哪一步？' } },
+    )
+    expect((b.view.getByRole('textbox') as HTMLTextAreaElement).placeholder).toBe('你卡在哪一步？')
+  })
+
+  it('falls back to the generic hero placeholder when no hint is set', () => {
+    const b = mount(conversationSnapshot({ composerPhase: 'blank', blank: true }))
+    expect((b.view.getByRole('textbox') as HTMLTextAreaElement).placeholder).toBe('描述你想要构建的内容')
+  })
+
+  it('leaves the docked composer on its own placeholder when a hint is set', () => {
+    const b = mount(
+      conversationSnapshot({ composerPhase: 'active' }),
+      undefined,
+      undefined,
+      { composerHint: { placeholder: '你卡在哪一步？' } },
+    )
+    expect((b.view.getByRole('textbox') as HTMLTextAreaElement).placeholder).toBe('给智能体发消息')
+  })
+
   it('renders the composer inert with the blocker\u2019s own reason', () => {
     const b = mount(conversationSnapshot(), undefined, undefined, {
       composerBlock: { reason: 'select a model first' },

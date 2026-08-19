@@ -28,6 +28,7 @@
 - paragraph: LIGHTHOUSE
 - button "复制":
   - img
+- button "再生成"
 - button "好的回答":
   - img
 - button "有问题的回答":
@@ -39,6 +40,9 @@
   - img
   - img
   - text: "feedback Feedback recorded for session session-{{uuid}} Anonymous user: {{uuid}}. Session sharing is enabled."
+- text: 这个模式会用到这些做法，发送时自动带上。点掉的这次不带。 讲明白
+- button "用上讲明白":
+  - img
 - textbox "给智能体发消息"
 - button "命令":
   - img

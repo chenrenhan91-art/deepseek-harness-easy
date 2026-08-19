@@ -13,8 +13,8 @@ import {
 } from '@deepseek-ai/dsh-client-runtime/client'
 import type {
   ConversationEventInput, ConversationLocationDataStore, ConversationMatch, ConversationNodeDefinition,
-  ConversationTimelineSnapshot, ConversationTurnDataMap, ConversationViewDefinition,
-  ConversationViewNode, ToolResultNode, TurnLocation,
+  ConversationSnapshot, ConversationTimelineSnapshot, ConversationTurnDataMap, ConversationViewDefinition,
+  ConversationViewNode, SessionId, SessionListState, ToolResultNode, TurnLocation,
 } from '@deepseek-ai/dsh-client-runtime/client'
 import { apply as applyLocale, inject as localeInject } from '@deepseek-ai/dsh-client-locale/client'
 import type { ChatFileMentions, TurnTailOwnerProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -77,6 +77,28 @@ function tailOwner(
   turn = 1,
 ): TurnTailOwnerProps {
   return { seq, openFile, turn: turnLocation(turn, data) }
+}
+
+function sessionKit(options: {
+  running?: boolean
+  turn?: number
+  turnOrder?: readonly number[]
+  agentPreset?: string
+  sessionId?: string
+} = {}): Pick<ProducedFilesProps, 'sessionId' | 'useSession' | 'useSessions' | 'turn'> {
+  const sessionId = (options.sessionId ?? 's1') as SessionId
+  const turn = options.turn ?? 1
+  return {
+    sessionId,
+    turn: turnLocation(turn),
+    useSession: selector => selector({
+      running: options.running ?? false,
+      chat: { timeline: { turnOrder: options.turnOrder ?? [turn] } },
+    } as ConversationSnapshot),
+    useSessions: selector => selector({
+      byId: { [sessionId]: { agentPreset: options.agentPreset } },
+    } as SessionListState),
+  }
 }
 
 interface TimelineSnapshot {
@@ -337,7 +359,7 @@ describe('ProducedFiles row', () => {
       })
 
     const view = render(
-      <ProducedFiles matched={paths} openFile={openFile} {...capability(true)} t={t} />,
+      <ProducedFiles matched={paths} openFile={openFile} {...capability(true)} {...sessionKit()} t={t} />,
     )
     expect(view.getByText('产物')).toBeTruthy()
     const row = view.container.querySelector('[data-produced-files-row]')
@@ -371,7 +393,7 @@ describe('ProducedFiles row', () => {
     // shrinks; the replacement observer must skip those stale slots.
     observeNode.mockClear()
     view.rerender(
-      <ProducedFiles matched={paths.slice(0, 1)} openFile={openFile} {...capability(true)} t={t} />,
+      <ProducedFiles matched={paths.slice(0, 1)} openFile={openFile} {...capability(true)} {...sessionKit()} t={t} />,
     )
     expect(within(row).getAllByRole('button')).toHaveLength(1)
     expect(observeNode).toHaveBeenCalledTimes(3)
@@ -384,12 +406,12 @@ describe('ProducedFiles row', () => {
   it('keeps the folder action absent without overflow or a local native opener', () => {
     const openFile = vi.fn<(path: string) => void>()
     const view = render(
-      <ProducedFiles matched={['a.md']} openFile={openFile} {...capability(true)} t={t} />,
+      <ProducedFiles matched={['a.md']} openFile={openFile} {...capability(true)} {...sessionKit()} t={t} />,
     )
     const overflowing = ['a.md', 'b.md', 'c.md', 'd.md', 'e.md', 'f.md', 'g.md']
     expect(view.queryByRole('button', { name: '在文件夹中显示' })).toBeNull()
     for (const unavailable of [capability(false), capability(true, false), capability(undefined)]) {
-      view.rerender(<ProducedFiles matched={overflowing} openFile={openFile} {...unavailable} t={t} />)
+      view.rerender(<ProducedFiles matched={overflowing} openFile={openFile} {...unavailable} {...sessionKit()} t={t} />)
       expect(view.queryByRole('button', { name: '在文件夹中显示' })).toBeNull()
     }
   })
@@ -400,12 +422,162 @@ describe('ProducedFiles row', () => {
         matched={['a.md', 'b.md', 'c.md', 'd.md', 'e.md', 'f.md', 'g.md']}
         openFile={() => {}}
         {...capability(false)}
+        {...sessionKit()}
         t={makeTranslate(en)}
       />,
     )
     const row = view.container.querySelector('[data-produced-files-row]')
     if (!(row instanceof HTMLElement)) throw new Error('produced row missing')
     expect(within(row).getByText('+ 1 file')).toBeTruthy()
+  })
+
+  it('opens the HTML deliverable when a web-page turn goes idle, and not on history load', () => {
+    const openFile = vi.fn<(path: string) => void>()
+    const view = render(
+      <ProducedFiles
+        matched={['out/index.html', 'out/app.css']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'web-page', running: true })}
+        t={t}
+      />,
+    )
+    expect(openFile).not.toHaveBeenCalled()
+    expect(view.queryByText('已在浏览器打开 index.html')).toBeNull()
+
+    view.rerender(
+      <ProducedFiles
+        matched={['out/index.html', 'out/app.css']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'web-page', running: false })}
+        t={t}
+      />,
+    )
+    expect(openFile).toHaveBeenCalledWith('out/index.html')
+    expect(view.getByText('已在浏览器打开 index.html')).toBeTruthy()
+
+    view.rerender(
+      <ProducedFiles
+        matched={['out/index.html', 'out/app.css']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'web-page', running: true })}
+        t={t}
+      />,
+    )
+    view.rerender(
+      <ProducedFiles
+        matched={['out/index.html', 'out/app.css']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'web-page', running: false })}
+        t={t}
+      />,
+    )
+    expect(openFile).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not open a settled history row or a study-mode HTML file', () => {
+    const openFile = vi.fn<(path: string) => void>()
+    render(
+      <ProducedFiles
+        matched={['out/index.html']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'web-page' })}
+        t={t}
+      />,
+    )
+    expect(openFile).not.toHaveBeenCalled()
+
+    cleanup()
+    render(
+      <ProducedFiles
+        matched={['out/index.html']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'study', running: true })}
+        t={t}
+      />,
+    ).rerender(
+      <ProducedFiles
+        matched={['out/index.html']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'study' })}
+        t={t}
+      />,
+    )
+    expect(openFile).not.toHaveBeenCalled()
+  })
+
+  it('shows the remote path instead of opening', () => {
+    const openFile = vi.fn<(path: string) => void>()
+    const view = render(
+      <ProducedFiles
+        matched={['deck.xhtml']}
+        openFile={openFile}
+        {...capability(false)}
+        {...sessionKit({ agentPreset: 'slides', running: true })}
+        t={t}
+      />,
+    )
+    view.rerender(
+      <ProducedFiles
+        matched={['deck.xhtml']}
+        openFile={openFile}
+        {...capability(false)}
+        {...sessionKit({ agentPreset: 'slides' })}
+        t={t}
+      />,
+    )
+    expect(openFile).not.toHaveBeenCalled()
+    expect(view.getByText('成品在 deck.xhtml。远程会话无法在此打开，请在那台电脑上打开这个文件。')).toBeTruthy()
+  })
+
+  it('does not open CSS-only output or an older turn', () => {
+    const openFile = vi.fn<(path: string) => void>()
+    const cssOnly = render(
+      <ProducedFiles
+        matched={['out/app.css']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'web-page', running: true })}
+        t={t}
+      />,
+    )
+    cssOnly.rerender(
+      <ProducedFiles
+        matched={['out/app.css']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'web-page' })}
+        t={t}
+      />,
+    )
+    expect(openFile).not.toHaveBeenCalled()
+    cssOnly.unmount()
+
+    const older = render(
+      <ProducedFiles
+        matched={['out/index.html']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'web-page', running: true, turn: 1, turnOrder: [1, 2] })}
+        t={t}
+      />,
+    )
+    older.rerender(
+      <ProducedFiles
+        matched={['out/index.html']}
+        openFile={openFile}
+        {...capability(true)}
+        {...sessionKit({ agentPreset: 'web-page', turn: 1, turnOrder: [1, 2] })}
+        t={t}
+      />,
+    )
+    expect(openFile).not.toHaveBeenCalled()
   })
 })
 

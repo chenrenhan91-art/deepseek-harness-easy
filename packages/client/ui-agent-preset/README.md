@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-The agent-preset surfaces: a mode grid filling the new-session screen, a General-settings row choosing which [preset](../../preset/agent-presets/README.md) later sessions are composed from, a read-only label in the session header, and the composer skill-pin tags for the mode's domain skills.
+The agent-preset surfaces: a mode grid filling the new-session screen, a General-settings row choosing which [preset](../../preset/agent-presets/README.md) later sessions are composed from, a read-only label in the session header, the composer skill-pin tags for the mode's domain skills, and the assistant-row regenerate action.
 
 ## Why it is a new-session preference
 
@@ -20,7 +20,7 @@ A preset names its glyph by name in `preset.yml` (`icon: question`). A preset na
 
 ## Mode skill pins
 
-On the composer, immediately above the input card: up to three tags for the current session's mode-owned skills. A pick on the grid refreshes `skill.list` and writes those `/name` tokens into the draft so the host injects the skill bodies on send. The shared `vision` skill stays in `+` and is not pinned. Dismissing a tag drops that token; switching mode replaces the previous mode's tokens and leaves the user's prose. See [mode skill pins](../../../.agents/notes/implemented/feature/2026-08-16-mode-skill-pins-and-preset-local-catalog.md).
+On the composer, immediately above the input card: tags for the current session's mode-owned skills (at most three; 学习答疑 pins only `explain-clearly`, and keeps `check-understanding` / `work-an-example` in `+`). A pick on the grid refreshes `skill.list` and writes those `/name` tokens into the draft so the host injects the skill bodies on send. The shared `vision` skill stays in `+` and is not pinned. Dismissing a tag drops that token; switching mode replaces the previous mode's tokens and leaves the user's prose. On a blank session the same card offers two example prompts for each shipped mode, and the hero placeholder is that mode's own sentence. After a reply, **再生成** on the assistant IconActions row resends that Turn's user sentence; fork remains the way to compare two versions. See [mode skill pins](../../../.agents/notes/implemented/feature/2026-08-16-mode-skill-pins-and-preset-local-catalog.md) and [empty-session defaults](../../../.agents/notes/implemented/feature/2026-08-19-workbench-empty-session-and-turn-actions.md).
 
 ## The session-header label
 

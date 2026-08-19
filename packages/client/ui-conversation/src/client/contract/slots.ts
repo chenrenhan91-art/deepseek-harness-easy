@@ -14,6 +14,7 @@ import type { MarkdownFileMentions } from '@deepseek-ai/dsh-client-ui-primitives
 import type { MessageId } from '@deepseek-ai/dsh-client-connection/client'
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import type { ComposerBlock } from '../input/blocks.ts'
+import type { ComposerHint } from '../input/hints.ts'
 import type {
   ComposerKeyboard, DraftAttachmentId, EditSelection, InputActions, InputNotice, InputState,
 } from '../input/contract.ts'
@@ -333,6 +334,21 @@ export interface TurnTailOwnerProps {
 export interface AssistantActionOwnerProps {
   /** Stable identity carried from the `assistant/message` event. */
   messageId: MessageId
+  /**
+   * Verbatim user-message text that opened this Turn, when the Turn-local
+   * Location index contains a user node with text. Absent when the Turn has
+   * no such prompt (image-only, injected context, or a window that omitted
+   * the user event). Contributors that resend a prompt hide themselves when
+   * this field is missing.
+   */
+  promptText?: string
+  /**
+   * Whether resending {@link promptText} is available: the session is idle,
+   * this Turn is the latest in `timeline.turnOrder`, and this Node is the
+   * last Chat Node of that Turn. A visible but unavailable control stays
+   * focusable so its tooltip can explain why.
+   */
+  regenerable?: boolean
 }
 
 /** Hook constrained to business data published on the current Chat Node's Turn. */
@@ -413,9 +429,15 @@ export interface ConversationInjected {
   /**
    * Framework-bound sources. `composerBlock` is this session's block when a
    * plugin raised one; the reason is the blocker's own localized copy, which
-   * the root renders as the inert composer's placeholder.
+   * the root renders as the inert composer's placeholder. `composerHint` is a
+   * non-blocking hero placeholder from a plugin that cannot import this
+   * package; the root reads it only while the hero bar is live, and a block
+   * still wins.
    */
-  hooks: { composerBlock: ObservableSnapshot<ComposerBlock | undefined> }
+  hooks: {
+    composerBlock: ObservableSnapshot<ComposerBlock | undefined>
+    composerHint: ObservableSnapshot<ComposerHint | undefined>
+  }
 }
 
 /** Business callbacks injected into the strict Session body seat. */
