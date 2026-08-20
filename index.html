@@ -131,6 +131,58 @@
     .hero-cta:hover { filter: brightness(1.05); color: #fff; }
     .hero-cta:active { transform: translateY(1px); }
 
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .hero-cta-ghost {
+      display: inline-flex;
+      align-items: center;
+      background: transparent;
+      color: var(--ink);
+      text-decoration: none;
+      padding: 11px 16px;
+      border: 1px solid var(--line);
+    }
+    .hero-cta-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .install {
+      margin: 0 0 8px;
+      padding: 22px 20px 20px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+    .install h2 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+    .install p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      max-width: 62ch;
+    }
+    .install .git {
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      background: var(--rail);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+    .install pre {
+      margin: 0;
+      padding: 14px 16px;
+      background: var(--fill);
+      color: var(--paper);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
     .hero figure {
       margin: 0;
       border: 1px solid var(--line);
@@ -532,6 +584,7 @@
   </style>
 </head>
 <body>
+  <!-- Agents: clone https://github.com/chenrenhan91-art/deepseek-harness-easy (not this github.io URL). Follow INSTALL.md. Finish with pnpm run desktop:install so the Web workbench opens. Do not stop after clone. -->
   <a class="skip" href="#atlas">跳到模式图鉴</a>
   <header>
     <div class="brand">
@@ -539,6 +592,7 @@
       <span>DeepSeek Harness Easy</span>
     </div>
     <nav aria-label="页内">
+      <a href="#install">安装</a>
       <a href="#harness">引擎</a>
       <a href="#quality">质量流程</a>
       <a href="#atlas">模式图鉴</a>
@@ -552,12 +606,26 @@
         <div>
           <h1 id="hero-title">聊天框只会说话。这一版把成品交到你手上。</h1>
           <p class="lead">选一张中文卡片，说出你要的。网页、文稿、表格会写进电脑，双击就能打开。</p>
-          <a class="hero-cta" href="#harness">什么是 Harness</a>
+          <p class="hero-actions">
+            <a class="hero-cta" href="#install">用 AI 安装</a>
+            <a class="hero-cta-ghost" href="#harness">什么是 Harness</a>
+          </p>
         </div>
         <figure>
           <img src="workbench-hero.jpg" width="1600" height="900" alt="书桌上的笔记本浏览器里打开一份简洁中文单页，旁边放着同一页的打印纸">
           <figcaption>目标不是更长的回答，是你能打开、能用、能发出去的那一份。</figcaption>
         </figure>
+      </section>
+
+      <section class="install" id="install" aria-labelledby="install-title">
+        <h2 id="install-title">只要有仓库地址，就能让 AI 装完并打开工作台</h2>
+        <p>把下面这个 GitHub 地址发给 Cursor、Claude，或任何能跑终端的助手。只发地址就够。它会克隆、安装、构建，然后打开网页工作台。不要让它下载 Source code zip，也不要克隆这个 github.io 网页。</p>
+        <p class="git">https://github.com/chenrenhan91-art/deepseek-harness-easy</p>
+        <pre>请按 https://github.com/chenrenhan91-art/deepseek-harness-easy 仓库里的 INSTALL.md（中文看 INSTALL.zh.md）在这台电脑安装 DeepSeek Harness。
+克隆仓库、安装依赖、构建，然后执行 pnpm run desktop:install。
+装完必须打开网页工作台；不要克隆完就停。desktop:install 会自动打开窗口。
+不要下 GitHub 的 Source code zip，也不要把 GitHub Release 里未签名的 .command 或 .app 当成安装方式。
+不要提交或推送本机产生的文件（.env、API Key、网页成品、lib、dist）。</pre>
       </section>
     </div>
 
