@@ -10,9 +10,9 @@ Status: implemented
 
 ## 决策
 
-**macOS 新手把本仓库地址发给能跑终端的编程助手来安装。** 助手按仓库根目录 [INSTALL.md](../../../../INSTALL.md)（中文 [INSTALL.zh.md](../../../../INSTALL.zh.md)）做：浅克隆、`corepack` 启用 pnpm 11.7.0、`pnpm install`、`pnpm run build`，然后 `pnpm run desktop:install`。这会写入 `~/Desktop/DeepSeek Harness.app` 并打开指向 `http://127.0.0.1:3080` 的 Electron（[macOS Electron 桌面壳](2026-08-17-macos-electron-desktop-shell.md)）。git 检出的文件不会像浏览器下载的 zip 那样被隔离。API Key 仍在首次页填写，官方控制台链接不变。密钥和设置在 `~/.dsh`。根目录 `.gitignore` 把本机工作台产出（`/*.html`、`/dist/`、`/.dsh/`）挡在 git 外，因此下一次克隆不会拿到上一个人的会话文件。
+**macOS 新手把本仓库地址发给能跑终端的编程助手来安装。** 只发 git 地址就够，即使用户发的是 GitHub Pages 站点。助手按仓库根目录 [INSTALL.md](../../../../INSTALL.md)（中文 [INSTALL.zh.md](../../../../INSTALL.zh.md)）做：浅克隆 `https://github.com/chenrenhan91-art/deepseek-harness-easy`（不要克隆 github.io）、`corepack` 启用 pnpm 11.7.0、`pnpm install`、`pnpm run build`，然后 `pnpm run desktop:install`。这会写入 `~/Desktop/DeepSeek Harness.app` 并打开指向 `http://127.0.0.1:3080` 的 Electron（网页工作台）。窗口出现在屏幕上之前，安装没有做完（[macOS Electron 桌面壳](2026-08-17-macos-electron-desktop-shell.md)）。git 检出的文件不会像浏览器下载的 zip 那样被隔离。API Key 仍在首次页填写，官方控制台链接不变。密钥和设置在 `~/.dsh`。根目录 `.gitignore` 把本机工作台产出（`/*.html`、`/dist/`、`/.dsh/`）挡在 git 外，因此下一次克隆不会拿到上一个人的会话文件。
 
-给模型读的入口是 `llms.txt`、`.github/copilot-instructions.md` 和 `dsh-user-install` skill。根 README 的粘贴块是给用户的提示词。这不增加托管安装器（[无需托管安装器的源码运行](../simplification/2026-08-10-source-run-without-managed-installer.md)）。Windows 的 exe 压缩包仍可选（[桌面 Release 产品包](2026-08-16-desktop-release-pack.md)）。
+给模型读的入口是根目录 [AGENTS.md](../../../../AGENTS.md)、`llms.txt`、`.github/copilot-instructions.md` 和 `dsh-user-install` skill。根 README 的粘贴块是可选的更稳提示词；只发 git 地址就是完整的安装请求。这不增加托管安装器（[无需托管安装器的源码运行](../simplification/2026-08-10-source-run-without-managed-installer.md)）。Windows 仍可用 exe 压缩包（[桌面 Release 产品包](2026-08-16-desktop-release-pack.md)）。
 
 ## 考虑过的替代方案
 

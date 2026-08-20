@@ -44,4 +44,4 @@ This shell is unsigned and macOS-only. It does not notarize, does not copy into 
 ## Verification
 
 - `apps/desktop/tests/desktop.spec.ts` pins spawn argv, Info.plist/launcher install into a temp directory, listen polling, boot-graph readiness, and baked-path quoting.
-- `scripts/install-docs.spec.ts` requires `desktop:install` in INSTALL.md, both READMEs, and `llms.txt`, and requires the user paste fence to match across those files.
+- `scripts/install-docs.spec.ts` requires `desktop:install` in INSTALL.md, both READMEs, `llms.txt`, and root `AGENTS.md`, and requires the user paste fence to match across those files.

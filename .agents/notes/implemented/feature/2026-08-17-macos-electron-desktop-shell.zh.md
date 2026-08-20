@@ -44,4 +44,4 @@ pnpm run desktop:install
 ## 验证
 
 - `apps/desktop/tests/desktop.spec.ts` 钉住 spawn argv、把 Info.plist/启动脚本装进临时目录、端口探测、引导图就绪，以及写入路径的引号。
-- `scripts/install-docs.spec.ts` 要求 INSTALL.md、两份 README 和 `llms.txt` 含 `desktop:install`，并要求用户粘贴块在这些文件里字节一致。
+- `scripts/install-docs.spec.ts` 要求 INSTALL.md、两份 README、`llms.txt` 和根目录 `AGENTS.md` 含 `desktop:install`，并要求用户粘贴块在这些文件里字节一致。
